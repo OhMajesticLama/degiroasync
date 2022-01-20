@@ -1,0 +1,13 @@
+[project]
+dependencies = [
+    'httpx >= 0.21.3'
+]
+
+[project.optional-dependencies]
+tests = [
+	'nose2 >= 0.10.0'
+]
+
+[build-system]
+requires=["setuptools >= 44.0.0", "wheel"]
+build-backend= "setuptools.build_meta"
