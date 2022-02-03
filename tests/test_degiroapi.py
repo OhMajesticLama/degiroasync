@@ -1,11 +1,15 @@
 import unittest
 import logging
 import os
+import pprint
+import asyncio
 
 
 import degiroasync
 import degiroasync.webapi
+import degiroasync.api
 import degiroasync.core
+import degiroasync.helpers
 from degiroasync.core import Credentials
 from degiroasync.core import Session
 from degiroasync.core import join_url
@@ -14,9 +18,15 @@ from degiroasync.webapi import get_client_info
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
+from degiroasync.api import set_params
+from degiroasync.api import convert_time_series
+from degiroasync.api import Product
+from degiroasync.constants import ProductConst
+from .test_degirowebapi import _get_credentials
+
 
 LOGGER = logging.getLogger(degiroasync.core.LOGGER_NAME)
-degiroasync.core.set_logs(LOGGER, logging.DEBUG)
+degiroasync.helpers.set_logs(LOGGER, logging.DEBUG)
 
 RUN_INTEGRATION_TESTS = 0
 try:
@@ -25,11 +35,11 @@ try:
 except:
     LOGGER.info('degiroasync integration tests will *not* run.')
 
-# Unittests
-class TestDegiroAPI(unittest.TestCase):
-    pass
 
-class TestDegiroAsyncCore(unittest.TestCase):
+#############
+# Unittests #
+#############
+class TestDegiroAsyncHelpers(unittest.TestCase):
     def test_join_url(self):
         url = join_url('https://foo.bar', '/rest/of/url')
         self.assertEquals(url, 'https://foo.bar/rest/of/url')
@@ -38,29 +48,84 @@ class TestDegiroAsyncCore(unittest.TestCase):
         url = join_url('https://foo.bar/product/', '/rest/of/url')
         self.assertEquals(url, 'https://foo.bar/product/rest/of/url')
 
+    def test_set_params(self):
+        class Foo:
+            pass
 
-# Integration tests
+        foo = Foo()
+
+        set_params(foo, [
+                 {'isAdded': True,
+                  'name': 'id',
+                  'value': '8614787'},
+                 {'isAdded': True,
+                  'name': 'positionType',
+                  'value': 'PRODUCT'},
+                 {'isAdded': True,
+                  'name': 'size',
+                  'value': 100},
+                 {'isAdded': True,
+                  'name': 'price',
+                  'value': 73.0},
+                 {'isAdded': True,
+                  'name': 'value',
+                  'value': 7300.0},
+            ])
+        
+        self.assertEquals(foo.id, '8614787')
+        self.assertEquals(foo.positionType, 'PRODUCT')
+        self.assertEquals(foo.size, 100)
+        self.assertEquals(foo.price, 73.0)
+        self.assertEquals(foo.value, 7300.0)
+
+
+class TestDegiroAsyncAPIHelpers(unittest.TestCase):
+    def test_convert_time_series(self):
+        data = {
+            "times": "2022-01-20T00:00:00/PT1M",
+            "expires": "2022-01-20T10:12:56+01:00",
+            "data": [
+                [
+                    540,
+                    114.0
+                ],
+                [
+                    541,
+                    114.08
+                ],
+                [
+                    542,
+                    114.12
+                ]
+            ]
+        }
+        data_out = convert_time_series(data)
+        self.maxDiff = None
+        self.assertEquals(data_out,
+            {
+
+                "type": "time",
+                "times": "2022-01-20T00:00:00",
+                "resolution": "PT1M",
+                "expires": "2022-01-20T10:12:56+01:00",
+                "data": {
+                    'price': [114.0, 114.08, 114.12],
+                    'date': [
+                        '2022-01-20T09:00:00',
+                        '2022-01-20T09:01:00',
+                        '2022-01-20T09:02:00']
+                }
+            })
+
+
+#####################
+# Integration tests #
+#####################
 if RUN_INTEGRATION_TESTS:
-    LOGGER.info('degiroasync integration tests will run.')
-    class TestDegiroWebAPIIntegration(unittest.IsolatedAsyncioTestCase):
-        def _get_credentials(self):
-            username = os.environ.get('DEGIRO_USERNAME')
-            password = os.environ.get('DEGIRO_PASSWORD')
-            assert username is not None, (
-                'DEGIRO_USERNAME environment variable not defined.')
-            assert password is not None, (
-                'DEGIRO_PASSWORD environment variable not defined.')
-            try:
-                totp_secret = os.environ.get('DEGIRO_TOTP_SECRET')
-            except:
-                LOGGER.info('DEGIRO_TOTP_SECRET environment variable'
-                        ' not defined, skip 2FA.')
-                totp_secret = None
-
-            return Credentials(username, password, totp_secret)
-
+    LOGGER.info('degiroasync.api integration tests will run.')
+    class TestDegiroAPI(unittest.IsolatedAsyncioTestCase):
         async def _login(self, credentials : Credentials):
-            credentials = self._get_credentials()
+            credentials = _get_credentials()
 
             #quick & dirty caching
             try:
@@ -74,74 +139,68 @@ if RUN_INTEGRATION_TESTS:
 
             return session
 
-        async def test_login(self):
-            session = await self._login(self._get_credentials())
-            self.assertTrue('JSESSIONID' in session.cookies, "No JSESSIONID found.")
+        async def test_get_portfolio_total(self):
+            session = await self._login(_get_credentials())
+            total, products = await degiroasync.api.get_portfolio(session)
+            LOGGER.debug("test_get_portfolio_total: %s", total.__dict__)
+            self.assertIsNotNone(total.degiroCash)
+            self.assertIsNotNone(total.totalCash)
+            self.assertIsNotNone(total.freeSpaceNew)
+            self.assertIsNotNone(total.reportPortfValue)
+            self.assertIsNotNone(total.reportCashBal)
+            await asyncio.gather(*[p.await_product_info() for p in products])
 
-        async def test_config(self):
-            session = await self._login(self._get_credentials())
-            await get_config(session)
-            self.assertTrue(session.config.paUrl is not None,
-                    "paUrl not defined.")
-            self.assertTrue(session.config.productSearchUrl is not None,
-                    "productSearchUrl not defined.")
-            self.assertTrue(session.config.tradingUrl is not None,
-                    "tradingUrl not defined.")
+        async def test_get_portfolio_products_info(self):
+            session = await self._login(_get_credentials())
+            _, products = await degiroasync.api.get_portfolio(session)
+            LOGGER.debug("test_get_portfolio_products_info: %s",
+                    pprint.pformat(tuple(p.__dict__ for p in products)))
 
-        async def test_porfolio(self):
-            session = await self._login(self._get_credentials())
-            await get_config(session)
-            await get_client_info(session)
+            for product in products:
+                self.assertIsNotNone(product.id)
+                await product.await_product_info()
+                self.assertIsInstance(product.name, str, f"{product.id}")
+                self.assertIsInstance(product.isin, str, f"{product.id}:{product.name}")
+                try:
+                    # Note: vwdId looks to be only available for
+                    # productType == 'STOCK'
+                    product.vwdId
+                except AttributeError as exc:
+                    LOGGER.info("test_get_portfolio_products_info|"
+                            "vwdId not found for product %s:%s:%s",
+                            product.id, product.name, product.isin)
 
-            response = await degiroasync.webapi.get_portfolio(session)
-            self.assertEquals(response.status_code, 200)
-            resp_json = response.json()
-            self.assertTrue('portfolio' in resp_json)
-            self.assertTrue('value' in resp_json['portfolio'])
+            LOGGER.debug("test_get_portfolio_products_info2: %s",
+                    pprint.pformat(tuple(p.__dict__ for p in products)))
 
-        async def test_get_products_info(self):
-            session = await self._login(self._get_credentials())
-            await get_config(session)
-            await get_client_info(session)
+        async def test_get_price_data_bulk(self):
+            raise NotImplementedError
+            session = await self._login(_get_credentials())
+            #degiroasync.api.Product
+            _, products = await degiroasync.api.get_portfolio(session)
+            # In a context where we'd want to optimize, we want to 
+            # build the pipeline by awaiting on each product instead of a bulk
+            # gather to not block execution while we wait for data on some
+            # of the products.
+            await asyncio.gather(await p.await_product_info() for p in products)
+            products = filter(lambda p: p.info.productType == ProductConst.Type.STOCKS, products)
+            price_data = degiroasync.api.get_price_data_bulk(session, products)
 
-            response = await degiroasync.webapi.get_portfolio(session)
-            portfolio = response.json()['portfolio']
-            product_ids = filter(lambda x: x is not None,
-                    (product.get('id')
-                    for product in portfolio['value']))
-            response = await get_products_info(session, [p for p in product_ids])
-            self.assertEquals(response.status_code, 200)
-
-            response = await degiroasync.webapi.get_products_info(session, ["72906"])
-            LOGGER.debug(response.content)
-            self.assertEqual(response.status_code, 200)
-                    
-
-        async def test_get_company_profile(self):
-            session = await self._login(self._get_credentials())
-            await get_config(session)
-            await get_client_info(session)
-
-            isin = "FR0010242511"
-            response = await get_company_profile(session, isin)
-            resp_json = response.json()
-            self.assertEquals(response.status_code, 200)
-            self.assertTrue('data' in resp_json, resp_json)
-            self.assertTrue('businessSummary' in resp_json['data'], resp_json)
-
-        async def test_get_news_by_company(self):
-            session = await self._login(self._get_credentials())
-            await get_config(session)
-            await get_client_info(session)
-
-            isin = "FR0010242511"
-            response = await get_news_by_company(session, isin)
-            resp_json = response.json()
-            self.assertEquals(response.status_code, 200)
-            self.assertTrue('data' in resp_json, resp_json)
-            self.assertTrue('items' in resp_json['data'], resp_json)
+        async def test_get_price_data_bulk(self):
+            raise NotImplementedError
+            session = await self._login(_get_credentials())
+            #degiroasync.api.Product
+            _, products = await degiroasync.api.get_portfolio(session)
+            # In a context where we'd want to optimize, we want to 
+            # build the pipeline by awaiting on each product instead of a bulk
+            # gather to not block execution while we wait for data on some
+            # of the products.
+            await asyncio.gather(await p.await_product_info() for p in products)
+            products = filter(lambda p: p.info.productType == ProductConst.Type.STOCKS, products)
+            price_data = degiroasync.api.get_price_data_bulk(session, products)
 
 
 if __name__ == '__main__':
     import nose2
     nose2.main()
+

@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.3",
+        version="0.3.0",
         author_email="ohmajesticlama@gmail.com",
         description="A Python asynchronous library for Degiro trading service.",
         long_description=long_description,
@@ -47,20 +47,25 @@ if __name__ == '__main__':
         #scripts=[],
         packages=setuptools.find_packages(),
         install_requires=[
-            'httpx >= 0.21.3'
+            'httpx >= 0.21.3',
+            'jsonloader >= 0.4.2'
             ],
         extra_requires={
             'dev': [
                 'nose2 >= 0.10.0',
                 'mypy >= 0.931',
-                'coverage >= 6.3'
-                'build >= 0.7.0'
+                'coverage >= 6.3',
+                'build >= 0.7.0',
+                'flake8 >= 4.0.1',
+                'ipython',
+                'ipdb'
                 ]
             },
         classifiers=[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
             "Operating System :: OS Independent",
+            "Development Status :: 2 - Pre-Alpha"
         ],
         test_suite='nose2.collector',
         tests_require=['nose2']
