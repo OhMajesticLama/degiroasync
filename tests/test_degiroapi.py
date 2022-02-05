@@ -20,7 +20,9 @@ from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
 from degiroasync.api import set_params
 from degiroasync.api import convert_time_series
-from degiroasync.api import Product
+from degiroasync.api import ProductBase
+from degiroasync.api import Stock
+from degiroasync.api import Currency
 from degiroasync.constants import ProductConst
 from .test_degirowebapi import _get_credentials
 
@@ -124,23 +126,24 @@ class TestDegiroAsyncAPIHelpers(unittest.TestCase):
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.api integration tests will run.')
     class TestDegiroAPI(unittest.IsolatedAsyncioTestCase):
-        async def _login(self, credentials : Credentials):
+        async def asyncSetUp(self):
+            self._lock = asyncio.Lock()
+
+        async def _login(self):
+            async with self._lock:
+                if not hasattr(self, 'session'):
+                    credentials = _get_credentials()
+                    self.session = await degiroasync.api.login(credentials)
+            return self.session
+
+        async def test_login(self):
             credentials = _get_credentials()
-
-            #quick & dirty caching
-            try:
-                session = Session()
-                session.cookies = {
-                        Session.JSESSIONID:
-                        self._session._cookies[Session.JSESSIONID]}
-            except AttributeError:
-                session = await degiroasync.webapi.login(credentials, session)
-            self._session = session
-
-            return session
+            session = await degiroasync.api.login(credentials) 
+            self.assertIsNotNone(session.config)
+            self.assertIsNotNone(session.client)
 
         async def test_get_portfolio_total(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             total, products = await degiroasync.api.get_portfolio(session)
             LOGGER.debug("test_get_portfolio_total: %s", total.__dict__)
             self.assertIsNotNone(total.degiroCash)
@@ -151,54 +154,104 @@ if RUN_INTEGRATION_TESTS:
             await asyncio.gather(*[p.await_product_info() for p in products])
 
         async def test_get_portfolio_products_info(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             _, products = await degiroasync.api.get_portfolio(session)
             LOGGER.debug("test_get_portfolio_products_info: %s",
                     pprint.pformat(tuple(p.__dict__ for p in products)))
 
             for product in products:
-                self.assertIsNotNone(product.id)
+                self.assertIsNotNone(product.base.id)
                 await product.await_product_info()
-                self.assertIsInstance(product.name, str, f"{product.id}")
-                self.assertIsInstance(product.isin, str, f"{product.id}:{product.name}")
-                try:
-                    # Note: vwdId looks to be only available for
-                    # productType == 'STOCK'
-                    product.vwdId
-                except AttributeError as exc:
-                    LOGGER.info("test_get_portfolio_products_info|"
-                            "vwdId not found for product %s:%s:%s",
-                            product.id, product.name, product.isin)
+                LOGGER.debug("test_get_portfolio_products_info2: %s",
+                        pprint.pformat(product.info))
+                self.assertNotEqual(product.info, None)
+                self.assertIsInstance(product.info.name, str, f"{product.base.id}")
+                self.assertIsInstance(product.info.isin, str, f"{product.base.id}:{product.info.name}")
 
-            LOGGER.debug("test_get_portfolio_products_info2: %s",
+        async def test_get_price_data(self):
+            session = await self._login()
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_isin='NL0000235190'
+                    )
+            #products_awaitable = [p.await_product_info() for p in products]
+            #LOGGER.debug('test_get_price_data products_awaitable| %s', products_awaitable)
+
+            # In a context where we'd want to optimize, we want to 
+            # build the pipeline by awaiting on each product instead of a bulk
+            # gather to not block execution while we wait for data on some
+            # of the products.
+            await asyncio.gather(*[p.await_product_info() for p in products])
+            self.assertGreaterEqual(len(products), 1)
+
+            LOGGER.debug('test_get_price_data products| %s', tuple(p.__dict__ for p in products))
+
+            products = filter(
+                    lambda p: (
+                        p.info.productType == ProductConst.Type.STOCK
+                        and p.info.tradable == True
+                        and p.info.symbol == 'AIR'
+                        ),
+                    products)
+            products = list(products)
+            LOGGER.debug('test_get_price_data products filtered| %s',
                     pprint.pformat(tuple(p.__dict__ for p in products)))
 
-        async def test_get_price_data_bulk(self):
-            raise NotImplementedError
-            session = await self._login(_get_credentials())
-            #degiroasync.api.Product
-            _, products = await degiroasync.api.get_portfolio(session)
-            # In a context where we'd want to optimize, we want to 
-            # build the pipeline by awaiting on each product instead of a bulk
-            # gather to not block execution while we wait for data on some
-            # of the products.
-            await asyncio.gather(await p.await_product_info() for p in products)
-            products = filter(lambda p: p.info.productType == ProductConst.Type.STOCKS, products)
-            price_data = degiroasync.api.get_price_data_bulk(session, products)
+            self.assertGreaterEqual(len(products), 1)
+            # Select product
+            for product in products:
+                if product.base.productTypeId == ProductConst.TypeId.STOCK:
+                    # Let's take the first stock as example
+                    break
 
-        async def test_get_price_data_bulk(self):
-            raise NotImplementedError
-            session = await self._login(_get_credentials())
-            #degiroasync.api.Product
-            _, products = await degiroasync.api.get_portfolio(session)
-            # In a context where we'd want to optimize, we want to 
-            # build the pipeline by awaiting on each product instead of a bulk
-            # gather to not block execution while we wait for data on some
-            # of the products.
-            await asyncio.gather(await p.await_product_info() for p in products)
-            products = filter(lambda p: p.info.productType == ProductConst.Type.STOCKS, products)
-            price_data = degiroasync.api.get_price_data_bulk(session, products)
+            LOGGER.debug('test_get_price_data price_data 1| %s', product.__dict__)
+            price_data = await degiroasync.api.get_price_data(session, product)
+            LOGGER.debug('test_get_price_data price_data 2| %s', price_data)
 
+        #async def test_get_price_data_bulk(self):
+        #    raise NotImplementedError
+        #    session = await self._login()
+        #    #degiroasync.api.Product
+        #    _, products = await degiroasync.api.get_portfolio(session)
+        #    # In a context where we'd want to optimize, we want to 
+        #    # build the pipeline by awaiting on each product instead of a bulk
+        #    # gather to not block execution while we wait for data on some
+        #    # of the products.
+        #    await asyncio.gather(await p.await_product_info() for p in products)
+        #    products = filter(lambda p: p.info.productType == ProductConst.Type.STOCKS, products)
+        #    price_data = await degiroasync.api.get_price_data_bulk(session, products)
+
+        async def test_search_product_isin(self):
+            session = await self._login()
+            isin = 'NL0000235190'  # Airbus ISIN
+            products = await degiroasync.api.search_product(session,
+                    by_isin=isin)
+            self.assertGreaterEqual(len(products), 1)
+            for product in products:
+                await product.await_product_info()
+                # We should only have airbus products here
+                self.assertTrue('airbus' in product.info.name.lower())
+
+        async def test_search_product_symbol(self):
+            session = await self._login()
+            symbol = 'AIR'  # Airbus symbol
+            products = await degiroasync.api.search_product(session,
+                    by_symbol=symbol)
+            self.assertGreaterEqual(len(products), 1)
+            for product in products:
+                await product.await_product_info()
+                # We should only have airbus products here
+                self.assertTrue('airbus' in product.info.name.lower())
+
+        async def test_search_product_text(self):
+            session = await self._login()
+            products = await degiroasync.api.search_product(session,
+                    by_text='airbus')
+            self.assertGreaterEqual(len(products), 1)
+            for product in products:
+                await product.await_product_info()
+                # We should only have airbus products here
+                self.assertTrue('airbus' in product.info.name.lower())
 
 if __name__ == '__main__':
     import nose2

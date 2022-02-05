@@ -2,6 +2,7 @@ import unittest
 import logging
 import os
 import pprint
+import asyncio
 
 
 import degiroasync
@@ -50,32 +51,30 @@ def _get_credentials():
 
     return Credentials(username, password, totp_secret)
 
+
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.webapi integration tests will run.')
+
     class TestDegiroWebAPIIntegration(unittest.IsolatedAsyncioTestCase):
-        async def _login(self, credentials : Credentials):
-            # Duplicated between TestDegiroAPI and this class, might 
-            # be worth doing in a cleaner way
-            credentials = _get_credentials()
+        def setUp(self):
+            self._lock = asyncio.Lock()
 
-            #quick & dirty caching
-            try:
-                session = Session()
-                session.cookies = {
-                        Session.JSESSIONID:
-                        self._session._cookies[Session.JSESSIONID]}
-            except AttributeError:
-                session = await degiroasync.webapi.login(credentials, session)
-            self._session = session
+        async def _login(self):
+            async with self._lock:
+                if not hasattr(self, 'session'):
+                    credentials = _get_credentials()
+                    self.session = await degiroasync.webapi.login(credentials)
+                    await degiroasync.webapi.get_config(self.session)
+                    await degiroasync.webapi.get_client_info(self.session)
+            return self.session
 
-            return session
 
         async def test_login(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             self.assertTrue('JSESSIONID' in session.cookies, "No JSESSIONID found.")
 
         async def test_config(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             await get_config(session)
             self.assertTrue(session.config.paUrl is not None,
                     "paUrl not defined.")
@@ -85,7 +84,7 @@ if RUN_INTEGRATION_TESTS:
                     "tradingUrl not defined.")
 
         async def test_porfolio(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             await get_config(session)
             await get_client_info(session)
 
@@ -96,7 +95,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('value' in resp_json['portfolio'])
 
         async def test_get_products_info(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             await get_config(session)
             await get_client_info(session)
 
@@ -113,9 +112,8 @@ if RUN_INTEGRATION_TESTS:
             LOGGER.debug('webapi.test_get_products_info| %s',
                     pprint.pformat(response.json()))
                     
-
         async def test_get_company_profile(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             await get_config(session)
             await get_client_info(session)
 
@@ -125,9 +123,11 @@ if RUN_INTEGRATION_TESTS:
             self.assertEquals(response.status_code, 200)
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('businessSummary' in resp_json['data'], resp_json)
+            LOGGER.debug('webapi.test_get_company_profile| %s',
+                    pprint.pformat(resp_json))
 
         async def test_get_news_by_company(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             await get_config(session)
             await get_client_info(session)
 
@@ -139,7 +139,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('items' in resp_json['data'], resp_json)
 
         async def test_get_price_data(self):
-            session = await self._login(_get_credentials())
+            session = await self._login()
             await get_config(session)
             await get_client_info(session)
             # TODO: test with search product once implemented
@@ -155,9 +155,12 @@ if RUN_INTEGRATION_TESTS:
             #response = await get_products_info(session, [p for p in product_ids])
             #self.assertEquals(response.status_code, 200)
 
-            vwdId = 360114899
+            vwdId = '360114899'
 
-            response = await degiroasync.webapi.get_price_data(session, vwdId)
+            response = await degiroasync.webapi.get_price_data(
+                    session,
+                    vwdId=vwdId,
+                    vwdIdentifierType='issueid')
             LOGGER.debug('get_price_data response: %s', response.content)
             self.assertEqual(response.status_code, 200)
             resp_json = response.json()
@@ -165,4 +168,16 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('series' in resp_json)
             self.assertTrue('data' in resp_json['series'][0])
 
+        async def test_search_product(self):
+            session = await self._login()
+            await get_config(session)
+            await get_client_info(session)
 
+            search = "AIRBUS"
+            response = await degiroasync.webapi.search_product(session, search)
+            resp_json = response.json()
+            self.assertTrue('products' in resp_json, resp_json)
+            self.assertGreaterEqual(len(resp_json['products']), 1)
+            self.assertTrue('id' in resp_json['products'][0], resp_json)
+            self.assertTrue('isin' in resp_json['products'][0], resp_json)
+            self.assertTrue('name' in resp_json['products'][0], resp_json)

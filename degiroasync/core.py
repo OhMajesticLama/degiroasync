@@ -9,6 +9,7 @@ import enum
 from typing import Union, Any, Iterable
 
 import httpx
+from jsonloader import JSONclass
 
 from degiroasync import helpers
 #from .helpers import check_session_config
@@ -19,6 +20,9 @@ from .constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
+class ResponseError(Exception):
+    "Raised when bad response has been received."
+
 
 @dataclasses.dataclass
 class Credentials:
@@ -27,7 +31,8 @@ class Credentials:
     totp_secret : Union[str, None] = None
 
 
-@dataclasses.dataclass
+#@dataclasses.dataclass
+@JSONclass
 class Config:
     # Session config, as returned by Degiro
     clientId = Union[str, None]
@@ -65,34 +70,6 @@ class Config:
     vwdNewsUrl = Union[str, None]
     vwdQuotecastServiceUrl = Union[str, None]
 
-    def set_data(self, config : dict):
-        """
-        Register config dictionnary.
-        """
-        check_keys(config,
-                ('tradingUrl',
-                 'sessionId',
-                 'paUrl',
-                 'productSearchUrl'))
-        # Store for debug purpose
-        setattrs(self, **config)
-        #_set_data(self, config)
-        self._config = config
-        return self
-
-
-#def _set_data(obj : object, data : dict):
-#    """
-#    Helper to assign data as obj attributes.
-#    """
-#    for key, value in data.items():
-#        if not hasattr(obj, key):
-#            # Skip unknown config
-#            LOGGER.debug(
-#                '%s found in API response but not defined as attribute in data', key)
-#            continue
-#        setattr(obj, key, value)
-
 
 # Currently unused
 #class AwaitableDestructor:
@@ -109,6 +86,7 @@ class Config:
 #        pass
 
 
+@JSONclass
 class PAClient:
     """
     Data Structure for PA Client 
@@ -157,10 +135,10 @@ class PAClient:
     isAllocationAvailable = Union[str, None]
     isAmClientActive = Union[str, None]
 
-    def set_data(self, data : dict):
-        check_keys(data, ('intAccount', 'id'))
-        setattrs(self, **data)
-        return self
+    #def set_data(self, data : dict):
+    #    check_keys(data, ('intAccount', 'id'))
+    #    setattrs(self, **data)
+    #    return self
 
 
 @dataclasses.dataclass
@@ -202,7 +180,7 @@ class URLs:
         Build client info url.
         """
         check_session_config(session)
-        return os.path.join(session.config.paUrl, 'client')
+        return join_url(session.config.paUrl, 'client')
 
     @staticmethod
     def get_portfolio_url(session : Session) -> str:
@@ -214,11 +192,10 @@ class URLs:
 
         jsessionid = session._cookies[session.JSESSIONID]
 
-        url = (f'{session.config.tradingUrl}'
-            f'v5/update/{session.client.intAccount}'
+        url = join_url(
+            session.config.tradingUrl,
+            f'v5/update/{session.client.intAccount}',
             f';jsessionid={jsessionid}')
-        #url = (f'{session.trading_url}v5/update/{session.int_account}'
-            #f';jsessionid={jsessionid}')
         LOGGER.debug('get_portfolio_url: %s', url)
         return url
 
@@ -235,6 +212,15 @@ class URLs:
         check_session_config(session)
         # Check if this should be pulled from session config
         return 'https://charting.vwdservices.com/hchart/v1/deGiro/data.js'
+
+    @staticmethod
+    def get_product_search_url(session : Session) -> str:
+        check_session_config(session)
+        url = join_url(
+                session.config.productSearchUrl,
+                'v5/products/lookup')
+        LOGGER.debug('get_product_search_url: %s', url)
+        return url
 
 
 def check_session_config(session : Session):

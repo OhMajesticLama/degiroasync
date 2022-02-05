@@ -1,4 +1,5 @@
 import enum
+import functools
 LOGGER_NAME = 'degiroasync'
 
 
@@ -78,7 +79,7 @@ class Order:
 class ProductConst:
     class TypeId:
         ALL = None
-        SHARES = 1
+        STOCK = 1
         BONDS = 2
         FUTURES = 7
         OPTIONS = 8
@@ -87,9 +88,10 @@ class ProductConst:
         ETFS = 131
         CFDS = 535
         WARRANTS = 536
+        CURRENCY = 311
 
     class Type(EnumStr):
-        STOCKS = 'STOCKS'
+        STOCK = 'STOCK'
 
 
 class Sort(EnumStr):

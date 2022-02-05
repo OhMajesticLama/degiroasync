@@ -24,6 +24,7 @@ from .core import join_url
 from .core import check_session_config
 from .constants import LOGGER_NAME
 from .constants import PriceConst
+from .constants import ProductConst
 from .constants import DegiroStatus
 from .helpers import check_keys
 from .helpers import check_response
@@ -34,8 +35,7 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 async def login(
         credentials : Credentials,
-        session : Union[Session, None],
-        one_time_password : Union[Session, None] = None) -> Session:
+        session : Union[Session, None] = None) -> Session:
     """
     Authentify with Degiro API.
     `session` will be updated with required data for further connections.
@@ -103,8 +103,8 @@ async def get_config(session : Session) -> Session:
         res = await client.get(URLs.CONFIG, cookies=session._cookies)
 
     check_response(res)
-    config = Config()
-    config.set_data(res.json()['data'])
+    config = Config(res.json()['data'])
+    #config.set_data(res.json()['data'])
 
     session.config = config
 
@@ -122,7 +122,7 @@ async def get_client_info(session : Session) -> Session:
                 cookies=session._cookies)
 
     check_response(res)
-    session.client = PAClient().set_data(res.json()['data'])
+    session.client = PAClient(res.json()['data'])
     #session.int_account = resp_json['data']['intAccount']
     #session.client_id = resp_json['data']['id']
     return session
@@ -730,6 +730,7 @@ async def get_news_by_company(
 async def get_price_data(
         session : Session,
         vwdId : str,
+        vwdIdentifierType : str,
         resolution : PriceConst.Resolution = PriceConst.Resolution.PT1M,
         period : PriceConst.Period = PriceConst.Period.P1DAY,
         timezone : str = 'Europe/Paris',
@@ -741,6 +742,8 @@ async def get_price_data(
 
     data_type = 'ohlc' provides access to 'Open', 'High', 'Low', 'Close' in that
     order for each period, instead of price data.
+
+    vwdIdentifierType can be 'issueid' or 'vwdkey'
 
     Example returned JSON:
     {
@@ -828,26 +831,28 @@ async def get_price_data(
 	    "type":"time"}]
 	}
     """
+    if vwdIdentifierType not in ('issueid', 'vwdkey'):
+        raise ValueError("vwdIdentifierType must be 'issueid' or 'vwdkey'")
 
     check_session_config(session)
     url = URLs.get_price_data_url(session)
-    LOGGER.debug('get_price_data url: %s', url)
+    LOGGER.debug('get_price_data url| %s', url)
     params = {
             'requestid': 1,
             'resolution': resolution,
             'culture': culture,
             'period': period,
-            'series': f'issueid:{vwdId}',
+            'series': f'price:{vwdIdentifierType}:{vwdId}',
             'format': 'json',
             'userToken': session.config.clientId
             }
-    LOGGER.debug('get_price_data params: %s', params)
+    LOGGER.debug('get_price_data params| %s', params)
     async with httpx.AsyncClient() as client:
         response = await client.get(url,
                 cookies=session.cookies,
                 params=params)
     check_response(response)
-    LOGGER.debug(response.json())
+    LOGGER.debug('get_price_data response| %s', response.json())
     return response
 
 
@@ -885,6 +890,92 @@ async def get_trading_update(session : Session, params : Dict[str, int]
 
     check_response(response)
     LOGGER.debug(response.json())
+    return response
+
+
+async def search_product(
+        session: Session,
+        search_txt: str,
+        product_type_id: Union[ProductConst.TypeId, None] = None,
+        limit: int = 10,
+        offset: int = 0) -> httpx.Response:
+    """
+    Access `product_search` endpoint.
+
+    Example JSON response:
+    {
+        "offset": 0,
+        "products": [
+            {
+                "active": true,
+                "buyOrderTypes": [
+                    "LIMIT",
+                    "MARKET",
+                    "STOPLOSS",
+                    "STOPLIMIT"
+                ],
+                "category": "B",
+                "closePrice": 113.3,
+                "closePriceDate": "2022-02-02",
+                "contractSize": 1.0,
+                "currency": "EUR",
+                "exchangeId": "710",
+                "feedQuality": "R",
+                "feedQualitySecondary": "CX",
+                "id": "96008",
+                "isin": "NL0000235190",
+                "name": "AIRBUS",
+                "onlyEodPrices": false,
+                "orderBookDepth": 0,
+                "orderBookDepthSecondary": 0,
+                "orderTimeTypes": [
+                    "DAY",
+                    "GTC"
+                ],
+                "productBitTypes": [],
+                "productType": "STOCK",
+                "productTypeId": 1,
+                "qualitySwitchFree": false,
+                "qualitySwitchFreeSecondary": false,
+                "qualitySwitchable": false,
+                "qualitySwitchableSecondary": false,
+                "sellOrderTypes": [
+                    "LIMIT",
+                    "MARKET",
+                    "STOPLOSS",
+                    "STOPLIMIT"
+                ],
+                "strikePrice": -0.0001,
+                "symbol": "AIR",
+                "tradable": true,
+                "vwdId": "360114899",
+                "vwdIdSecondary": "955000256",
+                "vwdIdentifierType": "issueid",
+                "vwdIdentifierTypeSecondary": "issueid",
+                "vwdModuleId": 1,
+                "vwdModuleIdSecondary": 2
+            }
+        ]
+    }
+ 
+    """
+    url = URLs.get_product_search_url(session)
+    params = dict(
+        offset=offset,
+        limit=limit,
+        searchText=search_txt,
+        intAccount=session.client.intAccount,
+        sessionId=session.config.sessionId
+            )
+    if product_type_id is not None:
+        params['productTypeId'] = product_type_id
+    LOGGER.debug("webapi.search_product params| %s", params)
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url,
+                cookies=session._cookies,
+                params=params)
+    check_response(response)
+    LOGGER.debug("webapi.search_product response| %s", response.json())
     return response
 
 async def set_order(session : Session):

@@ -48,7 +48,7 @@ if __name__ == '__main__':
         packages=setuptools.find_packages(),
         install_requires=[
             'httpx >= 0.21.3',
-            'jsonloader >= 0.4.2'
+            'jsonloader >= 0.5.0'
             ],
         extra_requires={
             'dev': [

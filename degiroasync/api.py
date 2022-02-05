@@ -12,9 +12,10 @@ import datetime
 from .constants import DegiroStatus
 from .constants import ProductConst
 from .constants import PriceConst
+from .constants import EnumStr
 from . import webapi
-from .webapi import login
 from .core import LOGGER_NAME
+from .core import ResponseError
 from .core import Credentials, Session, URLs, Config, PAClient
 #from .jsonwrapper import JSONWrapper
 from .helpers import set_params
@@ -67,86 +68,89 @@ class ProductsInfo:
         return None
 
 
-class Product:
+class ProductBase:
     @JSONclass(annotations=True, annotations_type=True)
     class Base:
         id: str
-        price: float
-        size: int
-        value: float
+        productTypeId: int
 
-    @JSONclass(annotations=True, annotations_type=True)
     class Info:
-        "Store Info calls return."
-        # Must await .await_product_info() before use
-        isin: str
-        symbol: str
+        """
+        Must be overwritten and/or subclassed by subclasses of ProductBase.
+        """
         name: str
-        vwdId: str
-        productType: str
-
-    info: Union[None, Info] = None
+        symbol: str
     base: Base
+    info: Union[None, Info] = None
 
-
-    def __getattr__(self, attr: str) -> Union[str, float, int, Dict]:
+    def __init__(self, *,
+            _product_info: ProductsInfo,
+            **attributes: Dict[str, Any]):
         """
-        This method is called if `attr` was not found in object.
+        Consider using `Product.init_bulk` to instantiate Products: API endpoint
+        provides bulk request, batching will speed up your requests.
 
-        This can legitimately happen if `attr` is expected to be provided by
-        a `webapi.get_products_info` call.
-        In which case, `.await_product_info`
-        method class should be called before accessing such an attribute to
-        ensure we have received an answer: if we have not received an answer to
-        this product info request, raises `RuntimeError`.
-
-        If we have received an answer to this product info request but `attr`
-        is still not found, raises `AttributeError`.
+        id: str
+            `id` is `id` attribute as returned by DegiroAPI. It is used
+            to query Degiro endpoints for this product.
         """
-        # TODO: Remove commented code once external behavior is validated
-        # and locked.
-        # Only called if attribute not found.
-        # This might be an additional attribute from product_info 
-        # Wait for product info to be populated
-        #import asyncio
-        #loop = asyncio.get_event_loop()
-        #def _product_info():
-        #loop.shutdown_asyncgens(self.await_product_info)
-        #self.wait_product_info()
-        if self.__product_info is None:
-            raise RuntimeError(f"{attr} not found in {self}."
-                    " Additional product info not received yet. Try await .await_product_info().")
-        elif attr in self.__product_info:
-            return self.__product_info[attr]
-        else:
-            raise AttributeError(f"{attr} not found in {self}. "
-                    "This could be triggered by an API change. "
-                    " product_info: {}".format(pprint.pformat(self.__product_info)))
-                
+        #if self.Info is ProductBase.Info:
+        #    raise NotImplementedError(
+        #        "ProductBase.Info must be overwritten by subclasses.")
+        self.base = self.Base(attributes)
+        self.__product_info_batch = _product_info
+        self.__product_info = None
+
+
     @staticmethod
-    def _create_batch(
-            session: Session,
-            attributes_batch: Iterable[Dict[str, Any]]
-            ) -> Iterable[Any]:
+    def init_product(
+            *,
+            _product_info: ProductsInfo,
+            productTypeId: Union[int, None] = None,
+            **attributes: Dict[str, Any]):
         """
-        Create Products and their common ProductsInfo.
-        Returns an Iterable of Product instances.
+        Initialize adequate product specialization based on productTypeId.
+        Default to ProductGeneric if no specialized implementation found for
+        provided productTypeId.
         """
-        ids_batch = [attrs['id'] for attrs in attributes_batch]
-        #ids_batch = map(lambda attrs: attrs['id'], attributes_batch) 
-        products_info_batch = ProductsInfo(session, ids_batch)
-        products_batch = map(
-                lambda attrs: Product(
-                    product_info=products_info_batch, **attrs),
-                attributes_batch) 
-        return products_batch
+        params = dict(productTypeId=productTypeId, **attributes)
+        LOGGER.debug("api.ProductBase.init_product| attributes %s", attributes)
+        # Some attributes are not returned in a consistent way.
+        # Manually fix the most important of them
+        force_types = (('id', str),)
+        for attr, loader in force_types:
+            if attr in params:
+                params[attr] = loader(params[attr])
+
+        cls = {
+            ProductConst.TypeId.CURRENCY: Currency,
+            ProductConst.TypeId.STOCK: Stock
+                }.get(
+                        productTypeId,
+                        ProductGeneric
+                    )
+        LOGGER.debug("api.ProductBase.init_product| class %s", cls)
+        return cls(_product_info=_product_info,
+                      **params)
+
+    async def await_product_info(self) -> None:
+        """
+        Ensure we have received product_info attributes by awaiting this method.
+        """
+        if self.__product_info is None:
+            self.__product_info = await self.__product_info_batch.get_response(self.base.id)
+            LOGGER.debug("ProductsInfo.await_product_info: %s", self.__product_info)
+            self.info = self.Info(self.__product_info)
+            # Unreference batch when we don't need it anymore
+            self.__product_info_batch = None
+        return
 
     @classmethod
     def init_bulk(cls,
             session: Session,
             attributes_iter: Iterable[Dict[str, Any]],
             batch_size=50
-            ) -> List[Any]:
+            ) -> List['Product']:
         """
         Bulk init Product instances.
 
@@ -175,33 +179,74 @@ class Product:
             instances.extend(cls._create_batch(session, attributes_batch))
         return instances
 
-    def __init__(self, *,
-            id: str,
-            product_info: ProductsInfo,
-            **kwargs):
+    @staticmethod
+    def _create_batch(
+            session: Session,
+            attributes_batch: Iterable[Dict[str, Any]]
+            ) -> Iterable['ProductBase']:
         """
-        Consider using `Product.init_bulk` to instantiate Products: API endpoint
-        provides bulk request, batching will speed up your requests.
+        Create Products and their common ProductsInfo.
+        Returns an Iterable of Product instances.
+        """
+        ids_batch = [attrs['id'] for attrs in attributes_batch]
+        #ids_batch = map(lambda attrs: attrs['id'], attributes_batch) 
+        products_info_batch = ProductsInfo(session, ids_batch)
 
+        products_batch = map(
+                lambda attrs: ProductBase.init_product(
+                    _product_info=products_info_batch, **attrs),
+                attributes_batch) 
+        return products_batch
+
+
+class Currency(ProductBase):
+    @JSONclass(annotations=True, annotations_type=True)
+    class Info(ProductBase.Info):
+        "Store Info calls return."
+        # Must await .await_product_info() before use
+        isin: str
+        symbol: str
+        name: str
+        vwdId: Union[str, None] = None  # not set for non-tradable
+        productType: str
+        tradable: bool
+
+
+class Stock(ProductBase):
+    @JSONclass(annotations=True, annotations_type=True)
+    class Info(ProductBase.Info):
+        "Store Info calls return."
+        # Must await .await_product_info() before use
+        isin: str
+        symbol: str
+        name: str
+        vwdId: Union[str, None] = None  # not set for non-tradable
+        vwdIdentifierType: Union[str, None] = None  # not set for non-tradable
+        productType: str
+        tradable: bool
+        category: str
+        feedQuality: str
+
+    class VwdIdentifierTypes(EnumStr):
+        ISSUEID = 'issueId'
+        VWDKEY = 'vwdkey'
+
+
+class ProductGeneric(ProductBase):
+    @JSONclass(annotations=True, annotations_type=True)
+    class Base:
         id: str
-            `id` is `id` attribute as returned by DegiroAPI. It is used
-            to query Degiro endpoints for this product.
-        """
-        self.id = id  # we can't do anything without this one
-        setattrs(self, **kwargs)
-        self.__product_info_batch = product_info
-        self.__product_info = None
+        productTypeId: Union[None, int]  # sometimes not returned by API.
 
-    async def await_product_info(self) -> None:
-        """
-        Ensure we have received product_info attributes by awaiting this method.
-        """
-        if self.__product_info is None:
-            self.__product_info = await self.__product_info_batch.get_response(self.id)
-            LOGGER.debug("ProductsInfo.wait_product_info: %s", self.__product_info)
-            # Unreference batch when we don't need it anymore
-            self.__product_info_batch = None
-        return
+    @JSONclass(annotations=True, annotations_type=True)
+    class Info(ProductBase.Info):
+        "Store Info calls return."
+        # Must await .await_product_info() before use
+        isin: str
+        symbol: str
+        name: str
+        tradable: bool
+                
 
 @JSONclass(annotations=True, annotations_type=True)
 class TotalPortfolio:
@@ -233,50 +278,8 @@ class TotalPortfolio:
     up to date API changes.
     """
 
-
-#class TotalPortfolio:
-#    def __init__(self, 
-#        *,
-#        degiroCash: float,
-#        flatexCash: float,
-#        totalCash: float,
-#        totalDepositWithdrawal: float,
-#        todayDepositWithdrawal: float,
-#        cashFundCompensationCurrency: str,
-#        cashFundCompensation: float,
-#        cashFundCompensationWithdrawn: float,
-#        todayNonProductFees: float,
-#        freeSpaceNew: float,
-#        reportMargin: float,
-#        reportCreationTime: str,
-#        reportPortfValue: float,
-#        reportCashBal: float,
-#        reportNetliq: float,
-#        reportOverallMargin: float,
-#        reportTotalLongVal: float,
-#        reportDeficit: float,
-#        marginCallStatus: str,
-#        **kwargs
-#        ):
-#        """
-#        Total Portfolio
-#
-#        Core parameters for total portfolio as returned per API.
-#        
-#        Any additional parameter will be set to the object to reflect
-#        up to date API changes.
-#        """
-#        # Optional args
-#        setattrs(self, **kwargs)
-#        # Set mandatory args
-#        args = locals().copy()
-#        del args['self']
-#        del args['kwargs']
-#        setattrs(self, **args)
-
-
 async def get_portfolio(session: Session
-        ) -> Tuple[TotalPortfolio, Iterable[Product]]:
+        ) -> Tuple[TotalPortfolio, Iterable[ProductBase]]:
     """
     Returns (TotalPortfolio, Products). Refer to `TotalPortfolio` and `Products`
     classes for attributes available.
@@ -289,9 +292,11 @@ async def get_portfolio(session: Session
     resp = await webapi.get_portfolio(session)
     resp_json = resp.json()
     portf_json = resp_json['portfolio']['value']
+    portf_dict_json = [dict_from_attr_list(v['value'], ignore_error=True)
+            for v in portf_json]
+    LOGGER.debug("api.get_portfolio| %s", pprint.pformat(portf_dict_json))
 
-    portfolio = Product.init_bulk(session, (dict_from_attr_list(value['value'],
-        ignore_error=True) for value in portf_json))
+    portfolio = ProductBase.init_bulk(session, portf_dict_json)
     #portfolio = (set_params(Product(), value['value'], ignore_error=True)
     #        for value in portf_json)
 
@@ -302,74 +307,103 @@ async def get_portfolio(session: Session
     return total_portfolio, portfolio
 
 
-#@JSONclass(annotations=True, annotations_type=True)
+@JSONclass(annotations=True, annotations_type=True)
 class PriceData(JSONWrapper):
     start: str
     end: str
-    series: List[Dict[str, Union[float, str, int]]]
+    series: List[Dict[str, Union[list, float, str, int]]]
     resolution: str
 
 
-    MINIMUM_ATTRIBUTES = ('series', 'resolution', 'start', 'end')
-    def __init__(self, **kwargs):
-        check_keys(kwargs, *self.MINIMUM_ATTRIBUTES)
-        super().__init__(**kwargs)
+    #MINIMUM_ATTRIBUTES = ('series', 'resolution', 'start', 'end')
+    #def __init__(self, **kwargs):
+    #    check_keys(kwargs, *self.MINIMUM_ATTRIBUTES)
+    #    super().__init__(**kwargs)
+
+
 
 
 @JSONclass(annotations=True, annotations_type=True)
-class InputTimeSeriesPrice:
-    "Structure for straight out of Degiro API Price TimeSeries"
-    times: str
-    expires : str
-    data: List[List[Union[int, float]]]
+class PriceSeries:
+    type: str
+    expires: str
 
-class PriceTimeSeries:
-    pass  # TODO: Currently not used
+
+class PriceSeriesObject(PriceSeries):
+    """
+
+    Example JSON answer
+
+    """
+# Example JSON Answer
+#{'expires': '2022-02-04T19:31:38.7281028+01:00', 'data': {'issueId': 360114899, 'companyId': 1001, 'name': 'AIRBUS', 'identifier': 'issueid:360114899', 'isin': 'NL0000235190', 'alfa': 'AIR15598', 'market': 'XPAR', 'currency': 'EUR', 'type': 'AAN', 'quality': 'REALTIME', 'lastPrice': 110.32, 'lastTime': '2022-02-04T17:35:13', 'absDiff': -1.32, 'relDiff': -0.01182, 'highPrice': 112.16, 'highTime': '2022-02-04T09:01:36', 'lowPrice': 108.66, 'lowTime': '2022-02-04T14:34:47', 'openPrice': 111.94, 'openTime': '2022-02-04T09:00:12', 'closePrice': 111.94, 'closeTime': '2022-02-04T09:00:12', 'cumulativeVolume': 1209672.0, 'previousClosePrice': 111.64, 'previousCloseTime': '2022-02-03T17:36:47', 'tradingStartTime': '09:00:00', 'tradingEndTime': '17:40:00', 'tradingAddedTime': '00:10:00', 'lowPriceP1Y': 89.54, 'highPriceP1Y': 121.1, 'windowStart': '2022-02-04T00:00:00', 'windowEnd': '2022-02-04T17:35:13', 'windowFirst': '2022-02-04T09:00:00', 'windowLast': '2022-02-04T17:35:00', 'windowHighTime': '2022-02-04T09:01:00', 'windowHighPrice': 112.16, 'windowLowTime': '2022-02-04T14:34:00', 'windowLowPrice': 108.66, 'windowOpenTime': '2022-02-04T09:00:12', 'windowOpenPrice': 111.94, 'windowPreviousCloseTime': '2022-02-03T17:36:47', 'windowPreviousClosePrice': 111.64, 'windowTrend': -0.01182}, 'id': 'issueid:360114899', 'type': 'object'}
+    @JSONclass(annotations=True, annotations_type=True)
+    class Data:
+        issueId: str
+        companyId: Union[int, str]  # will need to check if it's garbage here too.
+        name: str
+        currency: str
+        market: str
+        identifier: str
+        isin: str
+        alfa: str
+        openTime: str
+        closetime: str
+        lowTime: str
+        HighTime: str
+        tradingStartTime: str
+        tradingEndTime: str
+        windowPreviousClosePrice: float
+        windowLowPrice: float
+        windowHighPrice: float
+
+class PriceSeriesTime(PriceSeries):
+    """
+    Converted Wrapper for PriceSeriestime for get_price_data.
+    """
+    times: str
+    data: List[List[Union[str, float]]]
 
 
 async def get_price_data(
         session: Session,
-        products: Union[Iterable[Product], Product],
-        resolution: PriceConst.Resolution = PriceConst.Resolution.PT1D,
+        product: Stock,
+        resolution: PriceConst.Resolution = PriceConst.Resolution.PT1M,
         period: PriceConst.Period = PriceConst.Period.P1DAY,
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PriceConst.Type = PriceConst.Type.PRICE
-        ) -> JSONWrapper:
+        ) -> JSONWrapper: # TODO: Define return type
+        "Single product get_price request, used by generic call."
         # Ensure product got results of product_info
+        if product.base.productTypeId != ProductConst.TypeId.STOCK:
+            raise NotImplementedError(
+                "Only productTypeId == ProductConst.TypeId.STOCK is currently "
+                "supported by get_price_data")
         await product.await_product_info()
         resp = await webapi.get_price_data(session,
-                product.vwdId,
+                vwdId=product.info.vwdId,
+                vwdIdentifierType=product.info.vwdIdentifierType,
                 resolution=resolution,
                 period=period,
                 timezone=timezone,
                 culture=culture,
                 data_type=data_type)
-        check_response(resp)
         resp_json = resp.json()
-        # TODO:  rework/check & update PriceData
-        timeseries = _TimesSeriesPrice(resp_json)
-        del resp_json
-        #check_keys(resp_json, PriceData.MINIMUM_ATTRIBUTES)
-        del resp
-        data = PriceData(resp_json)
-        # double check we have the right company
-        
-        if data.resolution != resolution:
-            raise RuntimeError(
-                    "Returned resolution {} different from input resolution {}.".format(data.resolution, resolution))
+        LOGGER.debug("api.get_price_data resp_json| %s", resp_json)
+        timeseries_ind = -1
+        objectseries_ind = -1
+        # Look for time series
+        for ind, series in enumerate(resp_json['series']):
+            if series['type'] == 'time':
+                timeseries_ind = ind
+            if series['type'] == 'object':
+                objectseries_ind = ind
+        if timeseries_ind < 0:
+            raise ResponseError("No 'time' series found in answer.")
+        converted_time_series = convert_time_series(resp_json['series'][ind])
+        return PriceSeriesTime(convert_time_series)
 
-        # make time series pandas friendly
-        series = data.series
-        filtered = tuple(filter(lambda s: 'time' in s ))
-        if not len(timeseries):
-            raise KeyError(
-                    "'time' timeseries not found in response: {}".format(resp_json))
-        timeseries = filtered[0]
-        
-
-
-        # Return as is or build a dataframe
 
 
 def convert_time_series(
@@ -443,9 +477,9 @@ def convert_time_series(
     return data_out
 
 
-async def get_price_data_bulk(
+async def get_price_data_batch(
         session: Session,
-        products: Union[Iterable[Product], Product],
+        products: Union[Iterable[ProductBase], ProductBase],
         resolution: PriceConst.Resolution = PriceConst.Resolution.PT1D,
         period: PriceConst.Period = PriceConst.Period.P1DAY,
         timezone: str = 'Europe/Paris',
@@ -454,18 +488,19 @@ async def get_price_data_bulk(
         ):
     """
     Get price data for products. Be mindful that not all product types will
-    have 
 
     >>>  
     """
+    raise NotImplementedError  # Add helper around _get_price_data
     if isinstance(products, Product):
         products = [products]
 
     for product in products:
         # Ensure product got results of product_info
-        if product.productType != ProductConst.Type.STOCKS:
+        if product.productTypeId != ProductConst.TypeId.STOCK:
             raise NotImplementedError(
-                "Only productType == 'STOCKS' is currently supported by get_price_data_bulk")
+                "Only productTypeId == ProductConst.TypeId.STOCK is currently "
+                "supported by get_price_data_bulk")
         await product.await_product_info()
         vwdId = product.vwdId
         prices_req.append(webapi.get_price_data(session,
@@ -477,6 +512,110 @@ async def get_price_data_bulk(
                 data_type=data_type))
         
 
+async def search_product(
+        session : Session,
+        *,
+        by_text : Union[str, None] = None,
+        by_isin : Union[str, None] = None,
+        by_symbol : Union[str, None] = None,
+        #by_id : Union[str, None] = None,
+        product_type_id : Union[ProductConst.TypeId, None] = ProductConst.TypeId.STOCK,
+        max_iter: Union[int, None] = 1000) -> List[ProductBase]:
+    """
+    Access `product_search` endpoint.
+
+    Exactly one of `by_text`, `by_isin`, `by_symbol` be set.
+    This is done because endpoint API doesn't return expected results
+    with both text and ISIN search.
+
+    `product_type_id` restricts search to one type of products.
+
+    Return a list of Product objects returned by Degiro for `search_txt`
+    attribute.
+    """
+    #if (
+    #    by_text is None
+    #    and by_isin is None
+    #    and by_symbol is None
+    #    #and by_id is None
+    #    ):
+    #    raise AssertionError("One of by_text, by_isin, by_symbol, by_id must be"
+    #                         " not None.")
+    if sum(k is not None for k in (by_text, by_isin, by_symbol)) != 1:
+        raise AssertionError(
+                "Exactly one of by_text, by_isin, by_symbol must "
+                "be not None.")
+    # Degiro API doesn't support well 2 or more attribute in searchTxt:
+    # e.g. we can't search for "AIRBUS NL0000235190" and get all the AIRBUS 
+    # named products with ISIN NL0000235190.
+    if by_text is None:
+        by_text = ' '.join(filter(lambda k: k is not None, (by_text, by_isin, by_symbol)))
+
+    LOGGER.debug('api.search_product args| %s', locals())
+    limit = 10
+    offset = 0
+    products = []
+    def __custom_filter(p_json: Dict[str, Any]) -> bool:
+        "Return True if product match user parameters"
+
+        # Web API should already filter by typeId, recheck TypeID here to be
+        # sure we don't have garbage in.
+        for attr, key in ((product_type_id, 'productTypeId'),
+                          (by_isin, 'isin'),
+                          #(by_id, 'id'),
+                          (by_symbol, 'symbol')):
+            if attr is not None and p_json[key] != attr:
+                return False
+        return True
+    for _ in range(max_iter):
+        resp = await webapi.search_product(
+                session,
+                by_text,
+                product_type_id=product_type_id,
+                limit=limit,
+                offset=offset)
+        resp_json = resp.json()
+        LOGGER.debug("api.search_product response| %s", pprint.pformat(resp_json))
+        if 'products' in resp_json:
+            products_json = resp_json['products']
+            batch = ProductBase.init_bulk(session,
+                                      filter(__custom_filter,
+                                      products_json))
+            # This could be optimized later on with a generator class to be able
+            # to yield data as soon as we receive it while still not blocking
+            # further calls to be launched, should it be needed.
+            products += batch
+            if len(batch) < limit:
+                break
+            else:
+                offset += len(batch)
+        else:
+            break
+    return products
+
+
+async def login(
+        credentials: Credentials,
+        session: Union[Session, None] = None) -> Session:
+    """
+    Authentify with Degiro API and populate basic information that'll be needed
+    for further calls.
+
+    `session` will be updated with required data for further connections.
+
+    Strictly equivalent to:
+
+    >>>> session = await degiroasync.webapi.login(credentials)
+    >>>> await webapi.get_config(session)
+    >>>> await webapi.get_client_info(session)
+
+    If no `session` is provided, create one.
+    """
+    session = await webapi.login(credentials, session)
+    await webapi.get_config(session)
+    await webapi.get_client_info(session)
+    return session
+
 
 __all__ = [
     obj.__name__ for obj in (
@@ -485,8 +624,11 @@ __all__ = [
         Session,
         Config,
         PriceData,
-        Product,
+        Stock,
+        Currency,
         get_portfolio,
+        get_price_data,
+        search_product,
         webapi.get_config,
         webapi.get_client_info
         )
