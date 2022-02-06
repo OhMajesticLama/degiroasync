@@ -17,7 +17,6 @@ from . import webapi
 from .core import LOGGER_NAME
 from .core import ResponseError
 from .core import Credentials, Session, URLs, Config, PAClient
-#from .jsonwrapper import JSONWrapper
 from .helpers import set_params
 from .helpers import dict_from_attr_list
 from .helpers import setattrs
@@ -29,6 +28,121 @@ from jsonloader import JSONclass, JSONWrapper
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
+
+class ExchangeDictionary:
+    """
+    Usage:
+
+    >>>> exchangedict = await ExchangeDictionary(session)
+    >>>> exchangedict.exchange_by(hiqAbbr='EPA')
+    {''}  # TODO
+
+    """
+    @JSONclass(annotations=True, annotations_type=True)
+    class Region:
+        id: int
+        name: str
+
+
+    @JSONclass(annotations=True, annotations_type=True)
+    class Country:
+        id: int
+        name: str  # 2 letters country codename
+        region: 'Region'
+
+
+    @JSONclass(annotations=True, annotations_type=True)
+    class Exchange:
+        id: int
+        name: str
+        city: Union[str, None] = None
+        code: Union[str, None] = None
+        countryName: str  # renamed from 'country' as it is country name
+        hiqAbbr: str
+        micCode: Union[str, None] = None
+
+
+    exchanges: List[Exchange]
+    countries: List[Country]
+    regions: List[Region]
+
+    async def __new__(cls, session: Session):
+        self = super().__new__(cls)
+
+        resp = await webapi.get_product_dictionary(session)
+        product_dictionary = resp.json()
+        LOGGER.debug("api.ExchangeDictionary| %s", pprint.pformat(product_dictionary))
+        self._regions = {p['id']: cls.Region(p)
+                        for p in product_dictionary['regions']}
+
+        self._countries_id = {}
+        self._countries_name = {}
+        for country in product_dictionary['countries']:
+            # Replace region dict by object.
+            region = self._regions[country['region']]
+            country['region'] = region
+            # Register country
+            country_inst = cls.Country(country)
+            self._countries_id[country['id']] = country_inst 
+            self._countries_name[country['name']] = country_inst
+
+        self._exchanges = {}
+        for exchange in product_dictionary['exchanges']:
+            # Replace region dict by object.
+            exchange['countryName'] = exchange['country']
+            del exchange['country']
+
+            # Register country
+            self._exchanges[exchange['id']] = cls.Exchange(exchange)
+
+        return self
+
+    @property
+    def exchanges(self):
+        return self._exchanges.values()
+
+    @property
+    def countries(self):
+        return self._countries_name.values()
+
+    @property
+    def regions(self):
+        return self._regions.values()
+
+    @functools.lru_cache(32)
+    def exchange_by(self,
+            *,
+            name: Union[str, None] = None,
+            id: Union[int, None] = None,
+            hiqAbbr: Union[str, None] = None,
+            micCode: Union[str, None] = None) -> Exchange:
+        "Get Exchange by *either* name, hiqAbbr (e.g. EPA), micCode (e.g. XPAR)."
+        if sum(attr is not None for attr in (name, id, hiqAbbr, micCode)) != 1:
+            raise AssertionError(
+                "Exactly one of (name, id, hiqAbbr, micCode) must be not None.")
+        if id is not None:
+            return self._exchanges[id]
+        for exc in self._exchanges.values():
+            if name is not None and exc.name == name:
+                return exc
+            elif hiqAbbr is not None and exc.hiqAbbr == hiqAbbr:
+                return exc
+            elif micCode is not None and exc.micCode == micCode:
+                return exc
+        raise KeyError("No exchange found with search attributes: {}",
+                       (name, id, hiqAbbr, micCode))
+
+    def country_by(self,
+            *,
+            name: Union[str, None] = None,
+            id: Union[int, None] = None) -> Country:
+        if sum(attr is not None for attr in (name, id)) != 1:
+            raise AssertionError(
+                "Exactly one of (name, id) must be not None.")
+        if name is not None:
+            return self._countries_name[name]
+        if id is not None:
+            return self._countries_id[id]
 
 
 class ProductsInfo:

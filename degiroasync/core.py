@@ -16,12 +16,11 @@ from degiroasync import helpers
 from .helpers import check_keys
 from .helpers import join_url
 from .helpers import setattrs
+from .helpers import ResponseError
 from .constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
-class ResponseError(Exception):
-    "Raised when bad response has been received."
 
 
 @dataclasses.dataclass
@@ -32,12 +31,12 @@ class Credentials:
 
 
 #@dataclasses.dataclass
-@JSONclass
+@JSONclass(annotations=True, annotations_type=True)
 class Config:
     # Session config, as returned by Degiro
-    clientId = Union[str, None]
+    clientId = str
     companiesServiceUrl = Union[str, None]
-    dictionaryUrl = Union[str, None]
+    dictionaryUrl = str
     i18nUrl = Union[str, None]
     landingPath = Union[str, None]
     latestSearchedProductsUrl = Union[str, None]
@@ -46,8 +45,8 @@ class Config:
     paUrl = Union[str, None]
     paymentServiceUrl = Union[str, None]
     productNotesUrl = Union[str, None]
-    productSearchUrl = Union[str, None]
-    productTypesUrl = Union[str, None]
+    productSearchUrl = str
+    productTypesUrl = str
     refinitivAgendaUrl = Union[str, None]
     refinitivClipsUrl = Union[str, None]
     refinitivCompanyProfileUrl = Union[str, None]
@@ -219,6 +218,13 @@ class URLs:
         url = join_url(
                 session.config.productSearchUrl,
                 'v5/products/lookup')
+        LOGGER.debug('get_product_search_url: %s', url)
+        return url
+
+    @staticmethod
+    def get_product_dictionary_url(session : Session) -> str:
+        check_session_config(session)
+        url = session.config.dictionaryUrl
         LOGGER.debug('get_product_search_url: %s', url)
         return url
 

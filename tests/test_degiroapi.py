@@ -3,6 +3,7 @@ import logging
 import os
 import pprint
 import asyncio
+import unittest.mock
 
 
 import degiroasync
@@ -119,13 +120,106 @@ class TestDegiroAsyncAPIHelpers(unittest.TestCase):
                 }
             })
 
+class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
+    "Unittest for api.ExchangeDictionary"
+    def setUp(self):
+        resp_mock = unittest.mock.MagicMock()
+        resp_mock.json = unittest.mock.MagicMock()
+        resp_mock.json.return_value = {
+                "regions": [
+                    {
+                        "id": 1,
+                        "name": "Europe",
+                        "translation": "translation.label.117"
+                    },
+                    {
+                        "id": 2,
+                        "name": "America",
+                        "translation": "translation.label.118"
+                    },
+                    {
+                        "id": 3,
+                        "name": "Other",
+                        "translation": "translation.label.121"
+                    }
+                ],
+                'countries': [
+		    {
+			"id": 978,
+			"name": "NL",
+			"region": 1,
+			"translation": "list.country.978"
+		    },
+                    {
+	                "id": 886,
+	                "name": "FR",
+	                "region": 1,
+	                "translation": "list.country.886"
+                    },
+ 
+                    ],
+                'exchanges': [
+                    {
+                        'id': 710, 'code': 'XPAR', 'hiqAbbr': 'EPA',
+                        'country': 'FR', 'city': 'Paris', 'micCode': 'XPAR',
+                        'name': 'Euronext Paris'},
+                    {
+                        'id': 200, 'code': 'XAMS', 'hiqAbbr': 'EAM',
+                        'country': 'NL', 'city': 'Amsterdam', 'micCode': 'XAMS',
+                        'name': 'Euronext Amsterdam'}
+                    ]
+            }
+        self.get_product_dictionary_mock = resp_mock
+
+    @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
+    async def test_exchange_dictionary_attributes(self, get_dict_mock):
+        # Mock webapi.get_product_dictionary
+        get_dict_mock.return_value = self.get_product_dictionary_mock
+        session = object()  # dummy is enough, we mocked the class
+        dictionary = await degiroasync.api.ExchangeDictionary(session)
+
+        regions = dictionary.regions
+        self.assertIn('Europe', (r.name for r in regions))
+        countries = dictionary.countries
+        self.assertIn('NL', (c.name for c in countries))
+        exchanges = dictionary.exchanges
+        self.assertIn('XAMS', (e.micCode for e in exchanges))
+        
+    @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
+    async def test_exchange_dictionary_exchange(self, get_dict_mock):
+        # Mock webapi.get_product_dictionary
+        get_dict_mock.return_value = self.get_product_dictionary_mock
+        session = object()  # dummy is enough, we mocked the class
+        dictionary = await degiroasync.api.ExchangeDictionary(session)
+
+        eam_exc = dictionary.exchange_by(hiqAbbr='EAM')
+        self.assertEqual(eam_exc.micCode, 'XAMS')
+        self.assertEqual(eam_exc.countryName, 'NL')
+
+    @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
+    async def test_exchange_dictionary_country(self, get_dict_mock):
+        # Mock webapi.get_product_dictionary
+        get_dict_mock.return_value = self.get_product_dictionary_mock
+        session = object()  # dummy is enough, we mocked the class
+        dictionary = await degiroasync.api.ExchangeDictionary(session)
+
+        country = dictionary.country_by(name='FR')
+        self.assertEqual(country.region.name, 'Europe')
+
+        country = dictionary.country_by(name='NL')
+        self.assertEqual(country.region.name, 'Europe')
+
 
 #####################
 # Integration tests #
 #####################
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.api integration tests will run.')
-    class TestDegiroAPI(unittest.IsolatedAsyncioTestCase):
+    class _IntegrationLogin:
+        """
+        Internal helper, can be inherited to make login for integration tests 
+        easier.
+        """
         async def asyncSetUp(self):
             self._lock = asyncio.Lock()
 
@@ -136,12 +230,18 @@ if RUN_INTEGRATION_TESTS:
                     self.session = await degiroasync.api.login(credentials)
             return self.session
 
+    class TestDegiroasyncIntegrationLogin(
+            _IntegrationLogin,
+            unittest.IsolatedAsyncioTestCase):
         async def test_login(self):
             credentials = _get_credentials()
             session = await degiroasync.api.login(credentials) 
             self.assertIsNotNone(session.config)
             self.assertIsNotNone(session.client)
 
+    class TestDegiroasyncIntegrationPortfolio(
+            _IntegrationLogin,
+            unittest.IsolatedAsyncioTestCase):
         async def test_get_portfolio_total(self):
             session = await self._login()
             total, products = await degiroasync.api.get_portfolio(session)
@@ -168,6 +268,10 @@ if RUN_INTEGRATION_TESTS:
                 self.assertIsInstance(product.info.name, str, f"{product.base.id}")
                 self.assertIsInstance(product.info.isin, str, f"{product.base.id}:{product.info.name}")
 
+
+    class TestDegiroasyncIntegrationPrice(
+            _IntegrationLogin,
+            unittest.IsolatedAsyncioTestCase):
         async def test_get_price_data(self):
             session = await self._login()
             products = await degiroasync.api.search_product(
@@ -221,6 +325,9 @@ if RUN_INTEGRATION_TESTS:
         #    products = filter(lambda p: p.info.productType == ProductConst.Type.STOCKS, products)
         #    price_data = await degiroasync.api.get_price_data_bulk(session, products)
 
+    class TestDegiroasyncIntegrationSearch(
+            _IntegrationLogin,
+            unittest.IsolatedAsyncioTestCase):
         async def test_search_product_isin(self):
             session = await self._login()
             isin = 'NL0000235190'  # Airbus ISIN
@@ -252,6 +359,29 @@ if RUN_INTEGRATION_TESTS:
                 await product.await_product_info()
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
+
+    
+    class TestDegiroasyncIntegrationExchangeDictionary(
+            _IntegrationLogin,
+            unittest.IsolatedAsyncioTestCase):
+        async def test_product_dictionary_attributes(self):
+            session = await self._login()
+            dictionary = await degiroasync.api.ExchangeDictionary(session)
+
+            regions = dictionary.regions
+            self.assertIn('Europe', (r.name for r in regions))
+            countries = dictionary.countries
+            self.assertIn('NL', (c.name for c in countries))
+            exchanges = dictionary.exchanges
+            self.assertIn('XAMS', (e.micCode for e in exchanges))
+
+        async def test_product_dictionary_exchange_by(self):
+            session = await self._login()
+            dictionary = await degiroasync.api.ExchangeDictionary(session)
+            eam_exc = dictionary.exchange_by(hiqAbbr='EAM')
+            self.assertEqual(eam_exc.micCode, 'XAMS')
+            self.assertEqual(eam_exc.countryName, 'NL')
+
 
 if __name__ == '__main__':
     import nose2

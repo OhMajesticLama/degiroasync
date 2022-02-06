@@ -959,6 +959,7 @@ async def search_product(
     }
  
     """
+    check_session_config(session)
     url = URLs.get_product_search_url(session)
     params = dict(
         offset=offset,
@@ -977,6 +978,33 @@ async def search_product(
     check_response(response)
     LOGGER.debug("webapi.search_product response| %s", response.json())
     return response
+
+
+async def get_product_dictionary(session : Session) -> Dict[str, Any]:
+    """
+    Get product dictionary information from server.
+
+    This is needed to provide human-redeable product data for products:
+
+    - Bonds, CFD Exchange places.
+    - ETF fees types.
+    - Countries.
+    """
+    check_session_config(session)
+    url = URLs.get_product_dictionary_url(session)
+    params = dict(
+        intAccount=session.client.intAccount,
+        sessionId=session.config.sessionId
+            )
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url,
+                cookies=session._cookies,
+                params=params
+                )
+    check_response(response)
+    LOGGER.debug("webapi.get_product_dictionary response| %s", response.json())
+    return response
+
 
 async def set_order(session : Session):
     raise NotImplementedError

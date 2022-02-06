@@ -11,11 +11,15 @@ import contextvars
 import httpx
 
 #from .core import Session
+#from .core import ResponseError
 from .constants import LOGGER_NAME
 
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
+
+class ResponseError(Exception):
+    "Raised when bad response has been received from server."
 
 
 def run_in_new_thread(
@@ -62,7 +66,7 @@ def check_response(response : httpx.Response):
     Raise an httpx.HTTPError if return code != 200
     """
     if response.status_code != httpx.codes.OK:
-        raise httpx.HTTPError(f"Error on call: url {response.url}"
+        raise ResponseError(f"Error on call: url {response.url}"
                 f" | code {response.status_code} | content {response.content}")
 
 

@@ -85,8 +85,6 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_porfolio(self):
             session = await self._login()
-            await get_config(session)
-            await get_client_info(session)
 
             response = await degiroasync.webapi.get_portfolio(session)
             self.assertEquals(response.status_code, 200)
@@ -96,8 +94,6 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_get_products_info(self):
             session = await self._login()
-            await get_config(session)
-            await get_client_info(session)
 
             response = await degiroasync.webapi.get_portfolio(session)
             portfolio = response.json()['portfolio']
@@ -114,8 +110,6 @@ if RUN_INTEGRATION_TESTS:
                     
         async def test_get_company_profile(self):
             session = await self._login()
-            await get_config(session)
-            await get_client_info(session)
 
             isin = "FR0010242511"
             response = await get_company_profile(session, isin)
@@ -128,8 +122,6 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_get_news_by_company(self):
             session = await self._login()
-            await get_config(session)
-            await get_client_info(session)
 
             isin = "FR0010242511"
             response = await get_news_by_company(session, isin)
@@ -140,8 +132,6 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_get_price_data(self):
             session = await self._login()
-            await get_config(session)
-            await get_client_info(session)
             # TODO: test with search product once implemented
 
             #response = await degiroasync.webapi.get_portfolio(session)
@@ -170,14 +160,31 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_search_product(self):
             session = await self._login()
-            await get_config(session)
-            await get_client_info(session)
 
             search = "AIRBUS"
             response = await degiroasync.webapi.search_product(session, search)
             resp_json = response.json()
-            self.assertTrue('products' in resp_json, resp_json)
+            self.assertIn('products', resp_json, resp_json)
             self.assertGreaterEqual(len(resp_json['products']), 1)
-            self.assertTrue('id' in resp_json['products'][0], resp_json)
-            self.assertTrue('isin' in resp_json['products'][0], resp_json)
-            self.assertTrue('name' in resp_json['products'][0], resp_json)
+            self.assertIn('id', resp_json['products'][0], resp_json)
+            self.assertIn('isin', resp_json['products'][0], resp_json)
+            self.assertIn('name', resp_json['products'][0], resp_json)
+
+        async def test_product_dictionary(self):
+            session = await self._login()
+
+            response = await degiroasync.webapi.get_product_dictionary(session)
+            resp_json = response.json()
+
+            self.assertIn('exchanges', resp_json)
+            self.assertIn('countries', resp_json)
+            self.assertIn('regions', resp_json)
+
+            # Not used by degiroasync.api at the time this test was written.
+            self.assertIn('bondExchanges', resp_json)
+            self.assertIn('cfdExchanges', resp_json)
+            self.assertIn('combinationExchanges', resp_json)
+            self.assertIn('etfAggregateTypes', resp_json)
+            self.assertIn('etfFeeTypes', resp_json)
+            self.assertIn('eurexCountries', resp_json)
+
