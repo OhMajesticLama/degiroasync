@@ -16,10 +16,11 @@ dependencies = [
 
 [project.optional-dependencies]
 tests = [
-	'nose2 >= 0.10.0',
+    'nose2 >= 0.10.0',
     'mypy >= 0.931'
 ]
 """
+
 
 def forbid_publish():
     argv = sys.argv
@@ -33,15 +34,17 @@ def forbid_publish():
 
 if __name__ == '__main__':
     forbid_publish()  # Not ready for publish
+
+    description = "A Python asynchronous library for Degiro trading service."
     readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
     with open(readme_path, "r") as fh:
         long_description = fh.read()
 
     setuptools.setup(
         name="degiroasync",
-        version="0.5.0",
+        version="0.6.0",
         author_email="ohmajesticlama@gmail.com",
-        description="A Python asynchronous library for Degiro trading service.",
+        description=description,
         long_description=long_description,
         #url="https://github.com/pypa/sampleproject",
         #scripts=[],
@@ -70,4 +73,3 @@ if __name__ == '__main__':
         test_suite='nose2.collector',
         tests_require=['nose2']
     )
-

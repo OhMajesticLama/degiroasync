@@ -13,14 +13,10 @@ import hashlib
 import time
 import logging
 from typing import Union, Any, List, Dict
-from collections import namedtuple
-from dataclasses import dataclass
-from urllib.parse import urljoin
 
 import httpx
 
 
-import degiroasync.core as core
 from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import join_url
 from ..core import check_session_config
@@ -28,7 +24,6 @@ from ..core.constants import LOGGER_NAME
 from ..core.constants import PriceConst
 from ..core.constants import ProductConst
 from ..core.constants import DegiroStatus
-from ..core.helpers import check_keys
 from ..core.helpers import check_response
 
 
@@ -36,8 +31,8 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 
 async def login(
-        credentials : Credentials,
-        session : Union[SessionCore, None] = None) -> SessionCore:
+        credentials: Credentials,
+        session: Union[SessionCore, None] = None) -> SessionCore:
     """
     Authentify with Degiro API.
     `session` will be updated with required data for further connections.
@@ -51,25 +46,25 @@ async def login(
         "isRedirectToMobile": False,
         "isPassCodeReset": '',
         "queryParams": {"reason": "session_expired"}
-        #"queryParams": {}
             }
     async with httpx.AsyncClient() as client:
         response = await client.post(url, data=json.dumps(payload))
         LOGGER.debug(response.__dict__)
-        #session._cookies = response.cookies
 
         response_load = response.json()
 
         if response_load['status'] == DegiroStatus.TOTP_NEEDED:
             # totp needed
-            if credentials.totp_secret is None and one_time_password is None:
+            if (credentials.totp_secret is None and
+                    credentials.one_time_password is None):
                 raise AssertionError(
                         "Account has TOTP enabled, but no TOTP secret"
                         " nor one_time_password was provided.")
             elif credentials.totp_secret is not None:
-                payload["oneTimePassword"] = _get_totp_token(credentials.totp_secret)
-            elif one_time_password is not None:
-                payload["oneTimePassword"] = one_time_password
+                payload["oneTimePassword"] = _get_totp_token(
+                        credentials.totp_secret)
+            elif credentials.one_time_password is not None:
+                payload["oneTimePassword"] = credentials.one_time_password
 
             url = URLs.LOGIN_TOTP
             LOGGER.debug("run totp login at %s", url)
@@ -85,13 +80,14 @@ async def login(
 
         if SessionCore.JSESSIONID not in session._cookies:
             LOGGER.error("No JSESSIONID in response: %s", response)
-            LOGGER.error("No JSESSIONID in response cookies: %s", response.cookies)
+            LOGGER.error("No JSESSIONID in response cookies: %s",
+                         response.cookies)
             raise AssertionError("No JSESSIONID in response.")
 
         return session
 
 
-async def get_config(session : SessionCore) -> SessionCore:
+async def get_config(session: SessionCore) -> SessionCore:
     """
     Populate session with configuration
     """
@@ -101,33 +97,31 @@ async def get_config(session : SessionCore) -> SessionCore:
 
     check_response(res)
     config = Config(res.json()['data'])
-    #config.set_data(res.json()['data'])
 
     session.config = config
 
     return session
 
 
-async def get_client_info(session : SessionCore) -> SessionCore:
+async def get_client_info(session: SessionCore) -> SessionCore:
     """
     Get client information.
     """
     url = URLs.get_client_info_url(session)
     async with httpx.AsyncClient() as client:
-        res = await client.get(url,
+        res = await client.get(
+                url,
                 params={'sessionId': session._cookies[session.JSESSIONID]},
                 cookies=session._cookies)
 
     check_response(res)
     session.client = PAClient(res.json()['data'])
-    #session.int_account = resp_json['data']['intAccount']
-    #session.client_id = resp_json['data']['id']
     return session
 
 
 async def get_account_info(session: SessionCore) -> SessionCore:
     """
-    
+
     """
     _check_active_session(session)
     join_url(URLs.ACCOUNT_INFO, session.client.intAccount)
@@ -137,7 +131,7 @@ async def get_account_info(session: SessionCore) -> SessionCore:
         res = await client.get(U)
 
 
-async def get_portfolio(session : SessionCore) -> httpx.Response:
+async def get_portfolio(session: SessionCore) -> httpx.Response:
     """
     Get portfolio web call.
 
@@ -646,22 +640,26 @@ async def get_portfolio(session : SessionCore) -> httpx.Response:
          {'isAdded': True, 'name': 'marginCallDeadline'}]}
         }
     """
-    return await get_trading_update(session,
+    return await get_trading_update(
+            session,
             params={'portfolio': 0, 'totalPortfolio': 0})
 
 
-async def get_products_info(session : SessionCore, products_ids : List[str]):
+async def get_products_info(
+        session: SessionCore,
+        products_ids: List[str]) -> httpx.Response:
     """
     Get Product info Web API call.
     """
     if session.config.productSearchUrl is None:
         raise AssertionError("productSearchUrl is None:"
-                " have you called get_config?")
+                             " have you called get_config?")
 
     url = join_url(session.config.productSearchUrl,
-            'v5/products/info')
+                   'v5/products/info')
     async with httpx.AsyncClient() as client:
-        response = await client.post(url,
+        response = await client.post(
+                url,
                 cookies=session.cookies,
                 params={
                     'intAccount': session.client.intAccount,
@@ -674,7 +672,9 @@ async def get_products_info(session : SessionCore, products_ids : List[str]):
         return response
 
 
-async def get_company_profile(session : SessionCore, isin : str) -> httpx.Response:
+async def get_company_profile(
+        session: SessionCore,
+        isin: str) -> httpx.Response:
     """
     Get company profile.
 
@@ -686,7 +686,8 @@ async def get_company_profile(session : SessionCore, isin : str) -> httpx.Respon
     # might have intraday data as well
     url = join_url(URLs.BASE, 'dgtbxdsservice/company-profile/v2', isin)
     async with httpx.AsyncClient() as client:
-        response = await client.get(url,
+        response = await client.get(
+                url,
                 cookies=session.cookies,
                 params={
                     'intAccount': session.client.intAccount,
@@ -698,11 +699,11 @@ async def get_company_profile(session : SessionCore, isin : str) -> httpx.Respon
 
 
 async def get_news_by_company(
-        session : SessionCore,
-        isin : str,
-        limit : int = 10,
-        languages : List[str] = ['en'],
-        offset : int = 0
+        session: SessionCore,
+        isin: str,
+        limit: int = 10,
+        languages: List[str] = ['en'],
+        offset: int = 0
         ):
     """
     Get news for a company.
@@ -725,108 +726,108 @@ async def get_news_by_company(
 
 
 async def get_price_data(
-        session : SessionCore,
-        vwdId : str,
-        vwdIdentifierType : str,
-        resolution : PriceConst.Resolution = PriceConst.Resolution.PT1M,
-        period : PriceConst.Period = PriceConst.Period.P1DAY,
-        timezone : str = 'Europe/Paris',
-        culture : str = 'fr-FR',
-        data_type : PriceConst.Type = PriceConst.Type.PRICE
+        session: SessionCore,
+        vwdId: str,
+        vwdIdentifierType: str,
+        resolution: PriceConst.Resolution = PriceConst.Resolution.PT1M,
+        period: PriceConst.Period = PriceConst.Period.P1DAY,
+        timezone: str = 'Europe/Paris',
+        culture: str = 'fr-FR',
+        data_type: PriceConst.Type = PriceConst.Type.PRICE
         ) -> httpx.Response:
     """
     Get price data for a company.
 
-    data_type = 'ohlc' provides access to 'Open', 'High', 'Low', 'Close' in that
-    order for each period, instead of price data.
+    data_type = 'ohlc' provides access to 'Open', 'High', 'Low', 'Close' in
+    that order for each period, instead of price data.
 
     vwdIdentifierType can be 'issueid' or 'vwdkey'
 
     Example returned JSON:
     {
-	"requestid": "1",
-	"start": "2022-01-20T00:00:00",
-	"end": "2022-01-20T14:12:24",
-	"resolution": "PT1M",
-	"series": [
-	    {
-		"expires": "2022-01-20T10:12:56+01:00",
-		"data": {
-		    "issueId": 360114899,
-		    "companyId": 1001,
-		    "name": "AIRBUS",
-		    "identifier": "issueid:360114899",
-		    "isin": "NL0000235190",
-		    "alfa": "AIR15598",
-		    "market": "XPAR",
-		    "currency": "EUR",
-		    "type": "AAN",
-		    "quality": "REALTIME",
-		    "lastPrice": 113.1,
-		    "lastTime": "2022-01-21T14:12:24",
-		    "absDiff": -2.62,
-		    "relDiff": -0.02264,
-		    "highPrice": 114.46,
-		    "highTime": "2022-01-21T10:31:14",
-		    "lowPrice": 112.78,
-		    "lowTime": "2022-01-21T13:56:36",
-		    "openPrice": 114.0,
-		    "openTime": "2022-01-21T09:00:19",
-		    "closePrice": 114.0,
-		    "closeTime": "2022-01-21T09:00:19",
-		    "cumulativeVolume": 857092.0,
-		    "previousClosePrice": 115.72,
-		    "previousCloseTime": "2022-01-20T17:35:03",
-		    "tradingStartTime": "09:00:00",
-		    "tradingEndTime": "17:40:00",
-		    "tradingAddedTime": "00:10:00",
-		    "lowPriceP1Y": 81.84,
-		    "highPriceP1Y": 121.1,
-		    "windowStart": "2022-01-20T00:00:00",
-		    "windowEnd": "2022-01-20T10:11:22",
-		    "windowFirst": "2022-01-20T09:00:00",
-		    "windowLast": "2022-01-20T10:11:00",
-		    "windowHighTime": "2022-01-20T10:11:00",
-		    "windowHighPrice": 114.46,
-		    "windowLowTime": "2022-01-20T10:16:00",
-		    "windowLowPrice": 112.78,
-		    "windowOpenTime": "2022-01-20T09:00:19",
-		    "windowOpenPrice": 114.0,
-		    "windowPreviousCloseTime": "2022-01-19T17:35:03",
-		    "windowPreviousClosePrice": 115.72,
-		    "windowTrend": -0.02264
-		},
-		"id": "issueid:360114899",
-		"type": "object"
-	    },
-	    {
-		"times": "2022-01-20T00:00:00",
-		"expires": "2022-01-20T10:12:56+01:00",
-		"data": [
-		    [
-			540,
-			114.0
-		    ],
-		    [
-			541,
-			114.08
-		    ],
-		    [
-			542,
-			113.62
-		    ],
-		    [
-			543,
-			113.8
-		    ],
-		    ...
-		    [
-			552,
-			113.7
-		    ]],
-	    "id":"price:issueid:360114899",
-	    "type":"time"}]
-	}
+        "requestid": "1",
+        "start": "2022-01-20T00:00:00",
+        "end": "2022-01-20T14:12:24",
+        "resolution": "PT1M",
+        "series": [
+            {
+                "expires": "2022-01-20T10:12:56+01:00",
+                "data": {
+                    "issueId": 360114899,
+                    "companyId": 1001,
+                    "name": "AIRBUS",
+                    "identifier": "issueid:360114899",
+                    "isin": "NL0000235190",
+                    "alfa": "AIR15598",
+                    "market": "XPAR",
+                    "currency": "EUR",
+                    "type": "AAN",
+                    "quality": "REALTIME",
+                    "lastPrice": 113.1,
+                    "lastTime": "2022-01-21T14:12:24",
+                    "absDiff": -2.62,
+                    "relDiff": -0.02264,
+                    "highPrice": 114.46,
+                    "highTime": "2022-01-21T10:31:14",
+                    "lowPrice": 112.78,
+                    "lowTime": "2022-01-21T13:56:36",
+                    "openPrice": 114.0,
+                    "openTime": "2022-01-21T09:00:19",
+                    "closePrice": 114.0,
+                    "closeTime": "2022-01-21T09:00:19",
+                    "cumulativeVolume": 857092.0,
+                    "previousClosePrice": 115.72,
+                    "previousCloseTime": "2022-01-20T17:35:03",
+                    "tradingStartTime": "09:00:00",
+                    "tradingEndTime": "17:40:00",
+                    "tradingAddedTime": "00:10:00",
+                    "lowPriceP1Y": 81.84,
+                    "highPriceP1Y": 121.1,
+                    "windowStart": "2022-01-20T00:00:00",
+                    "windowEnd": "2022-01-20T10:11:22",
+                    "windowFirst": "2022-01-20T09:00:00",
+                    "windowLast": "2022-01-20T10:11:00",
+                    "windowHighTime": "2022-01-20T10:11:00",
+                    "windowHighPrice": 114.46,
+                    "windowLowTime": "2022-01-20T10:16:00",
+                    "windowLowPrice": 112.78,
+                    "windowOpenTime": "2022-01-20T09:00:19",
+                    "windowOpenPrice": 114.0,
+                    "windowPreviousCloseTime": "2022-01-19T17:35:03",
+                    "windowPreviousClosePrice": 115.72,
+                    "windowTrend": -0.02264
+                },
+                "id": "issueid:360114899",
+                "type": "object"
+              
+             
+                "times": "2022-01-20T00:00:00",
+                "expires": "2022-01-20T10:12:56+01:00",
+                "data": [
+                    [
+                	540,
+                	114.0
+                    ],
+                    [
+                	541,
+                	114.08
+                    ],
+                    [
+                	542,
+                	113.62
+                    ],
+                    [
+                	543,
+                	113.8
+                    ],
+                    ...
+                    [
+                	552,
+                	113.7
+                    ]],
+            "id":"price:issueid:360114899",
+            "type":"time"}]
+        }
     """
     if vwdIdentifierType not in ('issueid', 'vwdkey'):
         raise ValueError("vwdIdentifierType must be 'issueid' or 'vwdkey'")
@@ -846,26 +847,29 @@ async def get_price_data(
     LOGGER.debug('get_price_data params| %s', params)
     async with httpx.AsyncClient() as client:
         response = await client.get(url,
-                cookies=session.cookies,
-                params=params)
+                                    cookies=session.cookies,
+                                    params=params)
     check_response(response)
     LOGGER.debug('get_price_data response| %s', response.json())
     return response
 
 
-async def get_order(session : SessionCore) -> httpx.Response:
+async def get_order(session: SessionCore) -> httpx.Response:
     """
     Get current and historical orders
     """
-    return await get_trading_update(session,
+    return await get_trading_update(
+            session,
             params={'orders': 0, 'historicalOrders': 0, 'transactions': 0})
 
 
-async def get_trading_update(session : SessionCore, params : Dict[str, int]
+async def get_trading_update(
+        session: SessionCore,
+        params: Dict[str, int]
         ) -> httpx.Response:
     """
     Common call to target {tradingUrl}/v5/update/{intAccount}
-    
+
     This is used by other calls leveraging the same endpoint in webapi.
 
     Known params:
@@ -954,7 +958,7 @@ async def search_product(
             }
         ]
     }
- 
+
     """
     check_session_config(session)
     url = URLs.get_product_search_url(session)
@@ -970,14 +974,14 @@ async def search_product(
     LOGGER.debug("webapi.search_product params| %s", params)
     async with httpx.AsyncClient() as client:
         response = await client.get(url,
-                cookies=session._cookies,
-                params=params)
+                                    cookies=session._cookies,
+                                    params=params)
     check_response(response)
     LOGGER.debug("webapi.search_product response| %s", response.json())
     return response
 
 
-async def get_product_dictionary(session : SessionCore) -> Dict[str, Any]:
+async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
     """
     Get product dictionary information from server.
 
@@ -995,22 +999,24 @@ async def get_product_dictionary(session : SessionCore) -> Dict[str, Any]:
             )
     async with httpx.AsyncClient() as client:
         response = await client.get(url,
-                cookies=session._cookies,
-                params=params
-                )
+                                    cookies=session._cookies,
+                                    params=params
+                                    )
     check_response(response)
     LOGGER.debug("webapi.get_product_dictionary response| %s", response.json())
     return response
 
 
-async def set_order(session : SessionCore):
+async def set_order(session: SessionCore):
     raise NotImplementedError
+
 
 ###########
 # Helpers #
 ###########
 
-def _check_active_session(session : SessionCore):
+
+def _check_active_session(session: SessionCore):
     """
     Check that session id has been populated. Raise AssertionError if not.
     """
@@ -1018,13 +1024,14 @@ def _check_active_session(session : SessionCore):
         raise AssertionError("No JSESSIONID in session.cookies")
 
 
-def _get_totp_token(secret_key : str) -> str:
+def _get_totp_token(secret_key: str) -> str:
     "Get one-time-password from secret key"
     key = base64.b32decode(secret_key)
     message = struct.pack(">Q", int(time.time()) // 30)
     message_hash = hmac.new(key, message, hashlib.sha1).digest()
     o = message_hash[19] & 15
-    message_hash = (struct.unpack(">I", message_hash[o:o+4])[0] & 0x7fffffff) % 1000000
+    message_hash = (struct.unpack(">I",
+                    message_hash[o:o+4])[0] & 0x7fffffff) % 1000000
     return message_hash
 
 

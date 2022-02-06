@@ -44,8 +44,10 @@ specific cases of your program.
 | get_client_info     | :white_check_mark: | :white_check_mark: |
 | get_portfolio       | :white_check_mark: | :white_check_mark: |
 | get_products_info   | :white_check_mark: | :white_check_mark: |
+| get_price_data      | :white_check_mark: | :white_check_mark: |
+| search_product      | :white_check_mark: | :white_check_mark: |
+| get_exchange        | :white_check_mark: | :white_check_mark: |
 | get_news_by_company |                    | :white_check_mark: |
-| get_price_data      |                    | :white_check_mark: |
 | get_company_profile |                    | :white_check_mark: |
 
 

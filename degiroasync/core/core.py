@@ -25,9 +25,23 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 @dataclasses.dataclass
 class Credentials:
+    """
+    Holds credentials for Web API.
+
+    If 2FA is enabled on the account, either totp_secret or one_time_password
+    must be provided for the login to be successful.
+
+    `totp_secret` can be obtained in a 2FA editor/app (e.g. andOTP) in the
+    'Secret' field.
+
+    If use of `one_time_password` is chosen instead, be mindful that login
+    must be called promptly as one_time_password expires frequently.
+    """
     username : str
     password : str
+
     totp_secret : Union[str, None] = None
+    one_time_password: Union[str, None] = None
 
 
 #@dataclasses.dataclass
@@ -184,7 +198,7 @@ class URLs:
     @staticmethod
     def get_portfolio_url(session : SessionCore) -> str:
         """
-        Build portfolio url
+        Build portfolio url, also used for orders.
         """
         check_session_config(session)
         check_session_client(session)
