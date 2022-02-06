@@ -10,26 +10,27 @@ import degiroasync
 import degiroasync.webapi
 import degiroasync.api
 import degiroasync.core
-import degiroasync.helpers
+import degiroasync.core.helpers
 from degiroasync.core import Credentials
 from degiroasync.core import SessionCore
 from degiroasync.core import join_url
+from degiroasync.core.helpers import set_params
 from degiroasync.webapi import get_config
 from degiroasync.webapi import get_client_info
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
-from degiroasync.api import set_params
 from degiroasync.api import convert_time_series
 from degiroasync.api import ProductBase
 from degiroasync.api import Stock
 from degiroasync.api import Currency
-from degiroasync.constants import ProductConst
+from degiroasync.core.constants import ProductConst
+
 from .test_degirowebapi import _get_credentials
 
 
 LOGGER = logging.getLogger(degiroasync.core.LOGGER_NAME)
-degiroasync.helpers.set_logs(LOGGER, logging.DEBUG)
+degiroasync.core.helpers.set_logs(LOGGER, logging.DEBUG)
 
 RUN_INTEGRATION_TESTS = 0
 try:

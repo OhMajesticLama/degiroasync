@@ -1,6 +1,7 @@
 """
-Async API for Degiro. This module is close to Degiro Web API structure
-And results are not interpreted.
+Async API for Degiro. This module is close to Degiro Web API structure:
+responses are provided (almost) as-is with minimum abstraction
+and verification.
 
 For a higher level api, see `api` module.
 """
@@ -19,15 +20,16 @@ from urllib.parse import urljoin
 import httpx
 
 
-from .core import Credentials, SessionCore, URLs, Config, PAClient
-from .core import join_url
-from .core import check_session_config
-from .constants import LOGGER_NAME
-from .constants import PriceConst
-from .constants import ProductConst
-from .constants import DegiroStatus
-from .helpers import check_keys
-from .helpers import check_response
+import degiroasync.core as core
+from ..core import Credentials, SessionCore, URLs, Config, PAClient
+from ..core import join_url
+from ..core import check_session_config
+from ..core.constants import LOGGER_NAME
+from ..core.constants import PriceConst
+from ..core.constants import ProductConst
+from ..core.constants import DegiroStatus
+from ..core.helpers import check_keys
+from ..core.helpers import check_response
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -1043,4 +1045,3 @@ __name__ = [
     get_order.__name__,
     set_order.__name__
         ]
-

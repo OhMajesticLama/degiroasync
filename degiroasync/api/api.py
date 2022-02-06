@@ -9,22 +9,22 @@ import asyncio
 import pprint
 import datetime
 
-from .constants import DegiroStatus
-from .constants import ProductConst
-from .constants import PriceConst
-from .constants import EnumStr
-from . import webapi
-from .core import LOGGER_NAME
-from .core import ResponseError
-from .core import Credentials, SessionCore, URLs, Config, PAClient
-from .helpers import set_params
-from .helpers import dict_from_attr_list
-from .helpers import setattrs
-from .helpers import run_in_new_thread
-from .helpers import check_keys
-from degiroasync import helpers
-from degiroasync import constants
-from jsonloader import JSONclass, JSONWrapper
+from ..core.constants import DegiroStatus
+from ..core.constants import ProductConst
+from ..core.constants import PriceConst
+from ..core.constants import EnumStr
+from .. import webapi
+from ..core import LOGGER_NAME
+from ..core import ResponseError
+from ..core import Credentials, SessionCore, URLs, Config, PAClient
+from ..core.helpers import set_params
+from ..core.helpers import dict_from_attr_list
+from ..core.helpers import setattrs
+from ..core.helpers import run_in_new_thread
+from ..core.helpers import check_keys
+from ..core import helpers
+from ..core import constants
+from jsonloader import JSONclass
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -423,7 +423,7 @@ async def get_portfolio(session: SessionCore
 
 
 @JSONclass(annotations=True, annotations_type=True)
-class PriceData(JSONWrapper):
+class PriceData:
     start: str
     end: str
     series: List[Dict[str, Union[list, float, str, int]]]
@@ -488,7 +488,7 @@ async def get_price_data(
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PriceConst.Type = PriceConst.Type.PRICE
-        ) -> JSONWrapper: # TODO: Define return type
+        ) -> PriceSeriesTime:
         "Single product get_price request, used by generic call."
         # Ensure product got results of product_info
         if product.base.productTypeId != ProductConst.TypeId.STOCK:
@@ -743,9 +743,6 @@ __all__ = [
         Currency,
         get_portfolio,
         get_price_data,
-        search_product,
-        webapi.get_config,
-        webapi.get_client_info
+        search_product
         )
         ]
-

@@ -11,7 +11,7 @@ from typing import Union, Any, Iterable
 import httpx
 from jsonloader import JSONclass
 
-from degiroasync import helpers
+from degiroasync.core import helpers
 #from .helpers import check_session_config
 from .helpers import check_keys
 from .helpers import join_url
