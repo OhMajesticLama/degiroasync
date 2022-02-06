@@ -30,6 +30,29 @@ from jsonloader import JSONclass
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 
+@JSONclass(annotations=True, annotations_type=True)
+class Region:
+    id: int
+    name: str
+
+
+@JSONclass(annotations=True, annotations_type=True)
+class Country:
+    id: str
+    name: str  # 2 letters country codename
+    region: 'Region'
+
+
+@JSONclass(annotations=True, annotations_type=True)
+class Exchange:
+    id: str
+    name: str
+    city: Union[str, None] = None
+    code: Union[str, None] = None
+    countryName: str  # renamed from 'country' as it is country name
+    hiqAbbr: str
+    micCode: Union[str, None] = None
+
 class ExchangeDictionary:
     """
     Usage:
@@ -39,29 +62,6 @@ class ExchangeDictionary:
     {''}  # TODO
 
     """
-    @JSONclass(annotations=True, annotations_type=True)
-    class Region:
-        id: int
-        name: str
-
-
-    @JSONclass(annotations=True, annotations_type=True)
-    class Country:
-        id: int
-        name: str  # 2 letters country codename
-        region: 'Region'
-
-
-    @JSONclass(annotations=True, annotations_type=True)
-    class Exchange:
-        id: int
-        name: str
-        city: Union[str, None] = None
-        code: Union[str, None] = None
-        countryName: str  # renamed from 'country' as it is country name
-        hiqAbbr: str
-        micCode: Union[str, None] = None
-
 
     exchanges: List[Exchange]
     countries: List[Country]
@@ -73,7 +73,7 @@ class ExchangeDictionary:
         resp = await webapi.get_product_dictionary(session)
         product_dictionary = resp.json()
         LOGGER.debug("api.ExchangeDictionary| %s", pprint.pformat(product_dictionary))
-        self._regions = {p['id']: cls.Region(p)
+        self._regions = {p['id']: Region(p)
                         for p in product_dictionary['regions']}
 
         self._countries_id = {}
@@ -82,19 +82,23 @@ class ExchangeDictionary:
             # Replace region dict by object.
             region = self._regions[country['region']]
             country['region'] = region
+            country['id'] = str(country['id'])
             # Register country
-            country_inst = cls.Country(country)
+            country_inst = Country(country)
             self._countries_id[country['id']] = country_inst 
             self._countries_name[country['name']] = country_inst
 
         self._exchanges = {}
         for exchange in product_dictionary['exchanges']:
+            # Some APIs call return id in int, others in str. Fix here as all
+            # str.
+            exchange['id'] = str(exchange['id'])
             # Replace region dict by object.
             exchange['countryName'] = exchange['country']
             del exchange['country']
 
             # Register country
-            self._exchanges[exchange['id']] = cls.Exchange(exchange)
+            self._exchanges[exchange['id']] = Exchange(exchange)
 
         return self
 
@@ -144,6 +148,10 @@ class ExchangeDictionary:
             return self._countries_name[name]
         if id is not None:
             return self._countries_id[id]
+
+
+class Session(SessionCore):
+    exchange_dictionary: Union[ExchangeDictionary, None] = None
 
 
 class ProductsInfo:
@@ -628,12 +636,12 @@ async def get_price_data_batch(
         
 
 async def search_product(
-        session : SessionCore,
+        session : Session,
         *,
         by_text : Union[str, None] = None,
         by_isin : Union[str, None] = None,
         by_symbol : Union[str, None] = None,
-        #by_id : Union[str, None] = None,
+        by_exchange: Union[str, Exchange, None] = None,
         product_type_id : Union[ProductConst.TypeId, None] = ProductConst.TypeId.STOCK,
         max_iter: Union[int, None] = 1000) -> List[ProductBase]:
     """
@@ -643,7 +651,11 @@ async def search_product(
     This is done because endpoint API doesn't return expected results
     with both text and ISIN search.
 
-    `product_type_id` restricts search to one type of products.
+    `product_type_id`
+        Restricts search to one type of products.
+    `by_exchange`
+        Restricts results to products in a exchange. Can be either an Exchange
+        instance or an `hiqAbbr` (e.g. EPA for Paris, AEX for Amsterdam)
 
     Return a list of Product objects returned by Degiro for `search_txt`
     attribute.
@@ -666,10 +678,23 @@ async def search_product(
     if by_text is None:
         by_text = ' '.join(filter(lambda k: k is not None, (by_text, by_isin, by_symbol)))
 
-    LOGGER.debug('api.search_product args| %s', locals())
+    exchange_id = None
+    if by_exchange is not None:
+        if isinstance(by_exchange, Exchange):
+            exchange_id = by_exchange.id
+        elif isinstance(by_exchange, str):
+            _check_session_exchange_dictionary(session)
+            exchange = session.exchange_dictionary.exchange_by(
+                    hiqAbbr=by_exchange)
+            exchange_id = exchange.id
+        else:
+            raise TypeError(
+                    "Only Exchange or str types supported for 'by_exchange'.")
+
     limit = 10
     offset = 0
     products = []
+
     def __custom_filter(p_json: Dict[str, Any]) -> bool:
         "Return True if product match user parameters"
 
@@ -677,11 +702,12 @@ async def search_product(
         # sure we don't have garbage in.
         for attr, key in ((product_type_id, 'productTypeId'),
                           (by_isin, 'isin'),
-                          #(by_id, 'id'),
-                          (by_symbol, 'symbol')):
-            if attr is not None and p_json[key] != attr:
+                          (by_symbol, 'symbol'),
+                          (exchange_id, 'exchangeId')):
+            if attr is not None and p_json.get(key) != attr:
                 return False
         return True
+
     for _ in range(max_iter):
         resp = await webapi.search_product(
                 session,
@@ -711,7 +737,7 @@ async def search_product(
 
 async def login(
         credentials: Credentials,
-        session: Union[SessionCore, None] = None) -> SessionCore:
+        session: Union[Session, None] = None) -> Session:
     """
     Authentify with Degiro API and populate basic information that'll be needed
     for further calls.
@@ -726,21 +752,51 @@ async def login(
 
     If no `session` is provided, create one.
     """
-    session = await webapi.login(credentials, session)
+    if session is None:
+        session = Session()
+    await webapi.login(credentials, session)
     await webapi.get_config(session)
     await webapi.get_client_info(session)
+    await get_exchange_dictionary(session)
+    return session
+
+
+def _check_session_exchange_dictionary(session: Session):
+    """
+    Check that session exchange dictionary has been populated.
+    Raise AssertionError if not.
+    """
+    if session.exchange_dictionary is None:
+        raise AssertionError(
+                "session.exchange_dictionary is not set. "
+                "Use api.login to build your session or call "
+                "api.get_exchange_dictionary on it.")
+
+
+async def get_exchange_dictionary(session: Session) -> Session:
+    """
+    Populate session with exchange_dictionary.
+    """
+    session.exchange_dictionary = await ExchangeDictionary(session)
     return session
 
 
 __all__ = [
     obj.__name__ for obj in (
+        # Login & setup
         login,
         Credentials,
+        Session,
         SessionCore,
         Config,
+        ExchangeDictionary,
+
+        # Product data structures
         PriceData,
         Stock,
         Currency,
+        ProductBase,
+
         get_portfolio,
         get_price_data,
         search_product

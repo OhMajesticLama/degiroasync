@@ -75,6 +75,7 @@ if RUN_INTEGRATION_TESTS:
         async def test_config(self):
             session = await self._login()
             await get_config(session)
+            LOGGER.debug('test_config| %s', session.config)
             self.assertTrue(session.config.paUrl is not None,
                     "paUrl not defined.")
             self.assertTrue(session.config.productSearchUrl is not None,

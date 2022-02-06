@@ -34,40 +34,40 @@ class Credentials:
 @JSONclass(annotations=True, annotations_type=True)
 class Config:
     # SessionCore config, as returned by Degiro
-    clientId = str
-    companiesServiceUrl = Union[str, None]
-    dictionaryUrl = str
-    i18nUrl = Union[str, None]
-    landingPath = Union[str, None]
-    latestSearchedProductsUrl = Union[str, None]
-    loginUrl = Union[str, None]
-    mobileLandingPath = Union[str, None]
-    paUrl = Union[str, None]
-    paymentServiceUrl = Union[str, None]
-    productNotesUrl = Union[str, None]
-    productSearchUrl = str
-    productTypesUrl = str
-    refinitivAgendaUrl = Union[str, None]
-    refinitivClipsUrl = Union[str, None]
-    refinitivCompanyProfileUrl = Union[str, None]
-    refinitivCompanyRatiosUrl = Union[str, None]
-    refinitivEsgsUrl = Union[str, None]
-    refinitivEstimatesUrl = Union[str, None]
-    refinitivFinancialStatementsUrl = Union[str, None]
-    refinitivInsiderTransactionsUrl = Union[str, None]
-    refinitivInsidersReportUrl = Union[str, None]
-    refinitivInvestorUrl = Union[str, None]
-    refinitivNewsUrl = Union[str, None]
-    refinitivShareholdersUrl = Union[str, None]
-    refinitivTopNewsCategoriesUrl = Union[str, None]
-    reportingUrl = Union[str, None]
-    sessionId = Union[str, None]
-    taskManagerUrl = Union[str, None]
-    tradingUrl = Union[str, None]
-    translationsUrl = Union[str, None]
-    vwdGossipsUrl = Union[str, None]
-    vwdNewsUrl = Union[str, None]
-    vwdQuotecastServiceUrl = Union[str, None]
+    clientId : int
+    companiesServiceUrl : Union[str, None]
+    dictionaryUrl : str
+    i18nUrl : Union[str, None]
+    landingPath : Union[str, None]
+    latestSearchedProductsUrl : Union[str, None]
+    loginUrl : str
+    mobileLandingPath : Union[str, None]
+    paUrl : str
+    paymentServiceUrl : Union[str, None]
+    productNotesUrl : Union[str, None]
+    productSearchUrl : str
+    productTypesUrl : str
+    refinitivAgendaUrl : Union[str, None]
+    refinitivClipsUrl : Union[str, None]
+    refinitivCompanyProfileUrl : Union[str, None]
+    refinitivCompanyRatiosUrl : Union[str, None]
+    refinitivEsgsUrl : Union[str, None]
+    refinitivEstimatesUrl : Union[str, None]
+    refinitivFinancialStatementsUrl : Union[str, None]
+    refinitivInsiderTransactionsUrl : Union[str, None]
+    refinitivInsidersReportUrl : Union[str, None]
+    refinitivInvestorUrl : Union[str, None]
+    refinitivNewsUrl : Union[str, None]
+    refinitivShareholdersUrl : Union[str, None]
+    refinitivTopNewsCategoriesUrl : Union[str, None]
+    reportingUrl : Union[str, None]
+    sessionId : Union[str, None]
+    taskManagerUrl : Union[str, None]
+    tradingUrl : Union[str, None]
+    translationsUrl : Union[str, None]
+    vwdGossipsUrl : Union[str, None]
+    vwdNewsUrl : Union[str, None]
+    vwdQuotecastServiceUrl : Union[str, None]
 
 
 # Currently unused
@@ -85,7 +85,7 @@ class Config:
 #        pass
 
 
-@JSONclass
+@JSONclass(annotations=True, annotations_type=True)
 class PAClient:
     """
     Data Structure for PA Client 

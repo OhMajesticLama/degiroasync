@@ -91,11 +91,6 @@ async def login(
         return session
 
 
-async def get_client_info(session : SessionCore):
-    async with httpx.AsyncClient() as client:
-        raise NotImplementedError
-
-
 async def get_config(session : SessionCore) -> SessionCore:
     """
     Populate session with configuration

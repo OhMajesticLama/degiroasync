@@ -20,7 +20,7 @@ from degiroasync.webapi import get_client_info
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
-from degiroasync.api import convert_time_series
+from degiroasync.api.api import convert_time_series
 from degiroasync.api import ProductBase
 from degiroasync.api import Stock
 from degiroasync.api import Currency
@@ -361,6 +361,22 @@ if RUN_INTEGRATION_TESTS:
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
 
+        async def test_search_product_symbol_exchange(self):
+            session = await self._login()
+            symbol = 'AIR'  # Airbus symbol
+            exchange_hiq = 'EPA'
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_symbol=symbol,
+                    by_exchange=exchange_hiq)
+            # The point of implementing filtering on symbol and exchange
+            # is to target one specific product. Raise an error if it doesn't
+            # work.
+            self.assertEqual(len(products), 1)
+            for product in products:
+                await product.await_product_info()
+                # We should only have airbus products here
+                self.assertTrue('airbus' in product.info.name.lower())
     
     class TestDegiroasyncIntegrationExchangeDictionary(
             _IntegrationLogin,
