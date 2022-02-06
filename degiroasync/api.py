@@ -16,7 +16,7 @@ from .constants import EnumStr
 from . import webapi
 from .core import LOGGER_NAME
 from .core import ResponseError
-from .core import Credentials, Session, URLs, Config, PAClient
+from .core import Credentials, SessionCore, URLs, Config, PAClient
 from .helpers import set_params
 from .helpers import dict_from_attr_list
 from .helpers import setattrs
@@ -28,6 +28,7 @@ from jsonloader import JSONclass, JSONWrapper
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
+
 
 class ExchangeDictionary:
     """
@@ -66,7 +67,7 @@ class ExchangeDictionary:
     countries: List[Country]
     regions: List[Region]
 
-    async def __new__(cls, session: Session):
+    async def __new__(cls, session: SessionCore):
         self = super().__new__(cls)
 
         resp = await webapi.get_product_dictionary(session)
@@ -147,7 +148,7 @@ class ExchangeDictionary:
 
 class ProductsInfo:
     # TODO: assess if it would be useful to create a generic batch class
-    def __init__(self, session: Session, products_ids: List[str]):
+    def __init__(self, session: SessionCore, products_ids: List[str]):
         "Takes a non-awaited get_products_info call."
         self.__awaitable = webapi.get_products_info(session, products_ids)
         self.__response = None
@@ -261,7 +262,7 @@ class ProductBase:
 
     @classmethod
     def init_bulk(cls,
-            session: Session,
+            session: SessionCore,
             attributes_iter: Iterable[Dict[str, Any]],
             batch_size=50
             ) -> List['Product']:
@@ -295,7 +296,7 @@ class ProductBase:
 
     @staticmethod
     def _create_batch(
-            session: Session,
+            session: SessionCore,
             attributes_batch: Iterable[Dict[str, Any]]
             ) -> Iterable['ProductBase']:
         """
@@ -392,7 +393,7 @@ class TotalPortfolio:
     up to date API changes.
     """
 
-async def get_portfolio(session: Session
+async def get_portfolio(session: SessionCore
         ) -> Tuple[TotalPortfolio, Iterable[ProductBase]]:
     """
     Returns (TotalPortfolio, Products). Refer to `TotalPortfolio` and `Products`
@@ -480,7 +481,7 @@ class PriceSeriesTime(PriceSeries):
 
 
 async def get_price_data(
-        session: Session,
+        session: SessionCore,
         product: Stock,
         resolution: PriceConst.Resolution = PriceConst.Resolution.PT1M,
         period: PriceConst.Period = PriceConst.Period.P1DAY,
@@ -592,7 +593,7 @@ def convert_time_series(
 
 
 async def get_price_data_batch(
-        session: Session,
+        session: SessionCore,
         products: Union[Iterable[ProductBase], ProductBase],
         resolution: PriceConst.Resolution = PriceConst.Resolution.PT1D,
         period: PriceConst.Period = PriceConst.Period.P1DAY,
@@ -627,7 +628,7 @@ async def get_price_data_batch(
         
 
 async def search_product(
-        session : Session,
+        session : SessionCore,
         *,
         by_text : Union[str, None] = None,
         by_isin : Union[str, None] = None,
@@ -710,7 +711,7 @@ async def search_product(
 
 async def login(
         credentials: Credentials,
-        session: Union[Session, None] = None) -> Session:
+        session: Union[SessionCore, None] = None) -> SessionCore:
     """
     Authentify with Degiro API and populate basic information that'll be needed
     for further calls.
@@ -735,7 +736,7 @@ __all__ = [
     obj.__name__ for obj in (
         login,
         Credentials,
-        Session,
+        SessionCore,
         Config,
         PriceData,
         Stock,

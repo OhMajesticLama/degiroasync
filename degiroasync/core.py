@@ -33,7 +33,7 @@ class Credentials:
 #@dataclasses.dataclass
 @JSONclass(annotations=True, annotations_type=True)
 class Config:
-    # Session config, as returned by Degiro
+    # SessionCore config, as returned by Degiro
     clientId = str
     companiesServiceUrl = Union[str, None]
     dictionaryUrl = str
@@ -141,7 +141,7 @@ class PAClient:
 
 
 @dataclasses.dataclass
-class Session:
+class SessionCore:
     JSESSIONID = 'JSESSIONID'
 
     config : Union[Config, None] = None
@@ -168,13 +168,13 @@ class URLs:
     ACCOUNT_INFO = join_url(BASE, '/trading/secure/v5/account/info')
 
     @staticmethod
-    def get_news_by_company_url(session : Session) -> str:
+    def get_news_by_company_url(session : SessionCore) -> str:
         "Build news_by_company url"
         check_session_config(session)
         return join_url(session.config.refinitivNewsUrl, 'news-by-company')
 
     @staticmethod
-    def get_client_info_url(session : Session) -> str:
+    def get_client_info_url(session : SessionCore) -> str:
         """
         Build client info url.
         """
@@ -182,7 +182,7 @@ class URLs:
         return join_url(session.config.paUrl, 'client')
 
     @staticmethod
-    def get_portfolio_url(session : Session) -> str:
+    def get_portfolio_url(session : SessionCore) -> str:
         """
         Build portfolio url
         """
@@ -199,7 +199,7 @@ class URLs:
         return url
 
     @classmethod
-    def get_orders_url(cls, session : Session) -> str:
+    def get_orders_url(cls, session : SessionCore) -> str:
         """
         Build Get Orders url
         """
@@ -207,13 +207,13 @@ class URLs:
         return cls.get_portfolio_url(session)
 
     @staticmethod
-    def get_price_data_url(session : Session) -> str:
+    def get_price_data_url(session : SessionCore) -> str:
         check_session_config(session)
         # Check if this should be pulled from session config
         return 'https://charting.vwdservices.com/hchart/v1/deGiro/data.js'
 
     @staticmethod
-    def get_product_search_url(session : Session) -> str:
+    def get_product_search_url(session : SessionCore) -> str:
         check_session_config(session)
         url = join_url(
                 session.config.productSearchUrl,
@@ -222,20 +222,20 @@ class URLs:
         return url
 
     @staticmethod
-    def get_product_dictionary_url(session : Session) -> str:
+    def get_product_dictionary_url(session : SessionCore) -> str:
         check_session_config(session)
         url = session.config.dictionaryUrl
         LOGGER.debug('get_product_search_url: %s', url)
         return url
 
 
-def check_session_config(session : Session):
+def check_session_config(session : SessionCore):
     "Raise an exception if session.config is not set"
     if session.config is None:
         raise AssertionError("session.config is not set. Call get_config first.")
 
 
-def check_session_client(session : Session):
+def check_session_client(session : SessionCore):
     "Raise an exception if session.client is not set"
     if session.config is None:
         raise AssertionError("session.client is not set. Call get_client_info first.")

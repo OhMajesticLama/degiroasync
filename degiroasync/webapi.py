@@ -19,7 +19,7 @@ from urllib.parse import urljoin
 import httpx
 
 
-from .core import Credentials, Session, URLs, Config, PAClient
+from .core import Credentials, SessionCore, URLs, Config, PAClient
 from .core import join_url
 from .core import check_session_config
 from .constants import LOGGER_NAME
@@ -35,14 +35,14 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 async def login(
         credentials : Credentials,
-        session : Union[Session, None] = None) -> Session:
+        session : Union[SessionCore, None] = None) -> SessionCore:
     """
     Authentify with Degiro API.
     `session` will be updated with required data for further connections.
     If no `session` is provided, create one.
     """
     url = URLs.LOGIN
-    session = session or Session()
+    session = session or SessionCore()
     payload = {
         "username": credentials.username,
         "password": credentials.password,
@@ -81,7 +81,7 @@ async def login(
         check_response(response)
         session._cookies = response.cookies
 
-        if Session.JSESSIONID not in session._cookies:
+        if SessionCore.JSESSIONID not in session._cookies:
             LOGGER.error("No JSESSIONID in response: %s", response)
             LOGGER.error("No JSESSIONID in response cookies: %s", response.cookies)
             raise AssertionError("No JSESSIONID in response.")
@@ -89,12 +89,12 @@ async def login(
         return session
 
 
-async def get_client_info(session : Session):
+async def get_client_info(session : SessionCore):
     async with httpx.AsyncClient() as client:
         raise NotImplementedError
 
 
-async def get_config(session : Session) -> Session:
+async def get_config(session : SessionCore) -> SessionCore:
     """
     Populate session with configuration
     """
@@ -111,7 +111,7 @@ async def get_config(session : Session) -> Session:
     return session
 
 
-async def get_client_info(session : Session) -> Session:
+async def get_client_info(session : SessionCore) -> SessionCore:
     """
     Get client information.
     """
@@ -128,7 +128,7 @@ async def get_client_info(session : Session) -> Session:
     return session
 
 
-async def get_account_info(session: Session) -> Session:
+async def get_account_info(session: SessionCore) -> SessionCore:
     """
     
     """
@@ -140,7 +140,7 @@ async def get_account_info(session: Session) -> Session:
         res = await client.get(U)
 
 
-async def get_portfolio(session : Session) -> httpx.Response:
+async def get_portfolio(session : SessionCore) -> httpx.Response:
     """
     Get portfolio web call.
 
@@ -653,7 +653,7 @@ async def get_portfolio(session : Session) -> httpx.Response:
             params={'portfolio': 0, 'totalPortfolio': 0})
 
 
-async def get_products_info(session : Session, products_ids : List[str]):
+async def get_products_info(session : SessionCore, products_ids : List[str]):
     """
     Get Product info Web API call.
     """
@@ -677,7 +677,7 @@ async def get_products_info(session : Session, products_ids : List[str]):
         return response
 
 
-async def get_company_profile(session : Session, isin : str) -> httpx.Response:
+async def get_company_profile(session : SessionCore, isin : str) -> httpx.Response:
     """
     Get company profile.
 
@@ -701,7 +701,7 @@ async def get_company_profile(session : Session, isin : str) -> httpx.Response:
 
 
 async def get_news_by_company(
-        session : Session,
+        session : SessionCore,
         isin : str,
         limit : int = 10,
         languages : List[str] = ['en'],
@@ -728,7 +728,7 @@ async def get_news_by_company(
 
 
 async def get_price_data(
-        session : Session,
+        session : SessionCore,
         vwdId : str,
         vwdIdentifierType : str,
         resolution : PriceConst.Resolution = PriceConst.Resolution.PT1M,
@@ -856,7 +856,7 @@ async def get_price_data(
     return response
 
 
-async def get_order(session : Session) -> httpx.Response:
+async def get_order(session : SessionCore) -> httpx.Response:
     """
     Get current and historical orders
     """
@@ -864,7 +864,7 @@ async def get_order(session : Session) -> httpx.Response:
             params={'orders': 0, 'historicalOrders': 0, 'transactions': 0})
 
 
-async def get_trading_update(session : Session, params : Dict[str, int]
+async def get_trading_update(session : SessionCore, params : Dict[str, int]
         ) -> httpx.Response:
     """
     Common call to target {tradingUrl}/v5/update/{intAccount}
@@ -894,7 +894,7 @@ async def get_trading_update(session : Session, params : Dict[str, int]
 
 
 async def search_product(
-        session: Session,
+        session: SessionCore,
         search_txt: str,
         product_type_id: Union[ProductConst.TypeId, None] = None,
         limit: int = 10,
@@ -980,7 +980,7 @@ async def search_product(
     return response
 
 
-async def get_product_dictionary(session : Session) -> Dict[str, Any]:
+async def get_product_dictionary(session : SessionCore) -> Dict[str, Any]:
     """
     Get product dictionary information from server.
 
@@ -1006,18 +1006,18 @@ async def get_product_dictionary(session : Session) -> Dict[str, Any]:
     return response
 
 
-async def set_order(session : Session):
+async def set_order(session : SessionCore):
     raise NotImplementedError
 
 ###########
 # Helpers #
 ###########
 
-def _check_active_session(session : Session):
+def _check_active_session(session : SessionCore):
     """
     Check that session id has been populated. Raise AssertionError if not.
     """
-    if Session.JSESSIONID not in session._cookies:
+    if SessionCore.JSESSIONID not in session._cookies:
         raise AssertionError("No JSESSIONID in session.cookies")
 
 

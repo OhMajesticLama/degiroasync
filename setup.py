@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.4.0",
+        version="0.5.0",
         author_email="ohmajesticlama@gmail.com",
         description="A Python asynchronous library for Degiro trading service.",
         long_description=long_description,

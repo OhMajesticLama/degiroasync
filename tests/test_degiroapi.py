@@ -12,7 +12,7 @@ import degiroasync.api
 import degiroasync.core
 import degiroasync.helpers
 from degiroasync.core import Credentials
-from degiroasync.core import Session
+from degiroasync.core import SessionCore
 from degiroasync.core import join_url
 from degiroasync.webapi import get_config
 from degiroasync.webapi import get_client_info
