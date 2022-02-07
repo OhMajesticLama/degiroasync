@@ -7,14 +7,10 @@ import asyncio
 
 import degiroasync
 import degiroasync.webapi
-#import degiroasync.api
 import degiroasync.core
 import degiroasync.core.helpers
 from degiroasync.core import Credentials
-from degiroasync.core import SessionCore
-from degiroasync.core import join_url
 from degiroasync.webapi import get_config
-from degiroasync.webapi import get_client_info
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
@@ -27,7 +23,7 @@ RUN_INTEGRATION_TESTS = 0
 try:
     _env_var = os.environ.get('DEGIROASYNC_INTEGRATION')
     RUN_INTEGRATION_TESTS = int(_env_var)
-except:
+except ValueError:
     LOGGER.info('degiroasync integration tests will *not* run.')
 
 
@@ -41,12 +37,7 @@ def _get_credentials():
         'DEGIRO_USERNAME environment variable not defined.')
     assert password is not None, (
         'DEGIRO_PASSWORD environment variable not defined.')
-    try:
-        totp_secret = os.environ.get('DEGIRO_TOTP_SECRET')
-    except:
-        LOGGER.info('DEGIRO_TOTP_SECRET environment variable'
-                ' not defined, skip 2FA.')
-        totp_secret = None
+    totp_secret = os.environ.get('DEGIRO_TOTP_SECRET')
 
     return Credentials(username, password, totp_secret)
 
@@ -67,10 +58,10 @@ if RUN_INTEGRATION_TESTS:
                     await degiroasync.webapi.get_client_info(self.session)
             return self.session
 
-
         async def test_login(self):
             session = await self._login()
-            self.assertTrue('JSESSIONID' in session.cookies, "No JSESSIONID found.")
+            self.assertTrue('JSESSIONID' in session.cookies,
+                            "No JSESSIONID found.")
 
         async def test_config(self):
             session = await self._login()
@@ -187,4 +178,3 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('etfAggregateTypes', resp_json)
             self.assertIn('etfFeeTypes', resp_json)
             self.assertIn('eurexCountries', resp_json)
-
