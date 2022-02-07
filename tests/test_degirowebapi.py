@@ -200,6 +200,8 @@ if RUN_INTEGRATION_TESTS:
             resp_json = response.json()
             LOGGER.debug("test_get_orders| %s", pprint.pformat(resp_json))
             self.assertIn(response.status_code, (200, 201))
+            self.assertIn('orders', resp_json)
+            self.assertIn('value', resp_json['orders'])
 
         async def test_check_order(self):
             raise NotImplementedError
