@@ -23,7 +23,7 @@ class ResponseError(Exception):
 
 
 def run_in_new_thread(
-        coroutine : Coroutine,
+        coroutine: Coroutine,
         ) -> concurrent.futures.Future:
     """
     Use to stop async creep: when you need to run a coroutine and return in
@@ -60,17 +60,16 @@ def join_url(*sections):
     return '/'.join(s.strip('/') for s in sections)
 
 
-
-def check_response(response : httpx.Response):
+def check_response(response: httpx.Response):
     """
     Raise an httpx.HTTPError if return code != 200
     """
-    if response.status_code != httpx.codes.OK:
+    if not response.status_code in (httpx.codes.OK, httpx.codes.CREATED):
         raise ResponseError(f"Error on call: url {response.url}"
                 f" | code {response.status_code} | content {response.content}")
 
 
-def check_keys(data : dict, keys : Iterable[str]):
+def check_keys(data: dict, keys: Iterable[str]):
     """
     Helper to check keys are in data.
     """
@@ -81,7 +80,7 @@ def check_keys(data : dict, keys : Iterable[str]):
 
 
 def dict_from_attr_list(
-        attributes_list : List[Dict[str, Any]],
+        attributes_list: List[Dict[str, Any]],
         ignore_error=False) -> Dict[str, Any]:
     """
     Helper to build a dict from an attribute list as returned by the web API.
@@ -164,8 +163,8 @@ def dict_from_attr_list(
 
 
 def set_params(
-        obj : Any,
-        attributes_list : Iterable[Dict[str, str]],
+        obj: Any,
+        attributes_list: Iterable[Dict[str, str]],
         ignore_error=False) -> Any:
     """
     This is a helper to translate Degiro-format params to a Python object.
@@ -231,14 +230,14 @@ def set_params(
     return obj
 
 
-def setattrs(obj : Any, **attributes) -> Any:
+def setattrs(obj: Any, **attributes) -> Any:
     "Set all attributes on obj."
     for k, v in attributes.items():
         setattr(obj,k, v)
     return obj
 
 
-def check_keys(data : dict, keys : Iterable[str]):
+def check_keys(data: dict, keys: Iterable[str]):
     """
     Helper to check keys are in data. Raise KeyError if that is not the case
     """
@@ -249,9 +248,9 @@ def check_keys(data : dict, keys : Iterable[str]):
                 name = data.__name__
             exc = KeyError(
                     "{attr} not found in {name}. Data content: {data}.".format(
-                    attr=attr,
-                    name=name,
-                    data=data
+                        attr=attr,
+                        name=name,
+                        data=data
                     ))
             raise exc
 
@@ -262,10 +261,10 @@ STREAMHANDLER_DEFAULT = logging.StreamHandler(stream=sys.stdout)
 
 
 def set_logs(
-        logger : logging.Logger,
-        logging_level : int,
-        log_format : str = FORMAT_DEFAULT,
-        handler : logging.Handler = STREAMHANDLER_DEFAULT
+        logger: logging.Logger,
+        logging_level: int,
+        log_format: str = FORMAT_DEFAULT,
+        handler: logging.Handler = STREAMHANDLER_DEFAULT
         ):
     "Configure logging for this module."
     # Configure logging

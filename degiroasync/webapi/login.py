@@ -10,7 +10,7 @@ import time
 import httpx
 
 from ..core.constants import LOGGER_NAME
-from ..core.constants import DegiroStatus
+from ..core.constants import LOGIN
 from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import check_session_config
 from ..core.helpers import check_response
@@ -41,7 +41,7 @@ async def login(
 
         response_load = response.json()
 
-        if response_load['status'] == DegiroStatus.TOTP_NEEDED:
+        if response_load['status'] == LOGIN.TOTP_NEEDED:
             # totp needed
             if (credentials.totp_secret is None and
                     credentials.one_time_password is None):
@@ -145,11 +145,9 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
     return response
 
 
-
 ###########
 # Helpers #
 ###########
-
 
 def _check_active_session(session: SessionCore):
     """

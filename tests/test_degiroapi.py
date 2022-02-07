@@ -24,7 +24,7 @@ from degiroasync.api.api import convert_time_series
 from degiroasync.api import ProductBase
 from degiroasync.api import Stock
 from degiroasync.api import Currency
-from degiroasync.core.constants import ProductConst
+from degiroasync.core.constants import PRODUCT
 
 from .test_degirowebapi import _get_credentials
 
@@ -121,6 +121,7 @@ class TestDegiroAsyncAPIHelpers(unittest.TestCase):
                 }
             })
 
+
 class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
     "Unittest for api.ExchangeDictionary"
     def setUp(self):
@@ -145,19 +146,19 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
                     }
                 ],
                 'countries': [
-		    {
-			"id": 978,
-			"name": "NL",
-			"region": 1,
-			"translation": "list.country.978"
-		    },
                     {
-	                "id": 886,
-	                "name": "FR",
-	                "region": 1,
-	                "translation": "list.country.886"
+                       "id": 978,
+                       "name": "NL",
+                       "region": 1,
+                       "translation": "list.country.978"
                     },
- 
+                    {
+                        "id": 886,
+                        "name": "FR",
+                        "region": 1,
+                        "translation": "list.country.886"
+                    },
+
                     ],
                 'exchanges': [
                     {
@@ -166,8 +167,8 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
                         'name': 'Euronext Paris'},
                     {
                         'id': 200, 'code': 'XAMS', 'hiqAbbr': 'EAM',
-                        'country': 'NL', 'city': 'Amsterdam', 'micCode': 'XAMS',
-                        'name': 'Euronext Amsterdam'}
+                        'country': 'NL', 'city': 'Amsterdam',
+                        'micCode': 'XAMS', 'name': 'Euronext Amsterdam'}
                     ]
             }
         self.get_product_dictionary_mock = resp_mock
@@ -185,7 +186,7 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
         self.assertIn('NL', (c.name for c in countries))
         exchanges = dictionary.exchanges
         self.assertIn('XAMS', (e.micCode for e in exchanges))
-        
+
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
     async def test_exchange_dictionary_exchange(self, get_dict_mock):
         # Mock webapi.get_product_dictionary
@@ -216,9 +217,10 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
 #####################
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.api integration tests will run.')
+
     class _IntegrationLogin:
         """
-        Internal helper, can be inherited to make login for integration tests 
+        Internal helper, can be inherited to make login for integration tests
         easier.
         """
         async def asyncSetUp(self):
@@ -236,7 +238,7 @@ if RUN_INTEGRATION_TESTS:
             unittest.IsolatedAsyncioTestCase):
         async def test_login(self):
             credentials = _get_credentials()
-            session = await degiroasync.api.login(credentials) 
+            session = await degiroasync.api.login(credentials)
             self.assertIsNotNone(session.config)
             self.assertIsNotNone(session.client)
 
@@ -293,7 +295,7 @@ if RUN_INTEGRATION_TESTS:
 
             products = filter(
                     lambda p: (
-                        p.info.productType == ProductConst.Type.STOCK
+                        p.info.productType == PRODUCT.TYPE.STOCK
                         and p.info.tradable == True
                         and p.info.symbol == 'AIR'
                         ),
@@ -305,7 +307,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertGreaterEqual(len(products), 1)
             # Select product
             for product in products:
-                if product.base.productTypeId == ProductConst.TypeId.STOCK:
+                if product.base.productTypeId == PRODUCT.TYPEID.STOCK:
                     # Let's take the first stock as example
                     break
 

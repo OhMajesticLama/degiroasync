@@ -42,11 +42,25 @@ def _get_credentials():
     return Credentials(username, password, totp_secret)
 
 
+#def mock_asyncclient(mock):
+#    pass
+#
+#
+#class TestDegiroWebAPIUnit(unittest.IsolatedAsyncioTestCase):
+#    @unittest.mock.patch('httpx.AsyncClient')
+#    async def test_confirm_order(self, asyncclient_mock):
+#        pass
+
+
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.webapi integration tests will run.')
 
-    class TestDegiroWebAPIIntegration(unittest.IsolatedAsyncioTestCase):
-        def setUp(self):
+    class _IntegrationWebLogin:
+        """
+        Internal helper, can be inherited to make login for integration tests
+        easier.
+        """
+        async def asyncSetUp(self):
             self._lock = asyncio.Lock()
 
         async def _login(self):
@@ -57,6 +71,10 @@ if RUN_INTEGRATION_TESTS:
                     await degiroasync.webapi.get_config(self.session)
                     await degiroasync.webapi.get_client_info(self.session)
             return self.session
+
+    class TestDegiroWebAPIIntegration(
+            _IntegrationWebLogin,
+            unittest.IsolatedAsyncioTestCase):
 
         async def test_login(self):
             session = await self._login()
@@ -123,18 +141,6 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_get_price_data(self):
             session = await self._login()
-            # TODO: test with search product once implemented
-
-            #response = await degiroasync.webapi.get_portfolio(session)
-            #portfolio = response.json()['portfolio']
-            #product_ids = filter(lambda x: x is not None,
-            #        (product.get('id')
-            #        for product in portfolio['value']))
-
-            # get product vwdId from get_products_info
-            # vwdId can be obtained from get_products_info
-            #response = await get_products_info(session, [p for p in product_ids])
-            #self.assertEquals(response.status_code, 200)
 
             vwdId = '360114899'
 
@@ -155,6 +161,7 @@ if RUN_INTEGRATION_TESTS:
             search = "AIRBUS"
             response = await degiroasync.webapi.search_product(session, search)
             resp_json = response.json()
+            self.assertEqual(response.status_code, 200, resp_json)
             self.assertIn('products', resp_json, resp_json)
             self.assertGreaterEqual(len(resp_json['products']), 1)
             self.assertIn('id', resp_json['products'][0], resp_json)
@@ -178,3 +185,21 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('etfAggregateTypes', resp_json)
             self.assertIn('etfFeeTypes', resp_json)
             self.assertIn('eurexCountries', resp_json)
+
+    class TestDegiroWebAPIOrdersIntegration(
+            _IntegrationWebLogin,
+            unittest.IsolatedAsyncioTestCase):
+        """
+        Set Orders will *not* be tested: this would imply being charged every
+        time tests are executed.
+        """
+        async def test_get_orders(self):
+            session = await self._login()
+
+            response = await degiroasync.webapi.get_orders(session)
+            resp_json = response.json()
+            LOGGER.debug("test_get_orders| %s", pprint.pformat(resp_json))
+            self.assertIn(response.status_code, (200, 201))
+
+        async def test_check_order(self):
+            raise NotImplementedError

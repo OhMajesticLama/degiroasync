@@ -1,17 +1,12 @@
-from typing import Iterable, Any, List, Dict, Tuple, Callable, Union
-import dataclasses
+from typing import Iterable, Any, List, Dict, Tuple, Union
 import logging
 import pprint
-from collections.abc import Awaitable
-import time
 import functools
 import asyncio
-import pprint
 import datetime
 
-from ..core.constants import DegiroStatus
-from ..core.constants import ProductConst
-from ..core.constants import PriceConst
+from ..core.constants import PRODUCT
+from ..core.constants import PRICE
 from ..core.constants import EnumStr
 from .. import webapi
 from ..core import LOGGER_NAME
@@ -256,8 +251,8 @@ class ProductBase:
                 params[attr] = loader(params[attr])
 
         cls = {
-            ProductConst.TypeId.CURRENCY: Currency,
-            ProductConst.TypeId.STOCK: Stock
+            PRODUCT.TYPEID.CURRENCY: Currency,
+            PRODUCT.TYPEID.STOCK: Stock
                 }.get(
                         productTypeId,
                         ProductGeneric
@@ -494,17 +489,17 @@ class PriceSeriesTime(PriceSeries):
 async def get_price_data(
         session: SessionCore,
         product: Stock,
-        resolution: PriceConst.Resolution = PriceConst.Resolution.PT1M,
-        period: PriceConst.Period = PriceConst.Period.P1DAY,
+        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1M,
+        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
-        data_type: PriceConst.Type = PriceConst.Type.PRICE
+        data_type: PRICE.TYPE = PRICE.TYPE.PRICE
         ) -> PriceSeriesTime:
     """Single product get_price request, used by generic call."""
     # Ensure product got results of product_info
-    if product.base.productTypeId != ProductConst.TypeId.STOCK:
+    if product.base.productTypeId != PRODUCT.TYPEID.STOCK:
         raise NotImplementedError(
-            "Only productTypeId == ProductConst.TypeId.STOCK is currently "
+            "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
             "supported by get_price_data")
     await product.await_product_info()
     resp = await webapi.get_price_data(
@@ -585,7 +580,7 @@ def convert_time_series(
         if key not in data_series:
             raise KeyError(f'{key} not found in data_series {data_series}')
 
-    if resolution_t != PriceConst.Resolution.PT1M:
+    if resolution_t != PRICE.RESOLUTION.PT1M:
         raise NotImplementedError("convert_time_series has not been tested "
                                   "with other resolutions than PT1M.")
 
@@ -606,11 +601,11 @@ def convert_time_series(
 async def get_price_data_batch(
         session: SessionCore,
         products: Union[Iterable[ProductBase], ProductBase],
-        resolution: PriceConst.Resolution = PriceConst.Resolution.PT1D,
-        period: PriceConst.Period = PriceConst.Period.P1DAY,
+        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
+        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
-        data_type: PriceConst.Type = PriceConst.Type.PRICE
+        data_type: PRICE.TYPE = PRICE.TYPE.PRICE
         ):
     """
     Get price data for products. Be mindful that not all product types will
@@ -623,9 +618,9 @@ async def get_price_data_batch(
 
     for product in products:
         # Ensure product got results of product_info
-        if product.productTypeId != ProductConst.TypeId.STOCK:
+        if product.productTypeId != PRODUCT.TYPEID.STOCK:
             raise NotImplementedError(
-                "Only productTypeId == ProductConst.TypeId.STOCK is currently "
+                "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
                 "supported by get_price_data_bulk")
         await product.await_product_info()
         vwdId = product.vwdId
@@ -645,7 +640,7 @@ async def search_product(
         by_isin: Union[str, None] = None,
         by_symbol: Union[str, None] = None,
         by_exchange: Union[str, Exchange, None] = None,
-        product_type_id: Union[ProductConst.TypeId, None] = ProductConst.TypeId.STOCK,
+        product_type_id: Union[PRODUCT.TYPEID, None] = PRODUCT.TYPEID.STOCK,
         max_iter: Union[int, None] = 1000) -> List[ProductBase]:
     """
     Access `product_search` endpoint.

@@ -1,3 +1,13 @@
+"""
+Async API for Degiro. This module is close to Degiro Web API structure:
+responses are provided (almost) as-is with minimum abstraction
+and verification.
+
+For a higher level api, see `api` module.
+
+Users should only import directly from `degiroasync.webapi`, its submodules
+should be considered implementation details.
+"""
 from .webapi import *
 from degiroasync.webapi import webapi
 
@@ -8,8 +18,9 @@ from .login import get_product_dictionary
 from .webapi import get_products_info
 from .webapi import search_product
 from .orders import get_orders
-from .orders import set_order
+from .orders import confirm_order
 from .orders import check_order
+
 
 __all__ = [
         # Login names
@@ -22,6 +33,6 @@ __all__ = [
         search_product.__name__,
         # Orders names
         get_orders.__name__,
-        set_order.__name__,
+        confirm_order.__name__,
         check_order.__name__,
         ] + webapi.__all__

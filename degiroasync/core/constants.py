@@ -1,9 +1,29 @@
 import enum
-import functools
 LOGGER_NAME = 'degiroasync'
 
 
-class EnumStr(str, enum.Enum):
+class _EnumBase(enum.Enum):
+    """
+    Base class for Enums that should behave as str or other types.
+
+    >>> class EnumStr(str, _EnumBase):
+    ...     pass
+    ...
+    >>> class Foo(EnumStr):
+    ...     A = 'foo'
+    ...
+    >>> str(Foo.A)
+    'foo'
+
+    """
+    def __repr__(self):
+        return f"'{self.__str__()}'"
+
+    def __str__(self):
+        return self.value.__str__()
+
+
+class EnumStr(str, _EnumBase):
     """
     Base class for Enums that should behave as str.
 
@@ -49,36 +69,103 @@ class EnumStr(str, enum.Enum):
     >>> type(Foo.A)
     <enum 'Foo'>
     """
-    def __repr__(self):
-        return f"'{super().__str__()}'"
-
-    def __str__(self):
-        return super().__str__()
 
 
-class DegiroStatus:
+class EnumInt(int, _EnumBase):
+    """
+    Base class for Enums that should behave as str.
+
+    Refer to example below for difference in behavior with other Enum based
+    solutions.
+
+    >>> import enum
+    >>> # Basic enum.Enum example
+    >>> class Foo(enum.Enum):
+    ...     A = 1
+    ...
+    >>> Foo.A
+    <Foo.A: 1>
+    >>> str(Foo.A)
+    'Foo.A'
+    >>> repr(Foo.A)
+    "<Foo.A: 1>"
+    >>> type(Foo.A)
+    <enum 'Foo'>
+    >>> # Inheriting from str, enum.Enum
+    >>> class Foo(int, enum.Enum):
+    ...     A = 1
+    ...
+    >>> Foo.A
+    <Foo.A: 1>
+    >>> str(Foo.A)
+    'Foo.A'
+    >>> repr(Foo.A)
+    "<Foo.A: 1>"
+    >>> type(Foo.A)
+    <enum 'Foo'>
+
+    >>> # An EnumStr child can be used as a drop-in replacement for an int
+    >>> class Foo(EnumInt):
+    ...     A = 1
+    ...
+    >>> Foo.A
+    1
+    >>> str(Foo.A)
+    '1'
+    >>> repr(Foo.A)
+    "'1'"
+    >>> type(Foo.A)
+    <enum 'Foo'>
+    """
+
+
+class LOGIN(EnumInt):
     TOTP_NEEDED = 6
 
 
-class Order:
-    class Action:
+class ORDER:
+    """
+    Constants for orders in web API.
+    """
+    class ACTION(EnumInt):
+        """
+        BUY:
+            Use when placing a _BUY_ order on a product.
+
+        SELL:
+            Use when placing a _SELL_ order on a product.
+
+        Check `ORDER.TYPE` for types of orders.
+        """
         BUY = 0
         SELL = 1
 
-    class Type:
+    class TYPE(EnumInt):
+        """
+        LIMITED:
+            This is the "Limit" field value in the web trader.
+
+        MARKET:
+            This is the "Market" field value in the web trader.
+
+        STOP_LOSS:
+            This is the "Stop Loss" field value in the web trader.
+
+        STOP_LIMITED:
+            This is the "Stop Limited" field value in the web trader.
+        """
         LIMITED = 0
         STOP_LIMITED = 1
         MARKET_ORDER = 2
         STOP_LOSS = 3
 
-    class Time:
+    class TIME(EnumInt):
         DAY = 1
         PERMANENT = 3
 
 
-class ProductConst:
-    class TypeId:
-        ALL = None
+class PRODUCT:
+    class TYPEID(EnumInt):
         STOCK = 1
         BONDS = 2
         FUTURES = 7
@@ -90,22 +177,22 @@ class ProductConst:
         WARRANTS = 536
         CURRENCY = 311
 
-    class Type(EnumStr):
+    class TYPE(EnumStr):
         STOCK = 'STOCK'
 
 
-class Sort(EnumStr):
+class SORT(EnumStr):
     ASC = "asc"
     DESC = "desc"
 
 
-class PriceConst:
-    class Resolution(EnumStr):
+class PRICE:
+    class RESOLUTION(EnumStr):
         # Resolution
         PT1M = 'PT1M'  # Higher resolution, is it one minute?
         PT1D = 'P1D'   # 1 tic per day
 
-    class Period(EnumStr):
+    class PERIOD(EnumStr):
         # Periods
         # P stands for Prior
         P1DAY = 'P1D'
@@ -116,8 +203,6 @@ class PriceConst:
         P1YEAR = 'P1Y'
         P50YEAR = 'P50Y'
 
-    class Type(EnumStr):
+    class TYPE(EnumStr):
         PRICE = 'price'
         OHLC = 'ohlc'
-
-

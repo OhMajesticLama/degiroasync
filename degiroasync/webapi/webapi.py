@@ -1,10 +1,3 @@
-"""
-Async API for Degiro. This module is close to Degiro Web API structure:
-responses are provided (almost) as-is with minimum abstraction
-and verification.
-
-For a higher level api, see `api` module.
-"""
 import logging
 from typing import Union, Any, List, Dict
 
@@ -14,8 +7,8 @@ from ..core import SessionCore, URLs
 from ..core import join_url
 from ..core import check_session_config
 from ..core.constants import LOGGER_NAME
-from ..core.constants import PriceConst
-from ..core.constants import ProductConst
+from ..core.constants import PRICE
+from ..core.constants import PRODUCT
 from ..core.helpers import check_response
 
 
@@ -620,11 +613,11 @@ async def get_price_data(
         session: SessionCore,
         vwdId: str,
         vwdIdentifierType: str,
-        resolution: PriceConst.Resolution = PriceConst.Resolution.PT1M,
-        period: PriceConst.Period = PriceConst.Period.P1DAY,
+        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1M,
+        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
-        data_type: PriceConst.Type = PriceConst.Type.PRICE
+        data_type: PRICE.TYPE = PRICE.TYPE.PRICE
         ) -> httpx.Response:
     """
     Get price data for a company.
@@ -777,7 +770,7 @@ async def get_trading_update(
 async def search_product(
         session: SessionCore,
         search_txt: str,
-        product_type_id: Union[ProductConst.TypeId, None] = None,
+        product_type_id: Union[PRODUCT.TYPEID, None] = None,
         limit: int = 10,
         offset: int = 0) -> httpx.Response:
     """
