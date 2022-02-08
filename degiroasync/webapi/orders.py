@@ -184,7 +184,15 @@ async def check_order(
 
     Example JSON response:
     ```
+    {
+        "data": {
+            "confirmationId": "c64332f0-a800-4f04-bc29-12a2b7efa20b",
+            "freeSpaceNew": 2282.0,
+            "showExAnteReportLink": true,
+            "transactionFee": 0.5
+        }
 
+    }
     ```
     """
     _order_calls_check(session,
@@ -194,14 +202,12 @@ async def check_order(
                        order_type=order_type,
                        size=size,
                        price=price)
-    # This call will not have integration tests to prevent misplaced orders
-    # All changes must be manually verified to work as intended.
 
     jsessionid = session._cookies[session.JSESSIONID]
 
     url = URLs.get_check_order_url(session)
     params = dict(
-        intAccount=session,
+        intAccount=session.client.intAccount,
         sessionId=jsessionid
             )
     data = dict(
@@ -210,13 +216,18 @@ async def check_order(
         price=price,
         productId=product_id,
         size=size,
-        time_type=time_type
+        timeType=time_type
             )
+    LOGGER.debug("check_order data| %s", data)
     async with httpx.AsyncClient() as client:
         response = await client.post(
                 url,
                 params=params,
                 json=data,
+                headers={
+                    'content-type': 'application/json;charset=UTF-8'
+                    },
+                cookies=session._cookies
                 )
     check_response(response)
     resp_json = response.json()

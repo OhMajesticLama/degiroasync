@@ -624,7 +624,8 @@ async def get_price_data_batch(
                 "supported by get_price_data_bulk")
         await product.await_product_info()
         vwdId = product.vwdId
-        prices_req.append(webapi.get_price_data(session,
+        prices_req.append(webapi.get_price_data(
+                session,
                 vwdId,
                 resolution=resolution,
                 period=period,
@@ -791,6 +792,7 @@ __all__ = [
 
         get_portfolio,
         get_price_data,
+        get_exchange_dictionary,
         search_product
         )
         ]

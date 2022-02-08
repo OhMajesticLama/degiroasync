@@ -127,7 +127,7 @@ class ORDER:
     """
     Constants for orders in web API.
     """
-    class ACTION(EnumInt):
+    class ACTION(EnumStr):
         """
         BUY:
             Use when placing a _BUY_ order on a product.
@@ -136,9 +136,14 @@ class ORDER:
             Use when placing a _SELL_ order on a product.
 
         Check `ORDER.TYPE` for types of orders.
+
+        For use with `checkOrder` HTTP endpoint - or `check_order` degiroasync
+        API calls.
         """
-        BUY = 0
-        SELL = 1
+        BUY = 'BUY'
+        SELL = 'SELL'
+        #BUY = 0
+        #SELL = 1
 
     class TYPE(EnumInt):
         """

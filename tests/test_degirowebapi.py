@@ -10,6 +10,9 @@ import degiroasync.webapi
 import degiroasync.core
 import degiroasync.core.helpers
 from degiroasync.core import Credentials
+from degiroasync.core.constants import PRODUCT
+from degiroasync.core.constants import PRICE
+from degiroasync.core.constants import ORDER
 from degiroasync.webapi import get_config
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
@@ -204,4 +207,47 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('value', resp_json['orders'])
 
         async def test_check_order(self):
-            raise NotImplementedError
+            session = await self._login()
+
+            # Leverage api.search_product to get a specific product_id
+            # as example for integration testing of check_order.
+            # This is introducing a dependency on api module, but is easier
+            # to manage. Future improvement opportunity: implement necesary
+            # query and filter here using only webapi.
+            from degiroasync import api
+            await api.get_exchange_dictionary(session)
+            products = await api.search_product(
+                    session,
+                    by_symbol="AIR",
+                    by_exchange="EPA",
+                    product_type_id=PRODUCT.TYPEID.STOCK
+                    )
+            self.assertEqual(len(products), 1,
+                             "We should only have one product here")
+            product = products[0]
+            await product.await_product_info()
+            # Reminder: typeId = 1 is STOCK
+            LOGGER.debug("test_check_order| product: %s . %s . %s . %s",
+                         product.info.symbol,
+                         product.info.name,
+                         product.info.productTypeId,
+                         product.base.id)
+
+            # This will *not* place the order: it would have to be confirmed
+            # with `confirm_order` call.
+            response = await degiroasync.webapi.check_order(
+                    session,
+                    product_id=product.base.id,
+                    buy_sell=ORDER.ACTION.BUY,
+                    time_type=ORDER.TIME.DAY,
+                    order_type=ORDER.TYPE.LIMITED,
+                    size=1,
+                    price=50
+                    )
+            resp_json = response.json()
+            LOGGER.debug("test_check_order| %s", pprint.pformat(resp_json))
+            self.assertIn(response.status_code, (200, 201))
+            self.assertIn('data', resp_json)
+            self.assertIn('confirmationId', resp_json['data'])
+            self.assertIn('freeSpaceNew', resp_json['data'])
+            self.assertIn('transactionFee', resp_json['data'])
