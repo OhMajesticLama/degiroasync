@@ -12,14 +12,9 @@ from ..core.constants import EnumStr
 from .. import webapi
 from ..core import LOGGER_NAME
 from ..core import ResponseError
-from ..core import Credentials, SessionCore, URLs, Config, PAClient
-from ..core.helpers import set_params
+from ..core import Credentials, SessionCore, Config
 from ..core.helpers import dict_from_attr_list
-from ..core.helpers import setattrs
-from ..core.helpers import run_in_new_thread
-from ..core.helpers import check_keys
 from ..core import helpers
-from ..core import constants
 from .session import Session
 from .session import Exchange
 from .session import check_session_exchange_dictionary
@@ -95,13 +90,9 @@ class ProductBase:
             `id` is `id` attribute as returned by DegiroAPI. It is used
             to query Degiro endpoints for this product.
         """
-        #if self.Info is ProductBase.Info:
-        #    raise NotImplementedError(
-        #        "ProductBase.Info must be overwritten by subclasses.")
         self.base = self.Base(attributes)
         self.__product_info_batch = _product_info
         self.__product_info = None
-
 
     @staticmethod
     def init_product(
@@ -155,7 +146,7 @@ class ProductBase:
             session: SessionCore,
             attributes_iter: Iterable[Dict[str, Any]],
             batch_size=50
-            ) -> List['Product']:
+            ) -> List[ForwardRef('ProductBase')]:
         """
         Bulk init Product instances.
 

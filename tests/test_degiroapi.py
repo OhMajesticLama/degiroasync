@@ -20,7 +20,7 @@ from degiroasync.webapi import get_client_info
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
-from degiroasync.api.api import convert_time_series
+from degiroasync.api.product import convert_time_series
 from degiroasync.api import ProductBase
 from degiroasync.api import Stock
 from degiroasync.api import Currency
