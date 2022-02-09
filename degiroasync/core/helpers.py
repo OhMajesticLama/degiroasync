@@ -69,14 +69,14 @@ def check_response(response: httpx.Response):
                 f" | code {response.status_code} | content {response.content}")
 
 
-def check_keys(data: dict, keys: Iterable[str]):
-    """
-    Helper to check keys are in data.
-    """
-    for attr in keys:
-        if attr not in data:
-            raise AssertionError(f'{attr} not found in config.'
-                    ' Please try again later and open a bug ticket if the problem persits.')
+#def check_keys(data: dict, keys: Iterable[str]):
+#    """
+#    Helper to check keys are in data.
+#    """
+#    for attr in keys:
+#        if attr not in data:
+#            raise AssertionError(f'{attr} not found in config.'
+#                    ' Please try again later and open a bug ticket if the problem persits.')
 
 
 def dict_from_attr_list(
@@ -260,18 +260,18 @@ FORMAT_DEFAULT = '%(asctime)s-%(name)s-%(levelname)s- %(message)s'
 STREAMHANDLER_DEFAULT = logging.StreamHandler(stream=sys.stdout)
 
 
-def set_logs(
-        logger: logging.Logger,
-        logging_level: int,
-        log_format: str = FORMAT_DEFAULT,
-        handler: logging.Handler = STREAMHANDLER_DEFAULT
-        ):
-    "Configure logging for this module."
-    # Configure logging
-    logger.setLevel(logging_level)
-    #handler = logging.StreamHandler(stream=sys.stdout)
-    handler.setLevel(logging_level)
-    # DEBUG: Will need to find where another handler is being added when running tests. nose2 catches loggers by default.
-    #logger.addHandler(handler)
-    formatter = logging.Formatter(log_format)
-    handler.setFormatter(formatter)
+#def set_logs(
+#        logger: logging.Logger,
+#        logging_level: int,
+#        log_format: str = FORMAT_DEFAULT,
+#        handler: logging.Handler = STREAMHANDLER_DEFAULT
+#        ):
+#    "Configure logging for this module."
+#    # Configure logging
+#    logger.setLevel(logging_level)
+#    #handler = logging.StreamHandler(stream=sys.stdout)
+#    handler.setLevel(logging_level)
+#    # DEBUG: Will need to find where another handler is being added when running tests. nose2 catches loggers by default.
+#    #logger.addHandler(handler)
+#    formatter = logging.Formatter(log_format)
+#    handler.setFormatter(formatter)

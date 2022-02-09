@@ -20,7 +20,7 @@ from degiroasync.webapi import get_news_by_company
 
 
 LOGGER = logging.getLogger(degiroasync.core.LOGGER_NAME)
-degiroasync.core.helpers.set_logs(LOGGER, logging.DEBUG)
+#degiroasync.core.helpers.set_logs(LOGGER, logging.DEBUG)
 
 RUN_INTEGRATION_TESTS = 0
 try:
@@ -101,8 +101,19 @@ if RUN_INTEGRATION_TESTS:
             response = await degiroasync.webapi.get_portfolio(session)
             self.assertEquals(response.status_code, 200)
             resp_json = response.json()
+            LOGGER.debug("test_portfolio| %s", resp_json)
             self.assertTrue('portfolio' in resp_json)
             self.assertTrue('value' in resp_json['portfolio'])
+
+        async def test_porfolio_total(self):
+            session = await self._login()
+
+            response = await degiroasync.webapi.get_portfolio_total(session)
+            resp_json = response.json()
+            LOGGER.debug("test_portfolio_total| %s", resp_json)
+            self.assertIn(response.status_code, (200, 201))
+            self.assertTrue('totalPortfolio' in resp_json)
+            self.assertTrue('value' in resp_json['totalPortfolio'])
 
         async def test_get_products_info(self):
             session = await self._login()
@@ -110,16 +121,18 @@ if RUN_INTEGRATION_TESTS:
             response = await degiroasync.webapi.get_portfolio(session)
             portfolio = response.json()['portfolio']
             product_ids = filter(lambda x: x is not None,
-                    (product.get('id')
-                    for product in portfolio['value']))
-            response = await get_products_info(session, [p for p in product_ids])
+                                 (product.get('id')
+                                  for product in portfolio['value']))
+            response = await get_products_info(session,
+                                               [p for p in product_ids])
             self.assertEquals(response.status_code, 200)
 
-            response = await degiroasync.webapi.get_products_info(session, ["72906"])
+            response = await degiroasync.webapi.get_products_info(session,
+                                                                  ["72906"])
             self.assertEqual(response.status_code, 200)
             LOGGER.debug('webapi.test_get_products_info| %s',
-                    pprint.pformat(response.json()))
-                    
+                         pprint.pformat(response.json()))
+
         async def test_get_company_profile(self):
             session = await self._login()
 
@@ -130,7 +143,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('businessSummary' in resp_json['data'], resp_json)
             LOGGER.debug('webapi.test_get_company_profile| %s',
-                    pprint.pformat(resp_json))
+                         pprint.pformat(resp_json))
 
         async def test_get_news_by_company(self):
             session = await self._login()
@@ -251,3 +264,14 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('confirmationId', resp_json['data'])
             self.assertIn('freeSpaceNew', resp_json['data'])
             self.assertIn('transactionFee', resp_json['data'])
+
+        async def test_get_account_info(self):
+            session = await self._login()
+            resp = await degiroasync.webapi.get_account_info(session)
+            resp_json = resp.json()
+            LOGGER.debug("test_get_account_info| response: %s", resp_json)
+
+            self.assertIn('data', resp_json)
+            self.assertIn('clientId', resp_json['data'])
+            self.assertIn('baseCurrency', resp_json['data'])
+            # Not sure what to test here.k

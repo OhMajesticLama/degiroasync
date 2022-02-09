@@ -7,20 +7,6 @@ import os
 import setuptools
 
 
-# pyproject.toml top
-"""
-[project]
-dependencies = [
-    'httpx >= 0.21.3'
-]
-
-[project.optional-dependencies]
-tests = [
-    'nose2 >= 0.10.0',
-    'mypy >= 0.931'
-]
-"""
-
 
 def forbid_publish():
     argv = sys.argv
@@ -42,7 +28,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.6.0",
+        version="0.7.0",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,

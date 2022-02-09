@@ -237,7 +237,11 @@ async def check_order(
 
 async def get_orders(session: SessionCore) -> httpx.Response:
     """
-    Get current and historical orders
+    Get current and historical orders.
+
+    Example response:
+
+
     """
     return await get_trading_update(
             session,

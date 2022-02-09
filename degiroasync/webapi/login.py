@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Any
+from typing import Union, Dict, Any
 import logging
 import json
 import base64
@@ -14,6 +14,7 @@ from ..core.constants import LOGIN
 from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import check_session_config
 from ..core.helpers import check_response
+from ..core.helpers import join_url
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
@@ -109,14 +110,18 @@ async def get_client_info(session: SessionCore) -> SessionCore:
 
 async def get_account_info(session: SessionCore) -> SessionCore:
     """
-
+       
     """
     _check_active_session(session)
-    join_url(URLs.ACCOUNT_INFO, session.client.intAccount)
+    #url = join_url(URLs.ACCOUNT_INFO, str(session.client.intAccount))
     #url = '/'.join((URLs.ACCOUNT_INFO, session.client.intAccount))
-    raise NotImplementedError
+    url = URLs.get_account_info_url(session)
     async with httpx.AsyncClient() as client:
-        res = await client.get(U)
+        res = await client.get(url,
+                cookies=session._cookies
+                )
+    check_response(res)
+    return res
 
 
 async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:

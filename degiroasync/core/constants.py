@@ -1,4 +1,6 @@
 import enum
+
+# Used to get same Logger instance across submodules.
 LOGGER_NAME = 'degiroasync'
 
 
@@ -23,6 +25,9 @@ class _EnumBase(enum.Enum):
         return self.value.__str__()
 
 
+# Will be replaced by enum.StrEnum in Python 3.11
+# TODO: move to StrEnum and do a try/except ImportError to switch to stdlib
+# implementation when available.
 class EnumStr(str, _EnumBase):
     """
     Base class for Enums that should behave as str.
@@ -142,8 +147,6 @@ class ORDER:
         """
         BUY = 'BUY'
         SELL = 'SELL'
-        #BUY = 0
-        #SELL = 1
 
     class TYPE(EnumInt):
         """
@@ -194,7 +197,7 @@ class SORT(EnumStr):
 class PRICE:
     class RESOLUTION(EnumStr):
         # Resolution
-        PT1M = 'PT1M'  # Higher resolution, is it one minute?
+        PT1M = 'PT1M'  # Higher resolution, 1 minute
         PT1D = 'P1D'   # 1 tic per day
 
     class PERIOD(EnumStr):

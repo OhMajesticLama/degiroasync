@@ -4,6 +4,7 @@ import os
 import pprint
 import asyncio
 import unittest.mock
+import sys
 
 
 import degiroasync
@@ -30,14 +31,18 @@ from .test_degirowebapi import _get_credentials
 
 
 LOGGER = logging.getLogger(degiroasync.core.LOGGER_NAME)
-degiroasync.core.helpers.set_logs(LOGGER, logging.DEBUG)
+LOGGER.setLevel(logging.DEBUG)
+#degiroasync.core.helpers.set_logs(LOGGER, logging.DEBUG)
+
+LOGGER.debug('Python Version: %s', sys.version)
 
 RUN_INTEGRATION_TESTS = 0
 try:
     _env_var = os.environ.get('DEGIROASYNC_INTEGRATION')
     RUN_INTEGRATION_TESTS = int(_env_var)
-except:
+except ValueError:
     LOGGER.info('degiroasync integration tests will *not* run.')
+del _env_var
 
 
 #############
@@ -247,18 +252,17 @@ if RUN_INTEGRATION_TESTS:
             unittest.IsolatedAsyncioTestCase):
         async def test_get_portfolio_total(self):
             session = await self._login()
-            total, products = await degiroasync.api.get_portfolio(session)
+            total = await degiroasync.api.get_portfolio_total(session)
             LOGGER.debug("test_get_portfolio_total: %s", total.__dict__)
             self.assertIsNotNone(total.degiroCash)
             self.assertIsNotNone(total.totalCash)
             self.assertIsNotNone(total.freeSpaceNew)
             self.assertIsNotNone(total.reportPortfValue)
             self.assertIsNotNone(total.reportCashBal)
-            await asyncio.gather(*[p.await_product_info() for p in products])
 
         async def test_get_portfolio_products_info(self):
             session = await self._login()
-            _, products = await degiroasync.api.get_portfolio(session)
+            products = await degiroasync.api.get_portfolio(session)
             LOGGER.debug("test_get_portfolio_products_info: %s",
                     pprint.pformat(tuple(p.__dict__ for p in products)))
 
@@ -314,6 +318,7 @@ if RUN_INTEGRATION_TESTS:
             LOGGER.debug('test_get_price_data price_data 1| %s', product.__dict__)
             price_data = await degiroasync.api.get_price_data(session, product)
             LOGGER.debug('test_get_price_data price_data 2| %s', price_data)
+
 
         #async def test_get_price_data_bulk(self):
         #    raise NotImplementedError

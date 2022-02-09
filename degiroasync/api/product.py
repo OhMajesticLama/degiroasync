@@ -13,6 +13,7 @@ from .. import webapi
 from ..core import LOGGER_NAME
 from ..core import ResponseError
 from ..core import Credentials, SessionCore, Config
+from ..core import check_session_client, check_session_config
 from ..core.helpers import dict_from_attr_list
 from ..core import helpers
 from .session import Session
@@ -24,7 +25,6 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 
 class ProductsInfo:
-    # TODO: assess if it would be useful to create a generic batch class
     def __init__(self, session: SessionCore, products_ids: List[str]):
         "Takes a non-awaited get_products_info call."
         self.__awaitable = webapi.get_products_info(session, products_ids)
@@ -273,15 +273,13 @@ class TotalPortfolio:
 
 async def get_portfolio(
         session: SessionCore
-        ) -> Tuple[TotalPortfolio, Iterable[ProductBase]]:
+        ) -> Iterable[ProductBase]:
     """
     Returns (TotalPortfolio, Products). Refer to `TotalPortfolio` and
     `Products` classes for attributes available.
     """
-    if session.config is None:
-        await webapi.get_config(session)
-    if session.client is None:
-        await webapi.get_client_info(session)
+    check_session_client(session)
+    check_session_config(session)
 
     resp = await webapi.get_portfolio(session)
     resp_json = resp.json()
@@ -292,19 +290,36 @@ async def get_portfolio(
 
     portfolio = ProductBase.init_bulk(session, portf_dict_json)
 
+    return portfolio
+
+
+async def get_portfolio_total(
+        session: SessionCore
+        ) -> TotalPortfolio:
+    """
+    Returns (TotalPortfolio, Products). Refer to `TotalPortfolio` and
+    `Products` classes for attributes available.
+    """
+    check_session_client(session)
+    check_session_config(session)
+
+    resp = await webapi.get_portfolio_total(session)
+    resp_json = resp.json()
+
+    LOGGER.debug("api.get_portfolio_total| %s", resp_json)
+
     total_args = dict_from_attr_list(resp_json['totalPortfolio']['value'],
                                      ignore_error=True)
     total_portfolio = TotalPortfolio(total_args)
 
-    return total_portfolio, portfolio
+    return total_portfolio
 
-
-@JSONclass(annotations=True, annotations_type=True)
-class PriceData:
-    start: str
-    end: str
-    series: List[Dict[str, Union[list, float, str, int]]]
-    resolution: str
+#@JSONclass(annotations=True, annotations_type=True)
+#class PriceData:
+#    start: str
+#    end: str
+#    series: List[Dict[str, Union[list, float, str, int]]]
+#    resolution: str
 
 
 @JSONclass(annotations=True, annotations_type=True)
@@ -342,12 +357,14 @@ class PriceSeriesObject(PriceSeries):
         windowHighPrice: float
 
 
-class PriceSeriesTime(PriceSeries):
+@JSONclass(annotations=True, annotations_type=True)
+class PriceSeriesTime:
     """
     Converted Wrapper for PriceSeriestime for get_price_data.
     """
     times: str
     data: Dict[str, List[Union[float, str]]]
+    expires: str
 
 
 async def get_price_data(
@@ -359,7 +376,9 @@ async def get_price_data(
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
         ) -> PriceSeriesTime:
-    """Single product get_price request, used by generic call."""
+    """
+    Single product get_price request, used by bulk call.
+    """
     # Ensure product got results of product_info
     if product.base.productTypeId != PRODUCT.TYPEID.STOCK:
         raise NotImplementedError(
@@ -601,7 +620,7 @@ __all__ = [
         Config,
 
         # Product data structures
-        PriceData,
+        #PriceData,
         Stock,
         Currency,
         ProductBase,

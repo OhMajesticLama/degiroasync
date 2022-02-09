@@ -526,7 +526,13 @@ async def get_portfolio(session: SessionCore) -> httpx.Response:
     """
     return await get_trading_update(
             session,
-            params={'portfolio': 0, 'totalPortfolio': 0})
+            params={'portfolio': 0})
+
+
+async def get_portfolio_total(session: SessionCore) -> httpx.Response:
+    return await get_trading_update(
+            session,
+            params={'totalPortfolio': 0})
 
 
 async def get_products_info(
@@ -856,6 +862,7 @@ async def search_product(
 
 __all__ = [
     get_portfolio.__name__,
+    get_portfolio_total.__name__,
     get_news_by_company.__name__,
     get_company_profile.__name__,
     get_price_data.__name__,

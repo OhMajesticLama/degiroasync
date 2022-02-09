@@ -11,6 +11,7 @@ from .helpers import join_url
 from .constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
+LOGGER.setLevel(logging.DEBUG)
 
 
 @dataclasses.dataclass
@@ -252,6 +253,18 @@ class URLs:
         url = session.config.dictionaryUrl
         LOGGER.debug('get_product_search_url: %s', url)
         return url
+
+    @classmethod
+    def get_account_info_url(cls, session: SessionCore) -> str:
+        check_session_client(session)
+        url = join_url(URLs.ACCOUNT_INFO, str(session.client.intAccount))
+        return cls._add_jsessionid(session, url)
+
+    @classmethod
+    def _add_jsessionid(cls, session: SessionCore, url: str) -> str:
+        check_session_config(session)
+        return url + ';jsessionid={}'.format(
+                session._cookies[session.JSESSIONID])
 
 
 def check_session_config(session: SessionCore):

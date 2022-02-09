@@ -15,8 +15,11 @@ from .login import login
 from .login import get_config
 from .login import get_client_info
 from .login import get_product_dictionary
+from .login import get_account_info  # Currently implemented but uncertain usefulness.
 from .webapi import get_products_info
 from .webapi import search_product
+from .webapi import get_portfolio
+from .webapi import get_portfolio_total
 from .orders import get_orders
 from .orders import confirm_order
 from .orders import check_order
