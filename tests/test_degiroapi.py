@@ -264,17 +264,18 @@ if RUN_INTEGRATION_TESTS:
             session = await self._login()
             products = await degiroasync.api.get_portfolio(session)
             LOGGER.debug("test_get_portfolio_products_info: %s",
-                    pprint.pformat(tuple(p.__dict__ for p in products)))
+                         pprint.pformat(tuple(p.__dict__ for p in products)))
 
             for product in products:
                 self.assertIsNotNone(product.base.id)
                 await product.await_product_info()
                 LOGGER.debug("test_get_portfolio_products_info2: %s",
-                        pprint.pformat(product.info))
+                             pprint.pformat(product.info))
                 self.assertNotEqual(product.info, None)
-                self.assertIsInstance(product.info.name, str, f"{product.base.id}")
-                self.assertIsInstance(product.info.isin, str, f"{product.base.id}:{product.info.name}")
-
+                self.assertIsInstance(product.info.name, str,
+                                      f"{product.base.id}")
+                self.assertIsInstance(product.info.isin, str,
+                                      f"{product.base.id}:{product.info.name}")
 
     class TestDegiroasyncIntegrationPrice(
             _IntegrationLogin,
@@ -288,7 +289,7 @@ if RUN_INTEGRATION_TESTS:
             #products_awaitable = [p.await_product_info() for p in products]
             #LOGGER.debug('test_get_price_data products_awaitable| %s', products_awaitable)
 
-            # In a context where we'd want to optimize, we want to 
+            # In a context where we'd want to optimize, we want to
             # build the pipeline by awaiting on each product instead of a bulk
             # gather to not block execution while we wait for data on some
             # of the products.
@@ -384,7 +385,7 @@ if RUN_INTEGRATION_TESTS:
                 await product.await_product_info()
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
-    
+
     class TestDegiroasyncIntegrationExchangeDictionary(
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
@@ -406,8 +407,17 @@ if RUN_INTEGRATION_TESTS:
             self.assertEqual(eam_exc.micCode, 'XAMS')
             self.assertEqual(eam_exc.countryName, 'NL')
 
+    class TestDegiroasyncIntegrationOrders(
+            _IntegrationLogin,
+            unittest.IsolatedAsyncioTestCase):
+        async def test_get_orders(self):
+            session = await self._login()
+            orders = await degiroasync.api.get_orders(session)
+            LOGGER.debug("test_get_orders| %s", orders)
+            self.assertIn('orders', orders)
+            self.assertIn('ordersHistory', orders)
+
 
 if __name__ == '__main__':
     import nose2
     nose2.main()
-

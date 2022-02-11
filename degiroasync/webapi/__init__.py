@@ -21,8 +21,11 @@ from .webapi import search_product
 from .webapi import get_portfolio
 from .webapi import get_portfolio_total
 from .orders import get_orders
+from .orders import get_orders_history
+from .orders import get_transactions
 from .orders import confirm_order
 from .orders import check_order
+from .orders import ORDER_DATE_FORMAT
 
 
 __all__ = [
@@ -36,6 +39,10 @@ __all__ = [
         search_product.__name__,
         # Orders names
         get_orders.__name__,
+        get_orders_history.__name__,
+        get_transactions.__name__,
         confirm_order.__name__,
         check_order.__name__,
-        ] + webapi.__all__
+        ] + webapi.__all__ + [
+        'ORDER_DATE_FORMAT'
+        ]

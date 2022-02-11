@@ -35,7 +35,6 @@ class Credentials:
     one_time_password: Union[str, None] = None
 
 
-#@dataclasses.dataclass
 @JSONclass(annotations=True, annotations_type=True)
 class Config:
     # SessionCore config, as returned by Degiro
@@ -189,6 +188,34 @@ class URLs:
         return url
 
     @staticmethod
+    def get_reporting_url(session: SessionCore) -> str:
+        """
+        Get reporting URL. Used for orders history and transactions.
+        """
+        check_session_config(session)
+        url = session.config.reportingUrl
+        LOGGER.debug('get_reporting_url| %s', url)
+        return url
+
+    @classmethod
+    def get_orders_history_url(cls, session: SessionCore) -> str:
+        """
+        Get reporting URL. Used for orders history.
+        """
+        url = join_url(cls.get_reporting_url(session), 'v4/order-history')
+        LOGGER.debug('get_orders_history_url| %s', url)
+        return url
+
+    @classmethod
+    def get_transactions_url(cls, session: SessionCore) -> str:
+        """
+        Get reporting URL. Used for orders history.
+        """
+        url = join_url(cls.get_reporting_url(session), 'v4/transactions')
+        LOGGER.debug('get_transactions_url| %s', url)
+        return url
+
+    @staticmethod
     def get_confirm_order_url(session: SessionCore) -> str:
         """
         Build url for confirm_order.
@@ -259,6 +286,7 @@ class URLs:
         check_session_client(session)
         url = join_url(URLs.ACCOUNT_INFO, str(session.client.intAccount))
         return cls._add_jsessionid(session, url)
+
 
     @classmethod
     def _add_jsessionid(cls, session: SessionCore, url: str) -> str:

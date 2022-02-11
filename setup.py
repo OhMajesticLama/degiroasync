@@ -7,7 +7,6 @@ import os
 import setuptools
 
 
-
 def forbid_publish():
     argv = sys.argv
     blacklist = ['register', 'upload']
@@ -32,8 +31,9 @@ if __name__ == '__main__':
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
-        #url="https://github.com/pypa/sampleproject",
-        #scripts=[],
+        #url="https://github.com/OhMajesticLama/degiroasync",
+        #scripts=[],  # we'll want a helper script that runs integration tests
+                      # to help users detecting API changes.
         packages=setuptools.find_packages(),
         install_requires=[
             'httpx >= 0.21.3',

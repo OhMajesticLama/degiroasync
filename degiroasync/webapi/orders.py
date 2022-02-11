@@ -1,5 +1,6 @@
 import logging
 from typing import Union
+import datetime
 
 import httpx
 
@@ -66,6 +67,8 @@ async def confirm_order(
     Example JSON response:
     ```
     # TODO: Next time we place an order
+    {'data': {'confirmationId': 'a8e49a7e-4d79-4f21-961b-988dc0806d09', 'freeSpaceNew': 55395, 'transactionFee': 0.5, 'showExAnteReportLink': True}}
+
     ```
     """
     # This call will not have integration tests to prevent misplaced orders
@@ -243,7 +246,103 @@ async def get_orders(session: SessionCore) -> httpx.Response:
 
 
     """
+    # TODO: assess if historicalOrders is relevant here
+    # or if it should be removed and we should only rely on get_orders_history
     return await get_trading_update(
             session,
-            params={'orders': 0, 'historicalOrders': 0, 'transactions': 0}
+            params={
+                'orders': 0,
+                'historicalOrders': 0}
             )
+
+
+ORDER_DATE_FORMAT = '%d/%m/%Y'
+
+async def get_orders_history(
+        session: SessionCore,
+        from_date: str,
+        to_date: str,
+        ) -> httpx.Response:
+    """
+    Get historical orders for session.
+
+    from_date:
+        Date in format DD/MM/YYYY. Raise ValueError if incorrect format.
+    to_date:
+        Date in format DD/MM/YYYY. Raise ValueError if incorrect format.
+    """
+    check_session_config(session)
+    check_session_client(session)
+    # Check date format, datetime will raise an exception
+    datetime.datetime.strptime(from_date, ORDER_DATE_FORMAT)
+    datetime.datetime.strptime(to_date, ORDER_DATE_FORMAT)
+
+    jsessionid = session._cookies[session.JSESSIONID]
+
+    url = URLs.get_orders_history_url(session)
+    params = dict(
+        fromDate=from_date,
+        toDate=to_date,
+        intAccount=session.client.intAccount,
+        sessionId=jsessionid
+            )
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+                url,
+                params=params,
+                headers={
+                    'content-type': 'application/json'
+                    },
+                cookies=session._cookies
+                )
+    check_response(response)
+    resp_json = response.json()
+    LOGGER.debug("get_orders_history| %s", resp_json)
+    return response
+
+
+async def get_transactions(
+        session: SessionCore,
+        from_date: str,
+        to_date: str,
+        ) -> httpx.Response:
+    """
+    Get transactions for session.
+
+    from_date:
+        Date in format DD/MM/YYYY. Raise ValueError if incorrect format.
+    to_date:
+        Date in format DD/MM/YYYY. Raise ValueError if incorrect format.
+
+    """
+    check_session_config(session)
+    check_session_client(session)
+    # Check date format, datetime will raise an exception
+    datetime.datetime.strptime(from_date, ORDER_DATE_FORMAT)
+    datetime.datetime.strptime(to_date, ORDER_DATE_FORMAT)
+
+    jsessionid = session._cookies[session.JSESSIONID]
+
+    url = URLs.get_transactions_url(session)
+    params = dict(
+        fromDate=from_date,
+        toDate=to_date,
+        intAccount=session.client.intAccount,
+        sessionId=jsessionid,
+        groupTransactionsByOrder=False
+            )
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+                url,
+                params=params,
+                headers={
+                    'content-type': 'application/json'
+                    },
+                cookies=session._cookies
+                )
+    check_response(response)
+    resp_json = response.json()
+    LOGGER.debug("get_orders_history| %s", resp_json)
+    return response

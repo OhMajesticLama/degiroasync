@@ -765,11 +765,12 @@ async def get_trading_update(
     """
     url = URLs.get_portfolio_url(session)
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, cookies=session._cookies,
+        response = await client.get(url,
+                                    cookies=session._cookies,
                                     params=params)
 
     check_response(response)
-    LOGGER.debug(response.json())
+    LOGGER.debug("get_trading_update| %s", response.json())
     return response
 
 

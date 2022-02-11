@@ -52,7 +52,8 @@ specific cases of your program.
 | get_company_profile |                    | :white_check_mark: |
 | check_order         | :white_check_mark: | :white_check_mark: |
 | confirm_order       |                    | :white_check_mark: |
-| get_orders          |                    | :white_check_mark: |
+| get_orders          | :white_check_mark: | :white_check_mark: |
+| get_orders_history  |                    | :white_check_mark: |
 
 
 ## Precautions

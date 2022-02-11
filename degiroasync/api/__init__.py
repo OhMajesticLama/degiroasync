@@ -1,5 +1,6 @@
 from .orders import submit_order
 from .orders import check_order
+from .orders import get_orders
 from .session import Session
 from .session import login
 from .session import get_exchange_dictionary
@@ -48,6 +49,7 @@ __all__ = [obj.__name__ for obj in (
         # Order
         submit_order,
         check_order,
+        get_orders,
 
         # Constants
         PRODUCT,

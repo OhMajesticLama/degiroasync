@@ -3,6 +3,7 @@ import logging
 import os
 import pprint
 import asyncio
+import datetime
 
 
 import degiroasync
@@ -225,8 +226,8 @@ if RUN_INTEGRATION_TESTS:
             # Leverage api.search_product to get a specific product_id
             # as example for integration testing of check_order.
             # This is introducing a dependency on api module, but is easier
-            # to manage. Future improvement opportunity: implement necesary
-            # query and filter here using only webapi.
+            # to manage. Future improvement opportunit for this test: implement
+            # required query and filter here using only webapi.
             from degiroasync import api
             await api.get_exchange_dictionary(session)
             products = await api.search_product(
@@ -274,4 +275,85 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('data', resp_json)
             self.assertIn('clientId', resp_json['data'])
             self.assertIn('baseCurrency', resp_json['data'])
-            # Not sure what to test here.k
+            # Not sure what more to test here. To be extended when this call
+            # usage has been identified.
+
+        async def test_get_orders_history(self):
+            session = await self._login()
+            to_date = datetime.datetime.today()
+            from_date = datetime.datetime.today() - datetime.timedelta(days=7)
+            date_format = degiroasync.webapi.orders.ORDER_DATE_FORMAT
+            resp = await degiroasync.webapi.get_orders_history(
+                    session,
+                    from_date=from_date.strftime(date_format),
+                    to_date=to_date.strftime(date_format)
+                    )
+            resp_json = resp.json()
+            LOGGER.debug("test_get_orders_history| response: %s", resp_json)
+
+            self.assertIn('data', resp_json)
+            data = resp_json['data']
+            for order in data:
+                self.assertIn('created', order)
+                self.assertIn('orderId', order)
+                self.assertIn('productId', order)
+                self.assertIn('size', order)
+                self.assertIn('price', order)
+                self.assertIn('buysell', order)
+                self.assertIn(order['buysell'], ('B', 'S'))
+                self.assertIn('orderTypeId', order)
+                self.assertIn('orderTimeTypeId', order)
+                self.assertIn('type', order)
+                self.assertIn('status', order)
+                self.assertIn('last', order)
+                self.assertIn('isActive', order)
+                self.assertIn('currentTradedSize', order)
+                self.assertIn('totalTradedSize', order)
+
+        async def test_get_orders_history_date_check(self):
+            session = await self._login()
+            with self.assertRaises(ValueError):
+                await degiroasync.webapi.get_orders_history(
+                    session,
+                    from_date='garbage',
+                    to_date='garbage')
+
+        async def test_get_transactions(self):
+            session = await self._login()
+            to_date = datetime.datetime.today()
+            from_date = datetime.datetime.today() - datetime.timedelta(days=7)
+            date_format = degiroasync.webapi.orders.ORDER_DATE_FORMAT
+            resp = await degiroasync.webapi.get_transactions(
+                    session,
+                    from_date=from_date.strftime(date_format),
+                    to_date=to_date.strftime(date_format)
+                    )
+            resp_json = resp.json()
+            LOGGER.debug("test_get_orders_history| response: %s", resp_json)
+
+            self.assertIn('data', resp_json)
+            data = resp_json['data']
+            for order in data:
+                self.assertIn('created', order)
+                self.assertIn('orderId', order)
+                self.assertIn('productId', order)
+                self.assertIn('size', order)
+                self.assertIn('price', order)
+                self.assertIn('buysell', order)
+                self.assertIn(order['buysell'], ('B', 'S'))
+                self.assertIn('orderTypeId', order)
+                self.assertIn('orderTimeTypeId', order)
+                self.assertIn('type', order)
+                self.assertIn('status', order)
+                self.assertIn('last', order)
+                self.assertIn('isActive', order)
+                self.assertIn('currentTradedSize', order)
+                self.assertIn('totalTradedSize', order)
+
+        async def test_get_transactions_date_check(self):
+            session = await self._login()
+            with self.assertRaises(ValueError):
+                await degiroasync.webapi.get_orders_history(
+                    session,
+                    from_date='garbage',
+                    to_date='garbage')
