@@ -4,11 +4,11 @@
 - essential features are still missing, see supported features section.
 - external interface is still subject to change, even between minor version.
 - while there are integration tests, coverage of integration and unit tests is
- not yet where we need it to be
+ not yet where it needs to be.
 
 DO NOT USE IN PRODUCTION. You have been warned.
  While in this _ALPHA_ state, code is made available in case it can be of use
- to other API developers.*
+ for proof-of-concepts, .*
 
 
 This project aims to provide an *unofficial* API for Degiro platform that works
@@ -26,14 +26,13 @@ Degiro trading interface.
 
 This module provides 2 APIs:
 - `degiroasync.api`: API that abstracts Degiro HTTP API to be closer to
-  a consummer needs. This is the recommended choice to start.
+  a consumer needs. This is the recommended choice to start.
 - `degiroasync.webapi`: API close to actual Degiro HTTP API. 
   This provides maximum flexibility and data availability, at the cost of
-  accessibility.
+  accessibility and checks.
 
-`degiroasync.api` is built on top of `degiroasync.webapi`: the two of them
-can work together should you want to leverage higher/lower level calls in a
-specific cases of your program.
+`degiroasync.api` is built on top of `degiroasync.webapi`: it should be easy
+to fall back to `webapi` should the need arise.
 
 
 | Feature             | degiroasync.api    | degiroasync.webapi |
@@ -53,7 +52,7 @@ specific cases of your program.
 | check_order         | :white_check_mark: | :white_check_mark: |
 | confirm_order       |                    | :white_check_mark: |
 | get_orders          | :white_check_mark: | :white_check_mark: |
-| get_orders_history  |                    | :white_check_mark: |
+| get_orders_history  | :white_check_mark: | :white_check_mark: |
 
 
 ## Precautions
@@ -87,7 +86,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 The license under which this software is made available can be found in
-the License file in this repository.
+the LICENSE file in this repository.
 
 It is the responsability of the user of this library to ensure its 
 product is running and passing adequate tests before running it in production.

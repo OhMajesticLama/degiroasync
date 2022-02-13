@@ -1,4 +1,5 @@
 import unittest
+import itertools
 import logging
 import os
 import pprint
@@ -25,6 +26,7 @@ from degiroasync.api.product import convert_time_series
 from degiroasync.api import ProductBase
 from degiroasync.api import Stock
 from degiroasync.api import Currency
+from degiroasync.api import Order
 from degiroasync.core.constants import PRODUCT
 
 from .test_degirowebapi import _get_credentials
@@ -412,10 +414,11 @@ if RUN_INTEGRATION_TESTS:
             unittest.IsolatedAsyncioTestCase):
         async def test_get_orders(self):
             session = await self._login()
-            orders = await degiroasync.api.get_orders(session)
-            LOGGER.debug("test_get_orders| %s", orders)
-            self.assertIn('orders', orders)
-            self.assertIn('ordersHistory', orders)
+            orders, orders_hist = await degiroasync.api.get_orders(session)
+            LOGGER.debug("test_get_orders orders| %s", orders)
+            LOGGER.debug("test_get_orders orders hist| %s", orders_hist)
+            for o in itertools.chain(orders, orders_hist):
+                self.assertTrue(isinstance(o, Order))
 
 
 if __name__ == '__main__':

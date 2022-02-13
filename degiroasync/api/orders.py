@@ -1,4 +1,4 @@
-from typing import Any, Union, List, Dict
+from typing import Any, Union, List, Dict, Tuple
 import functools
 import datetime
 import logging
@@ -68,7 +68,7 @@ async def get_orders(
         session: SessionCore,
         from_date: Union[datetime.datetime, None] = None,
         to_date: Union[datetime.datetime, None] = None,
-        ) -> Dict[str, List[Order]]:
+        ) -> Tuple[List[Order]]:
     """
     Get current orders and history.
 
@@ -76,6 +76,8 @@ async def get_orders(
         Request orders history up to `to_date`. Defaults to today.
     from_date:
         Request orders history from `from_date`. Defaults to today - 7 days.
+
+    Return current_orders, historical_orders.
 
     """
     if to_date is None:
@@ -98,7 +100,7 @@ async def get_orders(
     for order_list in (orders_dict, orders_history_dict):
         for order in order_list:
             order['productId'] = str(order['productId'])
-    return {
-            'orders': [Order(o) for o in orders_dict],
-            'ordersHistory': [Order(o) for o in orders_history_dict]
-           }
+    return (
+            [Order(o) for o in orders_dict],
+            [Order(o) for o in orders_history_dict]
+           )
