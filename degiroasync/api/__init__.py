@@ -1,6 +1,7 @@
 from .orders import submit_order
 from .orders import check_order
 from .orders import get_orders
+from .orders import get_transactions
 from .orders import Order
 from .session import Session
 from .session import login
@@ -51,6 +52,7 @@ __all__ = [obj.__name__ for obj in (
         submit_order,
         check_order,
         get_orders,
+        get_transactions,
         Order,
 
         # Constants

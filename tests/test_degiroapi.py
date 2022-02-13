@@ -6,6 +6,7 @@ import pprint
 import asyncio
 import unittest.mock
 import sys
+import datetime
 
 
 import degiroasync
@@ -419,6 +420,31 @@ if RUN_INTEGRATION_TESTS:
             LOGGER.debug("test_get_orders orders hist| %s", orders_hist)
             for o in itertools.chain(orders, orders_hist):
                 self.assertTrue(isinstance(o, Order))
+
+        async def test_get_transactions(self):
+            session = await self._login()
+            to_date = datetime.datetime.today()
+            from_date = datetime.datetime(year=to_date.year - 2,
+                                          month=1,
+                                          day=1)
+            LOGGER.debug("test_get_transactions params| %s",
+                         (from_date, to_date))
+            transactions = await degiroasync.api.get_transactions(
+                    session,
+                    from_date=from_date,
+                    to_date=to_date
+                    )
+            LOGGER.debug("test_get_transactions results| %s", transactions)
+            if not len(transactions):
+                LOGGER.warning(
+                        "No transaction found in the last two years. "
+                        "It's possible the account had no activity.")
+
+            for trans in transactions:
+                self.assertTrue(hasattr(trans, 'product'))
+                self.assertTrue(hasattr(trans, 'price'))
+                self.assertTrue(hasattr(trans, 'quantity'))
+                self.assertTrue(hasattr(trans, 'fxRate'))
 
 
 if __name__ == '__main__':

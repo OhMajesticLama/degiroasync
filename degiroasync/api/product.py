@@ -27,7 +27,8 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 class ProductsInfo:
     def __init__(self, session: SessionCore, products_ids: List[str]):
         "Takes a non-awaited get_products_info call."
-        self.__awaitable = webapi.get_products_info(session, products_ids)
+        self.__awaitable = webapi.get_products_info(session,
+                                                    list(set(products_ids)))
         self.__response = None
         self.__awaitable_lock = asyncio.Lock()
 
@@ -74,6 +75,8 @@ class ProductBase:
         """
         name: str
         symbol: str
+        currency: str
+        exchangeId: str
     base: Base
     info: Union[None, Info] = None
 
@@ -152,9 +155,6 @@ class ProductBase:
 
         This is useful to do batch requests to populate additional attributes
         for Products.
-
-        generator_output: bool
-            If set to True, yield Products as they are instanciated
 
         Returns a List of Product instances
         """
@@ -275,8 +275,8 @@ async def get_portfolio(
         session: SessionCore
         ) -> Iterable[ProductBase]:
     """
-    Returns (TotalPortfolio, Products). Refer to `TotalPortfolio` and
-    `Products` classes for attributes available.
+    Returns Products in portfolio. Refer to  `Products` classes for minimum
+    available attributes.
     """
     check_session_client(session)
     check_session_config(session)

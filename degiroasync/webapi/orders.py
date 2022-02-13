@@ -333,6 +333,7 @@ async def get_transactions(
         groupTransactionsByOrder=False
             )
 
+    LOGGER.debug('get_transactions params| %s', params)
     async with httpx.AsyncClient() as client:
         response = await client.get(
                 url,
@@ -344,5 +345,5 @@ async def get_transactions(
                 )
     check_response(response)
     resp_json = response.json()
-    LOGGER.debug("get_orders_history| %s", resp_json)
+    LOGGER.debug("get_transactions response| %s", resp_json)
     return response

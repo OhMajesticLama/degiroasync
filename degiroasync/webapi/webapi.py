@@ -545,6 +545,7 @@ async def get_products_info(
         raise AssertionError("productSearchUrl is None:"
                              " have you called get_config?")
 
+    LOGGER.debug('get_products_info products_ids| %s', products_ids)
     url = join_url(session.config.productSearchUrl,
                    'v5/products/info')
     async with httpx.AsyncClient() as client:
@@ -557,8 +558,13 @@ async def get_products_info(
                     },
                 json=products_ids
                 )
-        check_response(response)
-        LOGGER.debug(response.json())
+        try:
+            check_response(response)
+        except Exception:
+            LOGGER.error('get_products_info error| %s', products_ids)
+            LOGGER.error('get_products_info error| %s', response.json())
+            raise
+        LOGGER.debug('get_products_info|', response.json())
         return response
 
 

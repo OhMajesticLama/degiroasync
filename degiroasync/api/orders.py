@@ -11,6 +11,7 @@ from .. import webapi
 from ..core import SessionCore
 from ..core import ORDER
 from ..core import LOGGER_NAME
+from ..core import TRANSACTIONS
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -34,6 +35,21 @@ class Order:
     #product: Union[ProductBase, None] = None  # do we want to reinstantiate
                                                # products here or let user?
 
+# {'id': 182722888, 'productId': 65153, 'date': '2020-02-07T09:00:10+01:00', 'buysell': 'B', 'price': 36.07, 'quantity': 20, 'total': -721.4, 'orderTypeId': 0, 'counterParty': 'MK', 'transfered': False, 'fxRate': 0, 'totalInBaseCurrency': -721.4, 'feeInBaseCurrency': -0.29, 'totalPlusFeeInBaseCurrency': -721.69, 'transactionTypeId': 0, 'tradingVenue': 'XPAR'})
+
+@JSONclass(annotations=True, annotations_type=True)
+class Transaction:
+    id: str
+    product: ProductBase
+    date: datetime.datetime
+    buysell: ORDER.ACTION
+    price: float
+    quantity: float
+    total: float
+    transfered: bool
+    fxRate: float
+    totalInBaseCurrency: float
+    totalPlusFeeInBaseCurrency: float
 
 async def submit_order():
     raise NotImplementedError
@@ -104,3 +120,61 @@ async def get_orders(
             [Order(o) for o in orders_dict],
             [Order(o) for o in orders_history_dict]
            )
+
+
+async def get_transactions(
+        session: SessionCore,
+        from_date: Union[datetime.datetime, None] = None,
+        to_date: Union[datetime.datetime, None] = None
+        ) -> List[Order]:
+    """
+    Get transactions for `session`.
+
+    from_date:
+        Request transactions from `from_date`. Defaults to `to_date - 7 days`.
+
+    to_date:
+        Request transactions to `to_date`. Defaults to today.
+    """
+    to_date = to_date or datetime.datetime.today()
+    from_date = from_date or to_date - datetime.timedelta(days=7)
+
+    resp = await webapi.get_transactions(
+            session,
+            from_date=from_date.strftime(webapi.ORDER_DATE_FORMAT),
+            to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT)
+            )
+    data = resp.json()['data'].copy()
+    products = ProductBase.init_bulk(
+            session,
+            map(lambda t: {'id': str(t['productId'])}, data))
+
+    async def _build_transaction(prod, trans):
+        await prod.await_product_info()
+        trans.update(dict(
+            id=str(trans['id']),
+            product=prod,
+            date=datetime.datetime.fromisoformat(trans['date']),
+            buysell={'B': ORDER.ACTION.BUY,
+                     'S': ORDER.ACTION.SELL}[trans['buysell']],
+                ))
+        return Transaction(trans)
+
+    transactions = await asyncio.gather(*[_build_transaction(p, t)
+                                          for p, t in zip(products, data)])
+    return transactions
+    #for prod, trans in zip(products, data):
+        #await prod.await_product_info()
+        #trans.update(dict(
+        #    id=str(trans['id']),
+        #    product=prod,
+        #    date=datetime.datetime.strptime(trans['date']),
+        #    buysell={'B': ORDER.ACTION.BUY,
+        #             'S': ORDER.ACTION.SELL}[trans['buysell']],
+        #    counterParty={
+        #        'MK': TRANSACTIONS.COUNTERPARTY.MARKET,
+        #        'GR': TRANSACTIONS.COUNTERPARTY.GROUP,
+        #        'DG': TRANSACTIONS.COUNTERPARTY.DEGIRO
+        #        }
+        #        ))
+        #transaction = Transaction(trans)
