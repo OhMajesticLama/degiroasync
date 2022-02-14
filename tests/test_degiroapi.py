@@ -18,6 +18,8 @@ from degiroasync.core import Credentials
 from degiroasync.core import SessionCore
 from degiroasync.core import join_url
 from degiroasync.core.helpers import set_params
+from degiroasync.core.helpers import camelcase_to_snake
+from degiroasync.core.helpers import camelcase_dict_to_snake
 from degiroasync.webapi import get_config
 from degiroasync.webapi import get_client_info
 from degiroasync.webapi import get_products_info
@@ -83,12 +85,22 @@ class TestDegiroAsyncHelpers(unittest.TestCase):
                   'name': 'value',
                   'value': 7300.0},
             ])
-        
+
         self.assertEquals(foo.id, '8614787')
         self.assertEquals(foo.positionType, 'PRODUCT')
         self.assertEquals(foo.size, 100)
         self.assertEquals(foo.price, 73.0)
         self.assertEquals(foo.value, 7300.0)
+
+    def test_camelcase_to_snake(self):
+        inp = 'iAmCamelCase'
+        out = camelcase_to_snake(inp)
+        self.assertEqual(out, 'i_am_camel_case')
+
+    def test_camelcase_dict_to_snake(self):
+        d = {'fooBar': 2, 'camelCase': {'camelCase': 1}}
+        out = camelcase_dict_to_snake(d)
+        self.assertEqual(out, {'foo_bar': 2, 'camel_case': {'camelCase': 1}})
 
 
 class TestDegiroAsyncAPIHelpers(unittest.TestCase):

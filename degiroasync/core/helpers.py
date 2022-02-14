@@ -15,28 +15,64 @@ import httpx
 from .constants import LOGGER_NAME
 
 
-
 LOGGER = logging.getLogger(LOGGER_NAME)
+
 
 class ResponseError(Exception):
     "Raised when bad response has been received from server."
 
 
-def run_in_new_thread(
-        coroutine: Coroutine,
-        ) -> concurrent.futures.Future:
-    """
-    Use to stop async creep: when you need to run a coroutine and return in
-    a synchronous call.
-    """
-    loop = asyncio.new_event_loop()
-    #loop = asyncio.get_event_loop()
-    with concurrent.futures.ThreadPoolExecutor(1) as executor:
-        future = executor.submit(
-                loop.run_until_complete,
-                coroutine)
+#def run_in_new_thread(
+#        coroutine: Coroutine,
+#        ) -> concurrent.futures.Future:
+#    """
+#    Use to stop async creep: when you need to run a coroutine and return in
+#    a synchronous call.
+#    """
+#    loop = asyncio.new_event_loop()
+#    #loop = asyncio.get_event_loop()
+#    with concurrent.futures.ThreadPoolExecutor(1) as executor:
+#        future = executor.submit(
+#                loop.run_until_complete,
+#                coroutine)
+#
+#    return future
 
-    return future
+
+def camelcase_to_snake(text: str) -> str:
+    """
+    Convert a camelCase text to snake_case.
+
+    This helper replace any capitalized character by its lowered version
+    preceded by '_'.
+
+    This helper does not check that input text is camel case or not.
+
+    >>> s = 'iAmCamelCase'
+    >>> camelcase_to_snake(s)
+    'i_am_camel_case'
+    """
+    return ''.join(map(lambda c: '_' + c.lower() if c.isupper() else c, text))
+
+
+def camelcase_dict_to_snake(
+        dict_in: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert keys of dictionary with `str` keys from camelCase to snake_case.
+
+    This does not care for structures with depth: values dictionaries will not
+    be updated to snake_case.
+
+    >>> d = {'fooBar': 2, 'camelCase': {'camelCase': 1}}
+    >>> camelcase_dict_to_snake(d)
+    {'foo_bar': 2, 'camel_case': {'camelCase': 1}}
+    """
+    return {
+        camelcase_to_snake(k): v
+       #     camelcase_dict_to_snake(v) if isinstance(v, dict) else v
+        for k, v in dict_in.items()
+            }
+
 
 def join_url(*sections):
     """
