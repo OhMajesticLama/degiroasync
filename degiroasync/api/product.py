@@ -156,6 +156,9 @@ class ProductBase:
         This is useful to do batch requests to populate additional attributes
         for Products.
 
+        attributes_iter:
+            Base attributes for products, at the minimum must contains 'id'
+
         Returns a List of Product instances
         """
         instances = []
@@ -217,7 +220,7 @@ class Stock(ProductBase):
         productType: str
         tradable: bool
         category: str
-        feedQuality: str
+        #feedQuality: str
 
     class VwdIdentifierTypes(EnumStr):
         ISSUEID = 'issueId'
@@ -566,7 +569,7 @@ async def search_product(
             raise TypeError(
                     "Only Exchange or str types supported for 'by_exchange'.")
 
-    limit = 10
+    limit = 100
     offset = 0
     products = []
 
@@ -583,7 +586,9 @@ async def search_product(
                 return False
         return True
 
-    for _ in range(max_iter):
+    iter_n = 0
+    while iter_n < max_iter or max_iter is None:
+        iter_n += 1
         resp = await webapi.search_product(
                 session,
                 by_text,
@@ -595,6 +600,8 @@ async def search_product(
                      pprint.pformat(resp_json))
         if 'products' in resp_json:
             products_json = resp_json['products']
+            LOGGER.debug("api.search_product n_products| %s",
+                         products_json)
             batch = ProductBase.init_bulk(session,
                                           filter(__custom_filter,
                                                  products_json))
@@ -602,11 +609,14 @@ async def search_product(
             # able to yield data as soon as we receive it while still not
             # blocking further calls to be launched, should it be needed.
             products += batch
-            if len(batch) < limit:
+            LOGGER.debug("api.search_product (batch len, symbol)| (%s, %s)",
+                         len(batch), by_symbol)
+            if len(products_json) < limit:
                 break
             else:
-                offset += len(batch)
+                offset += len(products_json)
         else:
+            LOGGER.debug("No 'products' key in response. Stop.")
             break
     return products
 

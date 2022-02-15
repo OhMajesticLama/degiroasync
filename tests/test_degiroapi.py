@@ -365,14 +365,28 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_search_product_symbol(self):
             session = await self._login()
-            symbol = 'AIR'  # Airbus symbol
+            symbol = 'AIR'
             products = await degiroasync.api.search_product(session,
-                    by_symbol=symbol)
+                                                            by_symbol=symbol)
+            self.assertGreaterEqual(len(products), 1)
+            for product in products:
+                await product.await_product_info()
+                self.assertEqual(symbol, product.info.symbol, product.info)
+                # We should only have airbus products here
+                #self.assertTrue('airbus' in product.info.name.lower(),
+                #               product.info)
+
+        async def test_search_product_symbol_gne(self):
+            session = await self._login()
+            symbol = 'GNE'  # GE symbol on EPA
+            products = await degiroasync.api.search_product(session,
+                                                            by_symbol=symbol,
+                                                            by_exchange='EPA')
             self.assertGreaterEqual(len(products), 1)
             for product in products:
                 await product.await_product_info()
                 # We should only have airbus products here
-                self.assertTrue('airbus' in product.info.name.lower())
+                self.assertTrue('general electric' in product.info.name.lower())
 
         async def test_search_product_text(self):
             session = await self._login()

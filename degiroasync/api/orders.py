@@ -3,6 +3,7 @@ import functools
 import datetime
 import logging
 import asyncio
+import itertools
 
 from jsonloader import JSONclass
 
@@ -24,7 +25,7 @@ class Order:
     productId: str
     size: Union[float, int]
     price: float
-    buysell: str  # 'B' or 'S'
+    buysell: ORDER.ACTION  # 'B' or 'S'
     orderTypeId: int
     orderTimeTypeId: int
     currentTradedSize: int
@@ -113,9 +114,12 @@ async def get_orders(
     orders_history_dict = orders_history_resp.json()['data']
     LOGGER.debug("get_orders orders_dict| %s", orders_dict)
     LOGGER.debug("get_orders orders_history_dict| %s", orders_history_dict)
-    for order_list in (orders_dict, orders_history_dict):
-        for order in order_list:
-            order['productId'] = str(order['productId'])
+    for order in itertools.chain(orders_dict, orders_history_dict):
+        order['productId'] = str(order['productId'])
+        order['buysell'] = {
+            'B': ORDER.ACTION.BUY,
+            'S': ORDER.ACTION.SELL
+                }[order['buysell']]
     return (
             [Order(o) for o in orders_dict],
             [Order(o) for o in orders_history_dict]

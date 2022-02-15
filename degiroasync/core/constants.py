@@ -172,6 +172,16 @@ class ORDER:
         PERMANENT = 3
 
 
+class TRANSACTIONS:
+    class TYPEID(EnumInt):
+        pass
+
+    class COUNTERPARTY(EnumStr):
+        MARKET = 'MK'
+        DEGIRO = 'DG'
+        GROUP = 'GR'
+
+
 class PRODUCT:
     class TYPEID(EnumInt):
         STOCK = 1
@@ -187,6 +197,8 @@ class PRODUCT:
 
     class TYPE(EnumStr):
         STOCK = 'STOCK'
+        FUND = 'FUND'
+        CASH = 'CASH'
 
 
 class SORT(EnumStr):
