@@ -67,6 +67,7 @@ async def check_order(
         size: int,
         price: Union[float, None] = None,
         ) -> Any:
+    assert buy_sell in ("BUY", "SELL")
 
     response = await webapi.check_order(
         session=session,

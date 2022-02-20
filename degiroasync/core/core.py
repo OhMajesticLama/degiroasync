@@ -1,6 +1,15 @@
 from __future__ import annotations
 import logging
 import dataclasses
+try:
+    from enum import StrEnum
+except ImportError:
+    import enum
+    # Exists only starting Python 3.11
+    # Reimplement what we need from it here.
+    class StrEnum(str, enum.Enum):
+        def __str__(self):
+            return str.__str__(self)
 
 from typing import Union
 
@@ -9,6 +18,7 @@ from jsonloader import JSONclass
 
 from .helpers import join_url
 from .constants import LOGGER_NAME
+from .constants import PRODUCT
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 LOGGER.setLevel(logging.DEBUG)
@@ -265,12 +275,42 @@ class URLs:
         # Check if this should be pulled from session config
         return 'https://charting.vwdservices.com/hchart/v1/deGiro/data.js'
 
+    class PRODUCT_SEARCH_TYPE(StrEnum):
+        GENERIC = 'products/lookup'
+        STOCKS = 'stocks'
+        ETFS = 'etfs'
+        BONDS = 'bonds'
+        OPTIONS = 'options'
+        FUTURES = 'futures'
+        FUNDS = 'funds'
+        LEVERAGED_PRODUCTS = 'leverageds'
+        WARRANTS = 'warrants'
+
     @staticmethod
-    def get_product_search_url(session: SessionCore) -> str:
+    def get_product_search_url(
+            session: SessionCore,
+            product_type_id: Union[PRODUCT.TYPEID, None] = None) -> str:
+        specialization = {
+            PRODUCT.TYPEID.STOCK:
+                URLs.PRODUCT_SEARCH_TYPE.STOCKS,
+            PRODUCT.TYPEID.ETFS:
+                URLs.PRODUCT_SEARCH_TYPE.ETFS,
+            PRODUCT.TYPEID.OPTIONS:
+                URLs.PRODUCT_SEARCH_TYPE.OPTIONS,
+            PRODUCT.TYPEID.BONDS:
+                URLs.PRODUCT_SEARCH_TYPE.BONDS,
+            PRODUCT.TYPEID.FUNDS:
+                URLs.PRODUCT_SEARCH_TYPE.FUNDS,
+            PRODUCT.TYPEID.LEVERAGE_PRODUCTS:
+                URLs.PRODUCT_SEARCH_TYPE.LEVERAGED_PRODUCTS,
+            PRODUCT.TYPEID.WARRANTS:
+                URLs.PRODUCT_SEARCH_TYPE.WARRANTS,
+            }.get(product_type_id, URLs.PRODUCT_SEARCH_TYPE.GENERIC)
         check_session_config(session)
         url = join_url(
                 session.config.productSearchUrl,
-                'v5/products/lookup')
+                'v5',
+                specialization)
         LOGGER.debug('get_product_search_url: %s', url)
         return url
 

@@ -1,5 +1,15 @@
 import enum
 
+try:
+    from enum import StrEnum
+except ImportError:
+    # Exists only starting Python 3.11
+    # Reimplement what we need from it here.
+    class StrEnum(str, enum.Enum):
+        def __str__(self):
+            return str.__str__(self)
+
+
 # Used to get same Logger instance across submodules.
 LOGGER_NAME = 'degiroasync'
 
@@ -8,10 +18,10 @@ class _EnumBase(enum.Enum):
     """
     Base class for Enums that should behave as str or other types.
 
-    >>> class EnumStr(str, _EnumBase):
+    >>> class StrEnum(str, _EnumBase):
     ...     pass
     ...
-    >>> class Foo(EnumStr):
+    >>> class Foo(StrEnum):
     ...     A = 'foo'
     ...
     >>> str(Foo.A)
@@ -28,52 +38,52 @@ class _EnumBase(enum.Enum):
 # Will be replaced by enum.StrEnum in Python 3.11
 # TODO: move to StrEnum and do a try/except ImportError to switch to stdlib
 # implementation when available.
-class EnumStr(str, _EnumBase):
-    """
-    Base class for Enums that should behave as str.
-
-    Refer to example below for difference in behavior with other Enum based
-    solutions.
-
-    >>> import enum
-    >>> # Basic enum.Enum example
-    >>> class Foo(enum.Enum):
-    ...     A = 'foo'
-    ...
-    >>> Foo.A
-    <Foo.A: 'foo'>
-    >>> str(Foo.A)
-    'Foo.A'
-    >>> repr(Foo.A)
-    "<Foo.A: 'foo'>"
-    >>> type(Foo.A)
-    <enum 'Foo'>
-    >>> # Inheriting from str, enum.Enum
-    >>> class Foo(str, enum.Enum):
-    ...     A = 'foo'
-    ...
-    >>> Foo.A
-    <Foo.A: 'foo'>
-    >>> str(Foo.A)
-    'Foo.A'
-    >>> repr(Foo.A)
-    "<Foo.A: 'foo'>"
-    >>> type(Foo.A)
-    <enum 'Foo'>
-
-    >>> # An EnumStr child can be used as a drop-in replacement for a str
-    >>> class Foo(EnumStr):
-    ...     A = 'foo'
-    ...
-    >>> Foo.A
-    'foo'
-    >>> str(Foo.A)
-    'foo'
-    >>> repr(Foo.A)
-    "'foo'"
-    >>> type(Foo.A)
-    <enum 'Foo'>
-    """
+#class StrEnum(str, _EnumBase):
+#    """
+#    Base class for Enums that should behave as str.
+#
+#    Refer to example below for difference in behavior with other Enum based
+#    solutions.
+#
+#    >>> import enum
+#    >>> # Basic enum.Enum example
+#    >>> class Foo(enum.Enum):
+#    ...     A = 'foo'
+#    ...
+#    >>> Foo.A
+#    <Foo.A: 'foo'>
+#    >>> str(Foo.A)
+#    'Foo.A'
+#    >>> repr(Foo.A)
+#    "<Foo.A: 'foo'>"
+#    >>> type(Foo.A)
+#    <enum 'Foo'>
+#    >>> # Inheriting from str, enum.Enum
+#    >>> class Foo(str, enum.Enum):
+#    ...     A = 'foo'
+#    ...
+#    >>> Foo.A
+#    <Foo.A: 'foo'>
+#    >>> str(Foo.A)
+#    'Foo.A'
+#    >>> repr(Foo.A)
+#    "<Foo.A: 'foo'>"
+#    >>> type(Foo.A)
+#    <enum 'Foo'>
+#
+#    >>> # An StrEnum child can be used as a drop-in replacement for a str
+#    >>> class Foo(StrEnum):
+#    ...     A = 'foo'
+#    ...
+#    >>> Foo.A
+#    'foo'
+#    >>> str(Foo.A)
+#    'foo'
+#    >>> repr(Foo.A)
+#    "'foo'"
+#    >>> type(Foo.A)
+#    <enum 'Foo'>
+#    """
 
 
 class EnumInt(int, _EnumBase):
@@ -109,7 +119,7 @@ class EnumInt(int, _EnumBase):
     >>> type(Foo.A)
     <enum 'Foo'>
 
-    >>> # An EnumStr child can be used as a drop-in replacement for an int
+    >>> # An StrEnum child can be used as a drop-in replacement for an int
     >>> class Foo(EnumInt):
     ...     A = 1
     ...
@@ -132,7 +142,7 @@ class ORDER:
     """
     Constants for orders in web API.
     """
-    class ACTION(EnumStr):
+    class ACTION(StrEnum):
         """
         BUY:
             Use when placing a _BUY_ order on a product.
@@ -176,7 +186,7 @@ class TRANSACTIONS:
     class TYPEID(EnumInt):
         pass
 
-    class COUNTERPARTY(EnumStr):
+    class COUNTERPARTY(StrEnum):
         MARKET = 'MK'
         DEGIRO = 'DG'
         GROUP = 'GR'
@@ -188,31 +198,31 @@ class PRODUCT:
         BONDS = 2
         FUTURES = 7
         OPTIONS = 8
-        INVEST_FUNDS = 13
+        FUNDS = 13
         LEVERAGE_PRODUCTS = 14
         ETFS = 131
         CFDS = 535
         WARRANTS = 536
         CURRENCY = 311
 
-    class TYPE(EnumStr):
+    class TYPE(StrEnum):
         STOCK = 'STOCK'
         FUND = 'FUND'
         CASH = 'CASH'
 
 
-class SORT(EnumStr):
+class SORT(StrEnum):
     ASC = "asc"
     DESC = "desc"
 
 
 class PRICE:
-    class RESOLUTION(EnumStr):
+    class RESOLUTION(StrEnum):
         # Resolution
         PT1M = 'PT1M'  # Higher resolution, 1 minute
         PT1D = 'P1D'   # 1 tic per day
 
-    class PERIOD(EnumStr):
+    class PERIOD(StrEnum):
         # Periods
         # P stands for Prior
         P1DAY = 'P1D'
@@ -223,6 +233,6 @@ class PRICE:
         P1YEAR = 'P1Y'
         P50YEAR = 'P50Y'
 
-    class TYPE(EnumStr):
+    class TYPE(StrEnum):
         PRICE = 'price'
         OHLC = 'ohlc'

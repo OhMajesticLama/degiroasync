@@ -606,7 +606,8 @@ async def get_news_by_company(
     """
     url = URLs.get_news_by_company_url(session)
     async with httpx.AsyncClient() as client:
-        response = await client.get(url,
+        response = await client.get(
+                url,
                 cookies=session.cookies,
                 params={
                     'isin': isin,
@@ -847,7 +848,10 @@ async def search_product(
 
     """
     check_session_config(session)
-    url = URLs.get_product_search_url(session)
+    url = URLs.get_product_search_url(session, product_type_id)
+    # TODO: Implement to target specialized URLs
+    # Example query for stocks:
+    # indexId=5&stockCountryId=886&requireTotal=true&offset=0&limit=100&sortColumns=name&sortTypes=asc&intAccount=123123123&sessionId=sdfasdfasdf
     params = dict(
         offset=offset,
         limit=limit,

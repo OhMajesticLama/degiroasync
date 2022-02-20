@@ -198,6 +198,9 @@ async def check_order(
     }
     ```
     """
+    if buy_sell not in ("BUY", "SELL"):
+        raise AssertionError("buy_sell not 'BUY' or 'SELL'")
+    LOGGER.debug("webapi.check_order| %s", str(buy_sell))
     _order_calls_check(session,
                        product_id=product_id,
                        buy_sell=buy_sell,

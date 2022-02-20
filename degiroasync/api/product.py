@@ -3,12 +3,20 @@ import logging
 import pprint
 import asyncio
 import datetime
+try:
+    from enum import StrEnum
+except ImportError:
+    import enum
+    # Exists only starting Python 3.11
+    # Reimplement what we need from it here.
+    class StrEnum(str, enum.Enum):
+        def __str__(self):
+            return str.__str__(self)
 
 from jsonloader import JSONclass
 
 from ..core.constants import PRODUCT
 from ..core.constants import PRICE
-from ..core.constants import EnumStr
 from .. import webapi
 from ..core import LOGGER_NAME
 from ..core import ResponseError
@@ -77,6 +85,7 @@ class ProductBase:
         symbol: str
         currency: str
         exchangeId: str
+        productTypeId: int
     base: Base
     info: Union[None, Info] = None
 
@@ -220,9 +229,9 @@ class Stock(ProductBase):
         productType: str
         tradable: bool
         category: str
-        #feedQuality: str
+        #feedQuality: str  # Not always available
 
-    class VwdIdentifierTypes(EnumStr):
+    class VwdIdentifierTypes(StrEnum):
         ISSUEID = 'issueId'
         VWDKEY = 'vwdkey'
 
@@ -380,7 +389,6 @@ async def get_price_data(
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
         ) -> PriceSeriesTime:
     """
-    Single product get_price request, used by bulk call.
     """
     # Ensure product got results of product_info
     if product.base.productTypeId != PRODUCT.TYPEID.STOCK:

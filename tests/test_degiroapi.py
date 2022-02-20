@@ -56,11 +56,11 @@ del _env_var
 class TestDegiroAsyncHelpers(unittest.TestCase):
     def test_join_url(self):
         url = join_url('https://foo.bar', '/rest/of/url')
-        self.assertEquals(url, 'https://foo.bar/rest/of/url')
+        self.assertEqual(url, 'https://foo.bar/rest/of/url')
         url = join_url('https://foo.bar/product', '/rest/of/url')
-        self.assertEquals(url, 'https://foo.bar/product/rest/of/url')
+        self.assertEqual(url, 'https://foo.bar/product/rest/of/url')
         url = join_url('https://foo.bar/product/', '/rest/of/url')
-        self.assertEquals(url, 'https://foo.bar/product/rest/of/url')
+        self.assertEqual(url, 'https://foo.bar/product/rest/of/url')
 
     def test_set_params(self):
         class Foo:
@@ -86,11 +86,11 @@ class TestDegiroAsyncHelpers(unittest.TestCase):
                   'value': 7300.0},
             ])
 
-        self.assertEquals(foo.id, '8614787')
-        self.assertEquals(foo.positionType, 'PRODUCT')
-        self.assertEquals(foo.size, 100)
-        self.assertEquals(foo.price, 73.0)
-        self.assertEquals(foo.value, 7300.0)
+        self.assertEqual(foo.id, '8614787')
+        self.assertEqual(foo.positionType, 'PRODUCT')
+        self.assertEqual(foo.size, 100)
+        self.assertEqual(foo.price, 73.0)
+        self.assertEqual(foo.value, 7300.0)
 
     def test_camelcase_to_snake(self):
         inp = 'iAmCamelCase'
@@ -125,21 +125,22 @@ class TestDegiroAsyncAPIHelpers(unittest.TestCase):
         }
         data_out = convert_time_series(data)
         self.maxDiff = None
-        self.assertEquals(data_out,
-            {
+        self.assertEqual(
+                data_out,
+                {
 
-                "type": "time",
-                "times": "2022-01-20T00:00:00",
-                "resolution": "PT1M",
-                "expires": "2022-01-20T10:12:56+01:00",
-                "data": {
-                    'price': [114.0, 114.08, 114.12],
-                    'date': [
-                        '2022-01-20T09:00:00',
-                        '2022-01-20T09:01:00',
-                        '2022-01-20T09:02:00']
-                }
-            })
+                    "type": "time",
+                    "times": "2022-01-20T00:00:00",
+                    "resolution": "PT1M",
+                    "expires": "2022-01-20T10:12:56+01:00",
+                    "data": {
+                        'price': [114.0, 114.08, 114.12],
+                        'date': [
+                            '2022-01-20T09:00:00',
+                            '2022-01-20T09:01:00',
+                            '2022-01-20T09:02:00']
+                    }
+                })
 
 
 class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
@@ -281,6 +282,10 @@ if RUN_INTEGRATION_TESTS:
             LOGGER.debug("test_get_portfolio_products_info: %s",
                          pprint.pformat(tuple(p.__dict__ for p in products)))
 
+            self.assertGreaterEqual(
+                    len(products), 1,
+                    "If there is no product in portfolio, this is expected to "
+                    "fail. Otherwise: this is an issue to be fixed.")
             for product in products:
                 self.assertIsNotNone(product.base.id)
                 await product.await_product_info()

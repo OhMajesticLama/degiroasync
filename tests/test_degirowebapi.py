@@ -100,7 +100,7 @@ if RUN_INTEGRATION_TESTS:
             session = await self._login()
 
             response = await degiroasync.webapi.get_portfolio(session)
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             resp_json = response.json()
             LOGGER.debug("test_portfolio| %s", resp_json)
             self.assertTrue('portfolio' in resp_json)
@@ -126,7 +126,7 @@ if RUN_INTEGRATION_TESTS:
                                   for product in portfolio['value']))
             response = await get_products_info(session,
                                                [p for p in product_ids])
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
 
             response = await degiroasync.webapi.get_products_info(session,
                                                                   ["72906"])
@@ -140,7 +140,7 @@ if RUN_INTEGRATION_TESTS:
             isin = "FR0010242511"
             response = await get_company_profile(session, isin)
             resp_json = response.json()
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('businessSummary' in resp_json['data'], resp_json)
             LOGGER.debug('webapi.test_get_company_profile| %s',
@@ -152,7 +152,7 @@ if RUN_INTEGRATION_TESTS:
             isin = "FR0010242511"
             response = await get_news_by_company(session, isin)
             resp_json = response.json()
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('items' in resp_json['data'], resp_json)
 
