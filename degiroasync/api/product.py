@@ -1,4 +1,4 @@
-from typing import Iterable, Any, List, Dict, Tuple, Union, ForwardRef
+from typing import Iterable, Any, List, Dict, Tuple, Union, ForwardRef, AnyStr
 import logging
 import pprint
 import asyncio
@@ -214,8 +214,8 @@ class Currency(ProductBase):
         isin: str
         symbol: str
         name: str
-        vwdId: Union[str, None] = None  # not set for non-tradable
-        productType: str
+        vwd_id: Union[str, None] = None  # not set for non-tradable
+        product_type: str
         tradable: bool
 
 
@@ -227,8 +227,8 @@ class Stock(ProductBase):
         isin: str
         symbol: str
         name: str
-        vwd_id: Union[str, None] = None  # not set for non-tradable
-        vwd_identifier_type: Union[str, None] = None  # not set for non-tradable
+        vwd_id: Union[AnyStr, None] = None  # not set for non-tradable
+        vwd_identifier_type: Union[AnyStr, None] = None  # not set for non-tradable
         product_type: str
         tradable: bool
         category: str

@@ -159,6 +159,7 @@ class PRODUCT:
         STOCK = 'STOCK'
         FUND = 'FUND'
         CASH = 'CASH'
+        CURRENCY = 'CURRENCY'
 
 
 class SORT(StrEnum):
