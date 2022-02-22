@@ -1,13 +1,14 @@
 from __future__ import annotations
-import typing
-from typing import List, Dict, Any, Iterable
-from typing import Coroutine
+from typing import List, Dict, Any, Iterable, Callable, Union, Coroutine
 import logging
 import sys
-import asyncio
 import concurrent.futures
-import contextvars
+import functools
+import asyncio
+import time
 
+
+import asyncstdlib.functools as afunctools
 import httpx
 
 #from .core import Session
@@ -21,6 +22,103 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 class ResponseError(Exception):
     "Raised when bad response has been received from server."
 
+
+class CoroCache:
+    def __init__(self, coro: Coroutine):
+        """
+        Cache to allow awaiting coroutines several times.
+
+        >>> async def f():
+        ...     return 1
+        ...
+        >>> c = CoroCache(f())
+        >>> await c
+        1
+        >>> await c
+        1
+
+        """
+        self.coro = coro
+        self.res = None
+        self.wait = True
+
+    def __await__(self) -> Any:
+        if self.wait:
+            self.res = self.coro.__await__()
+            self.wait = False
+        return self.res
+
+
+def lru_cache_timed(
+        func: Union[Callable, None] = None,
+        *,
+        maxsize: int = 128,
+        typed: bool = False,
+        seconds: Union[None, float] = None,
+        ):
+    """
+    Time-sensitive LRU cache that works with async functions.
+
+    >>> @lru_cache_timed(seconds=120)
+    ... async def foo():
+    ...     asyncio.sleep(1)
+    ...     return 1
+    ...
+    >>> import time
+    >>> start = time.time()
+    >>> await foo()
+    1
+    >>> time.time() - start > 1
+    True
+    >>> start = time.time()
+    >>> await foo()
+    1
+    >>> time.time() - start < .1
+    True
+    """
+    first_start = []
+    if func is not None:
+        if asyncio.iscoroutinefunction(func):
+            @afunctools.lru_cache(maxsize=maxsize, typed=typed)
+            async def _in(time_key, *args, **kwargs):
+                return await func(*args, **kwargs)
+
+            @functools.wraps(func)
+            async def _out(*args, **kwargs):
+                if not len(first_start):
+                    first_start.append(time.time())
+                if seconds is None:
+                    time_key = 1
+                else:
+                    time_key = (time.time() - first_start[0]) // seconds
+                LOGGER.debug("time_key %s", time_key)
+
+                return await _in(time_key, *args, **kwargs)
+
+            return _out
+
+        else:
+            @functools.lru_cache(maxsize=maxsize, typed=typed)
+            def _in(time_key, *args, **kwargs):
+                return func(*args, **kwargs)
+
+            @functools.wraps(func)
+            def _out(*args, **kwargs):
+                if not len(first_start):
+                    first_start.append(time.time())
+                if seconds is None:
+                    time_key = 1
+                else:
+                    time_key = (time.time() - first_start[0]) // seconds
+
+                return _in(time_key, *args, **kwargs)
+
+            return _out
+    else:
+        return lambda func: lru_cache_timed(func,
+                                            maxsize=maxsize,
+                                            typed=typed,
+                                            seconds=seconds)
 
 #def run_in_new_thread(
 #        coroutine: Coroutine,

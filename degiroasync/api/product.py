@@ -389,6 +389,12 @@ async def get_price_data(
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
         ) -> PriceSeriesTime:
     """
+
+    Get price data for `product`.
+
+    product:
+        Product to look for the data.
+
     """
     # Ensure product got results of product_info
     if product.base.productTypeId != PRODUCT.TYPEID.STOCK:
