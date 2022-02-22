@@ -24,6 +24,7 @@ from ..core import ResponseError
 from ..core import Credentials, SessionCore, Config
 from ..core import check_session_client, check_session_config
 from ..core.helpers import dict_from_attr_list
+from ..core.helpers import camelcase_dict_to_snake
 from ..core import helpers
 from .session import Session
 from .session import Exchange
@@ -76,7 +77,7 @@ class ProductBase:
     @JSONclass(annotations=True, annotations_type=True)
     class Base:
         id: str
-        productTypeId: int
+        product_type_id: int
 
     class Info:
         """
@@ -85,8 +86,8 @@ class ProductBase:
         name: str
         symbol: str
         currency: str
-        exchangeId: str
-        productTypeId: int
+        exchange_id: str
+        product_type_id: int
     base: Base
     info: Union[None, Info] = None
 
@@ -103,7 +104,7 @@ class ProductBase:
             `id` is `id` attribute as returned by DegiroAPI. It is used
             to query Degiro endpoints for this product.
         """
-        self.base = self.Base(attributes)
+        self.base = self.Base(camelcase_dict_to_snake(attributes))
         self.__product_info_batch = _product_info
         self.__product_info = None
 
@@ -111,14 +112,14 @@ class ProductBase:
     def init_product(
             *,
             _product_info: ProductsInfo,
-            productTypeId: Union[int, None] = None,
+            product_type_id: Union[int, None] = None,
             **attributes: Dict[str, Any]):
         """
         Initialize adequate product specialization based on productTypeId.
         Default to ProductGeneric if no specialized implementation found for
         provided productTypeId.
         """
-        params = dict(productTypeId=productTypeId, **attributes)
+        params = dict(product_type_id=product_type_id, **attributes)
         LOGGER.debug("api.ProductBase.init_product| attributes %s", attributes)
         # Some attributes are not returned in a consistent way.
         # Manually fix the most important of them
@@ -131,7 +132,7 @@ class ProductBase:
             PRODUCT.TYPEID.CURRENCY: Currency,
             PRODUCT.TYPEID.STOCK: Stock
         }.get(
-            productTypeId,
+            product_type_id,
             ProductGeneric
         )
         LOGGER.debug("api.ProductBase.init_product| class %s", cls)
@@ -148,7 +149,7 @@ class ProductBase:
                 self.base.id)
             LOGGER.debug("ProductsInfo.await_product_info: %s",
                          self.__product_info)
-            self.info = self.Info(self.__product_info)
+            self.info = self.Info(camelcase_dict_to_snake(self.__product_info))
             # Unreference batch when we don't need it anymore
             self.__product_info_batch = None
         return
@@ -199,7 +200,8 @@ class ProductBase:
 
         products_batch = map(
             lambda attrs: ProductBase.init_product(
-                _product_info=products_info_batch, **attrs),
+                _product_info=products_info_batch,
+                **camelcase_dict_to_snake(attrs)),
             attributes_batch)
         return products_batch
 
@@ -225,9 +227,9 @@ class Stock(ProductBase):
         isin: str
         symbol: str
         name: str
-        vwdId: Union[str, None] = None  # not set for non-tradable
-        vwdIdentifierType: Union[str, None] = None  # not set for non-tradable
-        productType: str
+        vwd_id: Union[str, None] = None  # not set for non-tradable
+        vwd_identifier_type: Union[str, None] = None  # not set for non-tradable
+        product_type: str
         tradable: bool
         category: str
         # feedQuality: str  # Not always available
@@ -241,7 +243,7 @@ class ProductGeneric(ProductBase):
     @JSONclass(annotations=True, annotations_type=True)
     class Base:
         id: str
-        productTypeId: Union[None, int]  # sometimes not returned by API.
+        product_type_id: Union[None, int]  # sometimes not returned by API.
 
     @JSONclass(annotations=True, annotations_type=True)
     class Info(ProductBase.Info):
@@ -398,15 +400,15 @@ async def get_price_data(
 
     """
     # Ensure product got results of product_info
-    if product.base.productTypeId != PRODUCT.TYPEID.STOCK:
+    if product.base.product_type_id != PRODUCT.TYPEID.STOCK:
         raise NotImplementedError(
             "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
             "supported by get_price_data")
     await product.await_product_info()
     resp = await webapi.get_price_data(
         session,
-        vwdId=product.info.vwdId,
-        vwdIdentifierType=product.info.vwdIdentifierType,
+        vwdId=product.info.vwd_id,
+        vwdIdentifierType=product.info.vwd_identifier_type,
         resolution=resolution,
         period=period,
         timezone=timezone,

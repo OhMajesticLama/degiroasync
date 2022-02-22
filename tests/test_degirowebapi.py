@@ -244,7 +244,7 @@ if RUN_INTEGRATION_TESTS:
             LOGGER.debug("test_check_order| product: %s . %s . %s . %s",
                          product.info.symbol,
                          product.info.name,
-                         product.info.productTypeId,
+                         product.info.product_type_id,
                          product.base.id)
 
             # This will *not* place the order: it would have to be confirmed

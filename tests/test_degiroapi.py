@@ -268,29 +268,32 @@ if RUN_INTEGRATION_TESTS:
             await asyncio.gather(*[p.await_product_info() for p in products])
             self.assertGreaterEqual(len(products), 1)
 
-            LOGGER.debug('test_get_price_data products| %s', tuple(p.__dict__ for p in products))
+            LOGGER.debug('test_get_price_data products| %s',
+                         tuple(p.__dict__ for p in products))
 
             products = filter(
                     lambda p: (
-                        p.info.productType == PRODUCT.TYPE.STOCK
-                        and p.info.tradable == True
+                        p.info.product_type == PRODUCT.TYPE.STOCK
+                        and p.info.tradable is True
                         and p.info.symbol == 'AIR'
                         ),
                     products)
             products = list(products)
             LOGGER.debug('test_get_price_data products filtered| %s',
-                    pprint.pformat(tuple(p.__dict__ for p in products)))
+                         pprint.pformat(tuple(p.__dict__ for p in products)))
 
             self.assertGreaterEqual(len(products), 1)
             # Select product
             for product in products:
-                if product.base.productTypeId == PRODUCT.TYPEID.STOCK:
+                if product.base.product_type_id == PRODUCT.TYPEID.STOCK:
                     # Let's take the first stock as example
                     break
 
-            LOGGER.debug('test_get_price_data price_data 1| %s', product.__dict__)
+            LOGGER.debug('test_get_price_data price_data 1| %s',
+                         product.__dict__)
             price_data = await degiroasync.api.get_price_data(session, product)
-            LOGGER.debug('test_get_price_data price_data 2| %s', price_data)
+            LOGGER.debug('test_get_price_data price_data 2| %s',
+                         price_data)
 
 
         #async def test_get_price_data_bulk(self):
