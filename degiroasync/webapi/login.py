@@ -87,7 +87,7 @@ async def get_config(session: SessionCore) -> SessionCore:
         res = await client.get(URLs.CONFIG, cookies=session._cookies)
 
     check_response(res)
-    config = Config(res.json()['data'])
+    config = Config(camelcase_dict_to_snake(res.json()['data']))
 
     session.config = config
 
@@ -140,7 +140,7 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
     url = URLs.get_product_dictionary_url(session)
     params = dict(
         intAccount=session.client.int_account,
-        sessionId=session.config.sessionId
+        sessionId=session.config.session_id
     )
     async with httpx.AsyncClient() as client:
         response = await client.get(url,

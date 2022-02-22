@@ -49,40 +49,40 @@ class Credentials:
 @JSONclass(annotations=True, annotations_type=True)
 class Config:
     # SessionCore config, as returned by Degiro
-    clientId: int
-    companiesServiceUrl: Union[str, None]
-    dictionaryUrl: str
-    i18nUrl: Union[str, None]
-    landingPath: Union[str, None]
-    latestSearchedProductsUrl: Union[str, None]
-    loginUrl: str
-    mobileLandingPath: Union[str, None]
-    paUrl: str
-    paymentServiceUrl: Union[str, None]
-    productNotesUrl: Union[str, None]
-    productSearchUrl: str
-    productTypesUrl: str
-    refinitivAgendaUrl: Union[str, None]
-    refinitivClipsUrl: Union[str, None]
-    refinitivCompanyProfileUrl: Union[str, None]
-    refinitivCompanyRatiosUrl: Union[str, None]
-    refinitivEsgsUrl: Union[str, None]
-    refinitivEstimatesUrl: Union[str, None]
-    refinitivFinancialStatementsUrl: Union[str, None]
-    refinitivInsiderTransactionsUrl: Union[str, None]
-    refinitivInsidersReportUrl: Union[str, None]
-    refinitivInvestorUrl: Union[str, None]
-    refinitivNewsUrl: Union[str, None]
-    refinitivShareholdersUrl: Union[str, None]
-    refinitivTopNewsCategoriesUrl: Union[str, None]
-    reportingUrl: Union[str, None]
-    sessionId: Union[str, None]
-    taskManagerUrl: Union[str, None]
-    tradingUrl: Union[str, None]
-    translationsUrl: Union[str, None]
-    vwdGossipsUrl: Union[str, None]
-    vwdNewsUrl: Union[str, None]
-    vwdQuotecastServiceUrl: Union[str, None]
+    client_id: int
+    companies_service_url: Union[str, None]
+    dictionary_url: str
+    i18n_url: Union[str, None]
+    landing_path: Union[str, None]
+    latest_searched_products_url: Union[str, None]
+    login_url: str
+    mobile_landing_path: Union[str, None]
+    pa_url: str
+    payment_service_url: Union[str, None]
+    product_notes_url: Union[str, None]
+    product_search_url: str
+    product_types_url: str
+    refinitiv_agenda_url: Union[str, None]
+    refinitiv_clips_url: Union[str, None]
+    refinitiv_company_profile_url: Union[str, None]
+    refinitiv_company_ratios_url: Union[str, None]
+    refinitiv_esgs_url: Union[str, None]
+    refinitiv_estimates_url: Union[str, None]
+    refinitiv_financial_statements_url: Union[str, None]
+    refinitiv_insider_transactions_url: Union[str, None]
+    refinitiv_insiders_report_url: Union[str, None]
+    refinitiv_investor_url: Union[str, None]
+    refinitiv_news_url: Union[str, None]
+    refinitiv_shareholders_url: Union[str, None]
+    refinitiv_top_news_categories_url: Union[str, None]
+    reporting_url: Union[str, None]
+    session_id: Union[str, None]
+    task_manager_url: Union[str, None]
+    trading_url: Union[str, None]
+    translations_url: Union[str, None]
+    vwd_gossips_url: Union[str, None]
+    vwd_news_url: Union[str, None]
+    vwd_quotecast_service_url: Union[str, None]
 
 
 @JSONclass(annotations=True, annotations_type=True)
@@ -171,7 +171,7 @@ class URLs:
     def get_news_by_company_url(session: SessionCore) -> str:
         "Build news_by_company url"
         check_session_config(session)
-        return join_url(session.config.refinitivNewsUrl, 'news-by-company')
+        return join_url(session.config.refinitiv_news_url, 'news-by-company')
 
     @staticmethod
     def get_client_info_url(session: SessionCore) -> str:
@@ -179,7 +179,7 @@ class URLs:
         Build client info url.
         """
         check_session_config(session)
-        return join_url(session.config.paUrl, 'client')
+        return join_url(session.config.pa_url, 'client')
 
     @staticmethod
     def get_portfolio_url(session: SessionCore) -> str:
@@ -192,7 +192,7 @@ class URLs:
         jsessionid = session._cookies[session.JSESSIONID]
 
         url = join_url(
-            session.config.tradingUrl,
+            session.config.trading_url,
             f'v5/update/{session.client.int_account}',
             f';jsessionid={jsessionid}')
         LOGGER.debug('get_portfolio_url| %s', url)
@@ -204,7 +204,7 @@ class URLs:
         Get reporting URL. Used for orders history and transactions.
         """
         check_session_config(session)
-        url = session.config.reportingUrl
+        url = session.config.reporting_url
         LOGGER.debug('get_reporting_url| %s', url)
         return url
 
@@ -242,7 +242,7 @@ class URLs:
         check_session_config(session)
 
         return join_url(
-            session.config.tradingUrl,
+            session.config.trading_url,
             'v5/order'
         )
 
@@ -264,7 +264,7 @@ class URLs:
         jsessionid = session._cookies[session.JSESSIONID]
 
         url = join_url(
-            session.config.tradingUrl,
+            session.config.trading_url,
             f'v5/checkOrder;jsessionid={jsessionid}'
         )
         LOGGER.debug('get_check_order_url| %s', url)
@@ -309,7 +309,7 @@ class URLs:
         }.get(product_type_id, URLs.PRODUCT_SEARCH_TYPE.GENERIC)
         check_session_config(session)
         url = join_url(
-            session.config.productSearchUrl,
+            session.config.product_search_url,
             'v5',
             specialization)
         LOGGER.debug('get_product_search_url: %s', url)
@@ -318,7 +318,7 @@ class URLs:
     @staticmethod
     def get_product_dictionary_url(session: SessionCore) -> str:
         check_session_config(session)
-        url = session.config.dictionaryUrl
+        url = session.config.dictionary_url
         LOGGER.debug('get_product_search_url: %s', url)
         return url
 

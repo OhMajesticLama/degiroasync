@@ -89,11 +89,11 @@ if RUN_INTEGRATION_TESTS:
             session = await self._login()
             await get_config(session)
             LOGGER.debug('test_config| %s', session.config)
-            self.assertTrue(session.config.paUrl is not None,
+            self.assertTrue(session.config.pa_url is not None,
                     "paUrl not defined.")
-            self.assertTrue(session.config.productSearchUrl is not None,
+            self.assertTrue(session.config.product_search_url is not None,
                     "productSearchUrl not defined.")
-            self.assertTrue(session.config.tradingUrl is not None,
+            self.assertTrue(session.config.trading_url is not None,
                     "tradingUrl not defined.")
 
         async def test_porfolio(self):

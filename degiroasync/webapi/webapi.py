@@ -541,12 +541,12 @@ async def get_products_info(
     """
     Get Product info Web API call.
     """
-    if session.config.productSearchUrl is None:
+    if session.config.product_search_url is None:
         raise AssertionError("productSearchUrl is None:"
                              " have you called get_config?")
 
     LOGGER.debug('get_products_info products_ids| %s', products_ids)
-    url = join_url(session.config.productSearchUrl,
+    url = join_url(session.config.product_search_url,
                    'v5/products/info')
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -554,7 +554,7 @@ async def get_products_info(
             cookies=session.cookies,
             params={
                 'intAccount': session.client.int_account,
-                'sessionId': session.config.sessionId
+                'sessionId': session.config.session_id
             },
             json=products_ids
         )
@@ -587,7 +587,7 @@ async def get_company_profile(
             cookies=session.cookies,
             params={
                 'intAccount': session.client.int_account,
-                'sessionId': session.config.sessionId
+                'sessionId': session.config.session_id
             })
     check_response(response)
     LOGGER.debug(response.json())
@@ -615,7 +615,7 @@ async def get_news_by_company(
                 'languages': languages,
                 'offset': offset,
                 'intAccount': session.client.int_account,
-                'sessionId': session.config.sessionId
+                'sessionId': session.config.session_id
             })
     check_response(response)
     LOGGER.debug(response.json())
@@ -737,7 +737,7 @@ async def get_price_data(
         'period': period,
         'series': f'price:{vwdIdentifierType}:{vwdId}',
         'format': 'json',
-        'userToken': session.config.clientId
+        'userToken': session.config.client_id
     }
     LOGGER.debug('get_price_data params| %s', params)
     async with httpx.AsyncClient() as client:
@@ -857,7 +857,7 @@ async def search_product(
         limit=limit,
         searchText=search_txt,
         intAccount=session.client.int_account,
-        sessionId=session.config.sessionId
+        sessionId=session.config.session_id
     )
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
