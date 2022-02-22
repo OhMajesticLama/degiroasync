@@ -9,6 +9,7 @@ except ImportError:
     import enum
     # Exists only starting Python 3.11
     # Reimplement what we need from it here.
+
     class StrEnum(str, enum.Enum):
         def __str__(self):
             return str.__str__(self)
@@ -129,10 +130,10 @@ class ProductBase:
         cls = {
             PRODUCT.TYPEID.CURRENCY: Currency,
             PRODUCT.TYPEID.STOCK: Stock
-                }.get(
-                        productTypeId,
-                        ProductGeneric
-                    )
+        }.get(
+            productTypeId,
+            ProductGeneric
+        )
         LOGGER.debug("api.ProductBase.init_product| class %s", cls)
         return cls(_product_info=_product_info,
                    **params)
@@ -144,7 +145,7 @@ class ProductBase:
         """
         if self.__product_info is None:
             self.__product_info = await self.__product_info_batch.get_response(
-                    self.base.id)
+                self.base.id)
             LOGGER.debug("ProductsInfo.await_product_info: %s",
                          self.__product_info)
             self.info = self.Info(self.__product_info)
@@ -158,7 +159,7 @@ class ProductBase:
             session: SessionCore,
             attributes_iter: Iterable[Dict[str, Any]],
             batch_size=50
-            ) -> List[ForwardRef('ProductBase')]:
+    ) -> List[ForwardRef('ProductBase')]:
         """
         Bulk init Product instances.
 
@@ -188,7 +189,7 @@ class ProductBase:
     def _create_batch(
             session: SessionCore,
             attributes_batch: Iterable[Dict[str, Any]]
-            ) -> Iterable[ForwardRef('ProductBase')]:
+    ) -> Iterable[ForwardRef('ProductBase')]:
         """
         Create Products and their common ProductsInfo.
         Returns an Iterable of Product instances.
@@ -197,9 +198,9 @@ class ProductBase:
         products_info_batch = ProductsInfo(session, ids_batch)
 
         products_batch = map(
-                lambda attrs: ProductBase.init_product(
-                    _product_info=products_info_batch, **attrs),
-                attributes_batch)
+            lambda attrs: ProductBase.init_product(
+                _product_info=products_info_batch, **attrs),
+            attributes_batch)
         return products_batch
 
 
@@ -229,7 +230,7 @@ class Stock(ProductBase):
         productType: str
         tradable: bool
         category: str
-        #feedQuality: str  # Not always available
+        # feedQuality: str  # Not always available
 
     class VwdIdentifierTypes(StrEnum):
         ISSUEID = 'issueId'
@@ -285,7 +286,7 @@ class TotalPortfolio:
 
 async def get_portfolio(
         session: SessionCore
-        ) -> Iterable[ProductBase]:
+) -> Iterable[ProductBase]:
     """
     Returns Products in portfolio. Refer to  `Products` classes for minimum
     available attributes.
@@ -307,7 +308,7 @@ async def get_portfolio(
 
 async def get_portfolio_total(
         session: SessionCore
-        ) -> TotalPortfolio:
+) -> TotalPortfolio:
     """
     Returns (TotalPortfolio, Products). Refer to `TotalPortfolio` and
     `Products` classes for attributes available.
@@ -326,8 +327,8 @@ async def get_portfolio_total(
 
     return total_portfolio
 
-#@JSONclass(annotations=True, annotations_type=True)
-#class PriceData:
+# @JSONclass(annotations=True, annotations_type=True)
+# class PriceData:
 #    start: str
 #    end: str
 #    series: List[Dict[str, Union[list, float, str, int]]]
@@ -387,7 +388,7 @@ async def get_price_data(
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
-        ) -> PriceSeriesTime:
+) -> PriceSeriesTime:
     """
 
     Get price data for `product`.
@@ -403,14 +404,14 @@ async def get_price_data(
             "supported by get_price_data")
     await product.await_product_info()
     resp = await webapi.get_price_data(
-            session,
-            vwdId=product.info.vwdId,
-            vwdIdentifierType=product.info.vwdIdentifierType,
-            resolution=resolution,
-            period=period,
-            timezone=timezone,
-            culture=culture,
-            data_type=data_type)
+        session,
+        vwdId=product.info.vwdId,
+        vwdIdentifierType=product.info.vwdIdentifierType,
+        resolution=resolution,
+        period=period,
+        timezone=timezone,
+        culture=culture,
+        data_type=data_type)
     resp_json = resp.json()
     LOGGER.debug("api.get_price_data resp_json| %s", resp_json)
     timeseries_ind = -1
@@ -429,10 +430,10 @@ async def get_price_data(
 
 def convert_time_series(
         data_series: Dict[str, Union[str, List[Union[float, int]]]]
-        ) -> Dict[str,
-                  Union[
-                      str,
-                      Dict[str, Union[float, str]]]]:
+) -> Dict[str,
+          Union[
+              str,
+              Dict[str, Union[float, str]]]]:
     """
     Helper to convert data series.
 
@@ -506,7 +507,7 @@ async def get_price_data_batch(
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
-        ):
+):
     """
     Get price data for products. Be mindful that not all product types will
 
@@ -525,13 +526,13 @@ async def get_price_data_batch(
         await product.await_product_info()
         vwdId = product.vwdId
         prices_req.append(webapi.get_price_data(
-                session,
-                vwdId,
-                resolution=resolution,
-                period=period,
-                timezone=timezone,
-                culture=culture,
-                data_type=data_type))
+            session,
+            vwdId,
+            resolution=resolution,
+            period=period,
+            timezone=timezone,
+            culture=culture,
+            data_type=data_type))
 
 
 async def search_product(
@@ -561,8 +562,8 @@ async def search_product(
     """
     if sum(k is not None for k in (by_text, by_isin, by_symbol)) != 1:
         raise AssertionError(
-                "Exactly one of by_text, by_isin, by_symbol must "
-                "be not None.")
+            "Exactly one of by_text, by_isin, by_symbol must "
+            "be not None.")
     # Degiro API doesn't support well 2 or more attribute in searchTxt:
     # e.g. we can't search for "AIRBUS NL0000235190" and get all the AIRBUS
     # named products with ISIN NL0000235190.
@@ -577,11 +578,11 @@ async def search_product(
         elif isinstance(by_exchange, str):
             check_session_exchange_dictionary(session)
             exchange = session.exchange_dictionary.exchange_by(
-                    hiqAbbr=by_exchange)
+                hiqAbbr=by_exchange)
             exchange_id = exchange.id
         else:
             raise TypeError(
-                    "Only Exchange or str types supported for 'by_exchange'.")
+                "Only Exchange or str types supported for 'by_exchange'.")
 
     limit = 100
     offset = 0
@@ -604,11 +605,11 @@ async def search_product(
     while iter_n < max_iter or max_iter is None:
         iter_n += 1
         resp = await webapi.search_product(
-                session,
-                by_text,
-                product_type_id=product_type_id,
-                limit=limit,
-                offset=offset)
+            session,
+            by_text,
+            product_type_id=product_type_id,
+            limit=limit,
+            offset=offset)
         resp_json = resp.json()
         LOGGER.debug("api.search_product response| %s",
                      pprint.pformat(resp_json))
@@ -644,7 +645,7 @@ __all__ = [
         Config,
 
         # Product data structures
-        #PriceData,
+        # PriceData,
         Stock,
         Currency,
         ProductBase,
@@ -652,5 +653,5 @@ __all__ = [
         get_portfolio,
         get_price_data,
         search_product
-        )
-        ]
+    )
+]

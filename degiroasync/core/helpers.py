@@ -55,7 +55,7 @@ def lru_cache_timed(
         maxsize: int = 128,
         typed: bool = False,
         seconds: Union[None, float] = None,
-        ):
+):
     """
     Time-sensitive LRU cache that works with async functions.
 
@@ -119,7 +119,7 @@ def lru_cache_timed(
                                             typed=typed,
                                             seconds=seconds)
 
-#def run_in_new_thread(
+# def run_in_new_thread(
 #        coroutine: Coroutine,
 #        ) -> concurrent.futures.Future:
 #    """
@@ -171,9 +171,9 @@ def camelcase_dict_to_snake(
     """
     return {
         camelcase_to_snake(k): v
-       #     camelcase_dict_to_snake(v) if isinstance(v, dict) else v
+        #     camelcase_dict_to_snake(v) if isinstance(v, dict) else v
         for k, v in dict_in.items()
-            }
+    }
 
 
 def join_url(*sections):
@@ -202,12 +202,13 @@ def check_response(response: httpx.Response):
     """
     Raise an httpx.HTTPError if return code != 200
     """
-    if not response.status_code in (httpx.codes.OK, httpx.codes.CREATED):
-        raise ResponseError(f"Error on call: url {response.url}"
-                f" | code {response.status_code} | content {response.content}")
+    if response.status_code not in (httpx.codes.OK, httpx.codes.CREATED):
+        raise ResponseError(
+            f"Error on call: url {response.url}"
+            f" | code {response.status_code} | content {response.content}")
 
 
-#def check_keys(data: dict, keys: Iterable[str]):
+# def check_keys(data: dict, keys: Iterable[str]):
 #    """
 #    Helper to check keys are in data.
 #    """
@@ -287,13 +288,13 @@ def dict_from_attr_list(
         name, value = attr['name'], attr['value']
         if not hasattr(name, int.__hash__.__name__):
             raise ValueError(f"{name} in {attr} is not hashable:"
-                              " it can't be used as dict key.")
+                             " it can't be used as dict key.")
         dict_out[name] = value
         # TODO: above should never raise an error as long as attr['name'] is
-        # hashable. May 
-        #try:
+        # hashable. May
+        # try:
         #    dict_out[attr['name']] = attr['value']
-        #except Exception as exc:
+        # except Exception as exc:
         #    LOGGER.error('dict_from_attr| %s: %s', type(exc), exc.args)
         #    if not ignore_error:
         #        raise exc
@@ -364,14 +365,14 @@ def set_params(
     for k, v in dict_from_attr_list(
             attributes_list, ignore_error=ignore_error).items():
         setattr(obj, k, v)
-    
+
     return obj
 
 
 def setattrs(obj: Any, **attributes) -> Any:
     "Set all attributes on obj."
     for k, v in attributes.items():
-        setattr(obj,k, v)
+        setattr(obj, k, v)
     return obj
 
 
@@ -385,11 +386,11 @@ def check_keys(data: dict, keys: Iterable[str]):
             if hasattr(data, '__name__'):
                 name = data.__name__
             exc = KeyError(
-                    "{attr} not found in {name}. Data content: {data}.".format(
-                        attr=attr,
-                        name=name,
-                        data=data
-                    ))
+                "{attr} not found in {name}. Data content: {data}.".format(
+                    attr=attr,
+                    name=name,
+                    data=data
+                ))
             raise exc
 
 
@@ -398,7 +399,7 @@ FORMAT_DEFAULT = '%(asctime)s-%(name)s-%(levelname)s- %(message)s'
 STREAMHANDLER_DEFAULT = logging.StreamHandler(stream=sys.stdout)
 
 
-#def set_logs(
+# def set_logs(
 #        logger: logging.Logger,
 #        logging_level: int,
 #        log_format: str = FORMAT_DEFAULT,

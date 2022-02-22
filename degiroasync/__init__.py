@@ -14,4 +14,4 @@ __all__ = [obj.__name__ for obj in (
     Config,
     webapi,
     ResponseError,
-    )] + ['LOGGER_NAME']
+)] + ['LOGGER_NAME']

@@ -15,7 +15,8 @@ from .login import login
 from .login import get_config
 from .login import get_client_info
 from .login import get_product_dictionary
-from .login import get_account_info  # Currently implemented but uncertain usefulness.
+# Currently implemented but uncertain usefulness.
+from .login import get_account_info
 from .webapi import get_products_info
 from .webapi import search_product
 from .webapi import get_portfolio
@@ -29,20 +30,20 @@ from .orders import ORDER_DATE_FORMAT
 
 
 __all__ = [
-        # Login names
-        login.__name__,
-        get_config.__name__,
-        get_client_info.__name__,
-        get_product_dictionary.__name__,
-        # webapi names
-        get_products_info.__name__,
-        search_product.__name__,
-        # Orders names
-        get_orders.__name__,
-        get_orders_history.__name__,
-        get_transactions.__name__,
-        confirm_order.__name__,
-        check_order.__name__,
-        ] + webapi.__all__ + [
-        'ORDER_DATE_FORMAT'
-        ]
+    # Login names
+    login.__name__,
+    get_config.__name__,
+    get_client_info.__name__,
+    get_product_dictionary.__name__,
+    # webapi names
+    get_products_info.__name__,
+    search_product.__name__,
+    # Orders names
+    get_orders.__name__,
+    get_orders_history.__name__,
+    get_transactions.__name__,
+    confirm_order.__name__,
+    check_order.__name__,
+] + webapi.__all__ + [
+    'ORDER_DATE_FORMAT'
+]

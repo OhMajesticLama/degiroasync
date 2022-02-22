@@ -28,6 +28,7 @@ class _EnumBase(enum.Enum):
     'foo'
 
     """
+
     def __repr__(self):
         return f"'{self.__str__()}'"
 
@@ -38,7 +39,7 @@ class _EnumBase(enum.Enum):
 # Will be replaced by enum.StrEnum in Python 3.11
 # TODO: move to StrEnum and do a try/except ImportError to switch to stdlib
 # implementation when available.
-#class StrEnum(str, _EnumBase):
+# class StrEnum(str, _EnumBase):
 #    """
 #    Base class for Enums that should behave as str.
 #

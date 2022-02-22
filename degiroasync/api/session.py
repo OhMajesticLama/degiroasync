@@ -185,6 +185,6 @@ def check_session_exchange_dictionary(session: Session):
     """
     if session.exchange_dictionary is None:
         raise AssertionError(
-                "session.exchange_dictionary is not set. "
-                "Use api.login to build your session or call "
-                "api.get_exchange_dictionary on it.")
+            "session.exchange_dictionary is not set. "
+            "Use api.login to build your session or call "
+            "api.get_exchange_dictionary on it.")

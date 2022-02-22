@@ -28,7 +28,7 @@ async def confirm_order(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-        ):
+):
     """
     Close the placing order process. This is used after `check_order`
     to confirm placing an order. It must be called with the same paramaters
@@ -86,27 +86,27 @@ async def confirm_order(
     url = join_url(
         URLs.get_confirm_order_url(session),
         confirmation_id
-            )
+    )
     url += f';{jsession_id}'
 
     params = dict(
         intAccount=session.client.intAccount,
         sessionId=jsession_id
-            )
+    )
     data = dict(
         buySell=buy_sell,
         orderType=order_type,
         price=price,
         productId=product_id,
         timeType=time_type
-            )
+    )
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
-                url,
-                params=params,
-                json=data,
-                )
+            url,
+            params=params,
+            json=data,
+        )
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("check_order| %s", resp_json)
@@ -122,7 +122,7 @@ def _order_calls_check(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-        ):
+):
     check_session_config(session)
     check_session_client(session)
 
@@ -149,7 +149,7 @@ async def check_order(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-        ) -> httpx.Response:
+) -> httpx.Response:
     """
     Start the placing order process. This is used to retrieve order
     cost for instance and is mandatory to actually place an order with
@@ -215,7 +215,7 @@ async def check_order(
     params = dict(
         intAccount=session.client.intAccount,
         sessionId=jsessionid
-            )
+    )
     data = dict(
         buySell=buy_sell,
         orderType=order_type,
@@ -223,18 +223,18 @@ async def check_order(
         productId=product_id,
         size=size,
         timeType=time_type
-            )
+    )
     LOGGER.debug("check_order data| %s", data)
     async with httpx.AsyncClient() as client:
         response = await client.post(
-                url,
-                params=params,
-                json=data,
-                headers={
-                    'content-type': 'application/json;charset=UTF-8'
-                    },
-                cookies=session._cookies
-                )
+            url,
+            params=params,
+            json=data,
+            headers={
+                'content-type': 'application/json;charset=UTF-8'
+            },
+            cookies=session._cookies
+        )
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("check_order| %s", resp_json)
@@ -252,20 +252,21 @@ async def get_orders(session: SessionCore) -> httpx.Response:
     # TODO: assess if historicalOrders is relevant here
     # or if it should be removed and we should only rely on get_orders_history
     return await get_trading_update(
-            session,
-            params={
-                'orders': 0,
-                'historicalOrders': 0}
-            )
+        session,
+        params={
+            'orders': 0,
+            'historicalOrders': 0}
+    )
 
 
 ORDER_DATE_FORMAT = '%d/%m/%Y'
+
 
 async def get_orders_history(
         session: SessionCore,
         from_date: str,
         to_date: str,
-        ) -> httpx.Response:
+) -> httpx.Response:
     """
     Get historical orders for session.
 
@@ -288,17 +289,17 @@ async def get_orders_history(
         toDate=to_date,
         intAccount=session.client.intAccount,
         sessionId=jsessionid
-            )
+    )
 
     async with httpx.AsyncClient() as client:
         response = await client.get(
-                url,
-                params=params,
-                headers={
-                    'content-type': 'application/json'
-                    },
-                cookies=session._cookies
-                )
+            url,
+            params=params,
+            headers={
+                'content-type': 'application/json'
+            },
+            cookies=session._cookies
+        )
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("get_orders_history| %s", resp_json)
@@ -309,7 +310,7 @@ async def get_transactions(
         session: SessionCore,
         from_date: str,
         to_date: str,
-        ) -> httpx.Response:
+) -> httpx.Response:
     """
     Get transactions for session.
 
@@ -334,18 +335,18 @@ async def get_transactions(
         intAccount=session.client.intAccount,
         sessionId=jsessionid,
         groupTransactionsByOrder=False
-            )
+    )
 
     LOGGER.debug('get_transactions params| %s', params)
     async with httpx.AsyncClient() as client:
         response = await client.get(
-                url,
-                params=params,
-                headers={
-                    'content-type': 'application/json'
-                    },
-                cookies=session._cookies
-                )
+            url,
+            params=params,
+            headers={
+                'content-type': 'application/json'
+            },
+            cookies=session._cookies
+        )
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("get_transactions response| %s", resp_json)

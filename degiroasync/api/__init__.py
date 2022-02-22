@@ -26,36 +26,36 @@ from ..core.constants import ORDER
 
 
 __all__ = [obj.__name__ for obj in (
-        # Session
-        login,
-        Credentials,
-        Session,
-        get_exchange_dictionary,
-        ExchangeDictionary,
-        Exchange, Region, Country,
-        # Product
-        search_product,
-        get_portfolio,
-        get_price_data,
-        #PriceData,
-        PriceSeriesTime,
-        Stock,
-        Currency,
-        ProductBase,
-        ProductGeneric,
+    # Session
+    login,
+    Credentials,
+    Session,
+    get_exchange_dictionary,
+    ExchangeDictionary,
+    Exchange, Region, Country,
+    # Product
+    search_product,
+    get_portfolio,
+    get_price_data,
+    # PriceData,
+    PriceSeriesTime,
+    Stock,
+    Currency,
+    ProductBase,
+    ProductGeneric,
 
-        get_portfolio,
-        get_portfolio_total,
-        TotalPortfolio,
+    get_portfolio,
+    get_portfolio_total,
+    TotalPortfolio,
 
-        # Order
-        submit_order,
-        check_order,
-        get_orders,
-        get_transactions,
-        Order,
+    # Order
+    submit_order,
+    check_order,
+    get_orders,
+    get_transactions,
+    Order,
 
-        # Constants
-        PRODUCT,
-        PRICE
-    )]
+    # Constants
+    PRODUCT,
+    PRICE
+)]

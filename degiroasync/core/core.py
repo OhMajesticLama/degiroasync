@@ -7,6 +7,7 @@ except ImportError:
     import enum
     # Exists only starting Python 3.11
     # Reimplement what we need from it here.
+
     class StrEnum(str, enum.Enum):
         def __str__(self):
             return str.__str__(self)
@@ -90,20 +91,20 @@ class PAClient:
     Data Structure for PA Client
     """
     address: Union[dict, None]
-    #{
+    # {
     #    city = Union[str, None]
     #    country = Union[str, None]
     #    streetAddress = Union[str, None]
     #    streetAddressNumber = Union[str, None]
     #    zip: 83300
-    #}
+    # }
     bankAccount: Union[dict, None]
-    #{
+    # {
     #    bankAccountId = Union[str, None]
     #    bic = Union[str, None]
     #    iban = Union[str, None]
     #    status: VERIFIED
-    #}
+    # }
     canUpgrade: Union[str, None]
     clientRole: Union[str, None]
     contractType: Union[str, None]
@@ -113,7 +114,7 @@ class PAClient:
     effectiveClientRole: Union[str, None]
     email: Union[str, None]
     firstContact: Union[dict, None]
-    #{
+    # {
     #    countryOfBirth: Union[str, None]
     #    dateOfBirth: Union[str, None]
     #    displayName: Union[str, None]
@@ -122,18 +123,18 @@ class PAClient:
     #    lastName: Union[str, None]
     #    nationality: Union[str, None]
     #    placeOfBirth: Union[str, None]
-    #}
+    # }
     flatexBankAccount: Union[dict, None]
-    #{
+    # {
     #    bic = Union[str, None]
     #    iban = Union[str, None]
-    #}
+    # }
     id: Union[str, None]
     intAccount = Union[str, None]
     isAllocationAvailable = Union[str, None]
     isAmClientActive = Union[str, None]
 
-    #def set_data(self, data: dict):
+    # def set_data(self, data: dict):
     #    check_keys(data, ('intAccount', 'id'))
     #    setattrs(self, **data)
     #    return self
@@ -243,7 +244,7 @@ class URLs:
         return join_url(
             session.config.tradingUrl,
             'v5/order'
-                )
+        )
 
     @classmethod
     def get_orders_url(cls, session: SessionCore) -> str:
@@ -265,7 +266,7 @@ class URLs:
         url = join_url(
             session.config.tradingUrl,
             f'v5/checkOrder;jsessionid={jsessionid}'
-                )
+        )
         LOGGER.debug('get_check_order_url| %s', url)
         return url
 
@@ -305,12 +306,12 @@ class URLs:
                 URLs.PRODUCT_SEARCH_TYPE.LEVERAGED_PRODUCTS,
             PRODUCT.TYPEID.WARRANTS:
                 URLs.PRODUCT_SEARCH_TYPE.WARRANTS,
-            }.get(product_type_id, URLs.PRODUCT_SEARCH_TYPE.GENERIC)
+        }.get(product_type_id, URLs.PRODUCT_SEARCH_TYPE.GENERIC)
         check_session_config(session)
         url = join_url(
-                session.config.productSearchUrl,
-                'v5',
-                specialization)
+            session.config.productSearchUrl,
+            'v5',
+            specialization)
         LOGGER.debug('get_product_search_url: %s', url)
         return url
 
@@ -327,21 +328,22 @@ class URLs:
         url = join_url(URLs.ACCOUNT_INFO, str(session.client.intAccount))
         return cls._add_jsessionid(session, url)
 
-
     @classmethod
     def _add_jsessionid(cls, session: SessionCore, url: str) -> str:
         check_session_config(session)
         return url + ';jsessionid={}'.format(
-                session._cookies[session.JSESSIONID])
+            session._cookies[session.JSESSIONID])
 
 
 def check_session_config(session: SessionCore):
     "Raise an exception if session.config is not set"
     if session.config is None:
-        raise AssertionError("session.config is not set. Call get_config first.")
+        raise AssertionError(
+            "session.config is not set. Call get_config first.")
 
 
 def check_session_client(session: SessionCore):
     "Raise an exception if session.client is not set"
     if session.config is None:
-        raise AssertionError("session.client is not set. Call get_client_info first.")
+        raise AssertionError(
+            "session.client is not set. Call get_client_info first.")

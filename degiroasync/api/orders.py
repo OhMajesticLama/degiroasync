@@ -33,10 +33,11 @@ class Order:
     type: str  # 'CREATED' or ...?
     isActive: bool
     status: str  # 'REJECTED' or ...?
-    #product: Union[ProductBase, None] = None  # do we want to reinstantiate
-                                               # products here or let user?
+    # product: Union[ProductBase, None] = None  # do we want to reinstantiate
+    # products here or let user?
 
 # {'id': 182722888, 'productId': 65153, 'date': '2020-02-07T09:00:10+01:00', 'buysell': 'B', 'price': 36.07, 'quantity': 20, 'total': -721.4, 'orderTypeId': 0, 'counterParty': 'MK', 'transfered': False, 'fxRate': 0, 'totalInBaseCurrency': -721.4, 'feeInBaseCurrency': -0.29, 'totalPlusFeeInBaseCurrency': -721.69, 'transactionTypeId': 0, 'tradingVenue': 'XPAR'})
+
 
 @JSONclass(annotations=True, annotations_type=True)
 class Transaction:
@@ -52,6 +53,7 @@ class Transaction:
     totalInBaseCurrency: float
     totalPlusFeeInBaseCurrency: float
 
+
 async def submit_order():
     raise NotImplementedError
 
@@ -66,7 +68,7 @@ async def check_order(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-        ) -> Any:
+) -> Any:
     assert buy_sell in ("BUY", "SELL")
 
     response = await webapi.check_order(
@@ -77,7 +79,7 @@ async def check_order(
         order_type=order_type,
         size=size,
         price=price
-            )
+    )
     resp_json = response.json()
     return resp_json
 
@@ -86,7 +88,7 @@ async def get_orders(
         session: SessionCore,
         from_date: Union[datetime.datetime, None] = None,
         to_date: Union[datetime.datetime, None] = None,
-        ) -> Tuple[List[Order]]:
+) -> Tuple[List[Order]]:
     """
     Get current orders and history.
 
@@ -109,7 +111,7 @@ async def get_orders(
             session,
             from_date=from_date.strftime(webapi.ORDER_DATE_FORMAT),
             to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT))
-            )
+    )
 
     orders_dict = orders_current_resp.json()['orders']['value']
     orders_history_dict = orders_history_resp.json()['data']
@@ -120,18 +122,18 @@ async def get_orders(
         order['buysell'] = {
             'B': ORDER.ACTION.BUY,
             'S': ORDER.ACTION.SELL
-                }[order['buysell']]
+        }[order['buysell']]
     return (
-            [Order(o) for o in orders_dict],
-            [Order(o) for o in orders_history_dict]
-           )
+        [Order(o) for o in orders_dict],
+        [Order(o) for o in orders_history_dict]
+    )
 
 
 async def get_transactions(
         session: SessionCore,
         from_date: Union[datetime.datetime, None] = None,
         to_date: Union[datetime.datetime, None] = None
-        ) -> List[Order]:
+) -> List[Order]:
     """
     Get transactions for `session`.
 
@@ -145,14 +147,14 @@ async def get_transactions(
     from_date = from_date or to_date - datetime.timedelta(days=7)
 
     resp = await webapi.get_transactions(
-            session,
-            from_date=from_date.strftime(webapi.ORDER_DATE_FORMAT),
-            to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT)
-            )
+        session,
+        from_date=from_date.strftime(webapi.ORDER_DATE_FORMAT),
+        to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT)
+    )
     data = resp.json()['data'].copy()
     products = ProductBase.init_bulk(
-            session,
-            map(lambda t: {'id': str(t['productId'])}, data))
+        session,
+        map(lambda t: {'id': str(t['productId'])}, data))
 
     async def _build_transaction(prod, trans):
         await prod.await_product_info()
@@ -162,24 +164,24 @@ async def get_transactions(
             date=datetime.datetime.fromisoformat(trans['date']),
             buysell={'B': ORDER.ACTION.BUY,
                      'S': ORDER.ACTION.SELL}[trans['buysell']],
-                ))
+        ))
         return Transaction(trans)
 
     transactions = await asyncio.gather(*[_build_transaction(p, t)
                                           for p, t in zip(products, data)])
     return transactions
-    #for prod, trans in zip(products, data):
-        #await prod.await_product_info()
-        #trans.update(dict(
-        #    id=str(trans['id']),
-        #    product=prod,
-        #    date=datetime.datetime.strptime(trans['date']),
-        #    buysell={'B': ORDER.ACTION.BUY,
-        #             'S': ORDER.ACTION.SELL}[trans['buysell']],
-        #    counterParty={
-        #        'MK': TRANSACTIONS.COUNTERPARTY.MARKET,
-        #        'GR': TRANSACTIONS.COUNTERPARTY.GROUP,
-        #        'DG': TRANSACTIONS.COUNTERPARTY.DEGIRO
-        #        }
-        #        ))
-        #transaction = Transaction(trans)
+    # for prod, trans in zip(products, data):
+    # await prod.await_product_info()
+    # trans.update(dict(
+    #    id=str(trans['id']),
+    #    product=prod,
+    #    date=datetime.datetime.strptime(trans['date']),
+    #    buysell={'B': ORDER.ACTION.BUY,
+    #             'S': ORDER.ACTION.SELL}[trans['buysell']],
+    #    counterParty={
+    #        'MK': TRANSACTIONS.COUNTERPARTY.MARKET,
+    #        'GR': TRANSACTIONS.COUNTERPARTY.GROUP,
+    #        'DG': TRANSACTIONS.COUNTERPARTY.DEGIRO
+    #        }
+    #        ))
+    #transaction = Transaction(trans)

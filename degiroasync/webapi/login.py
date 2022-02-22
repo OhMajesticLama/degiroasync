@@ -35,7 +35,7 @@ async def login(
         "isRedirectToMobile": False,
         "isPassCodeReset": '',
         "queryParams": {"reason": "session_expired"}
-            }
+    }
     async with httpx.AsyncClient() as client:
         response = await client.post(url, data=json.dumps(payload))
         LOGGER.debug(response.__dict__)
@@ -47,20 +47,20 @@ async def login(
             if (credentials.totp_secret is None and
                     credentials.one_time_password is None):
                 raise AssertionError(
-                        "Account has TOTP enabled, but no TOTP secret"
-                        " nor one_time_password was provided.")
+                    "Account has TOTP enabled, but no TOTP secret"
+                    " nor one_time_password was provided.")
             elif credentials.totp_secret is not None:
                 payload["oneTimePassword"] = _get_totp_token(
-                        credentials.totp_secret)
+                    credentials.totp_secret)
             elif credentials.one_time_password is not None:
                 payload["oneTimePassword"] = credentials.one_time_password
 
             url = URLs.LOGIN_TOTP
             LOGGER.debug("run totp login at %s", url)
             response = await client.post(
-                    url,
-                    data=json.dumps(payload),
-                    cookies=response.cookies)
+                url,
+                data=json.dumps(payload),
+                cookies=response.cookies)
             LOGGER.debug(response.__dict__)
             LOGGER.debug(response.json())
 
@@ -99,9 +99,9 @@ async def get_client_info(session: SessionCore) -> SessionCore:
     url = URLs.get_client_info_url(session)
     async with httpx.AsyncClient() as client:
         res = await client.get(
-                url,
-                params={'sessionId': session._cookies[session.JSESSIONID]},
-                cookies=session._cookies)
+            url,
+            params={'sessionId': session._cookies[session.JSESSIONID]},
+            cookies=session._cookies)
 
     check_response(res)
     session.client = PAClient(res.json()['data'])
@@ -110,7 +110,7 @@ async def get_client_info(session: SessionCore) -> SessionCore:
 
 async def get_account_info(session: SessionCore) -> SessionCore:
     """
-       
+
     """
     _check_active_session(session)
     #url = join_url(URLs.ACCOUNT_INFO, str(session.client.intAccount))
@@ -118,8 +118,8 @@ async def get_account_info(session: SessionCore) -> SessionCore:
     url = URLs.get_account_info_url(session)
     async with httpx.AsyncClient() as client:
         res = await client.get(url,
-                cookies=session._cookies
-                )
+                               cookies=session._cookies
+                               )
     check_response(res)
     return res
 
@@ -139,7 +139,7 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
     params = dict(
         intAccount=session.client.intAccount,
         sessionId=session.config.sessionId
-            )
+    )
     async with httpx.AsyncClient() as client:
         response = await client.get(url,
                                     cookies=session._cookies,
@@ -169,7 +169,7 @@ def _get_totp_token(secret_key: str) -> str:
     message_hash = hmac.new(key, message, hashlib.sha1).digest()
     o = message_hash[19] & 15
     message_hash = (struct.unpack(">I",
-                    message_hash[o:o+4])[0] & 0x7fffffff) % 1000000
+                    message_hash[o:o + 4])[0] & 0x7fffffff) % 1000000
     return message_hash
 
 
@@ -177,4 +177,4 @@ __all__ = [
     login.__name__,
     get_account_info.__name__,
     get_config.__name__
-        ]
+]

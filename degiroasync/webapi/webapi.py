@@ -525,14 +525,14 @@ async def get_portfolio(session: SessionCore) -> httpx.Response:
         }
     """
     return await get_trading_update(
-            session,
-            params={'portfolio': 0})
+        session,
+        params={'portfolio': 0})
 
 
 async def get_portfolio_total(session: SessionCore) -> httpx.Response:
     return await get_trading_update(
-            session,
-            params={'totalPortfolio': 0})
+        session,
+        params={'totalPortfolio': 0})
 
 
 async def get_products_info(
@@ -550,14 +550,14 @@ async def get_products_info(
                    'v5/products/info')
     async with httpx.AsyncClient() as client:
         response = await client.post(
-                url,
-                cookies=session.cookies,
-                params={
-                    'intAccount': session.client.intAccount,
-                    'sessionId': session.config.sessionId
-                    },
-                json=products_ids
-                )
+            url,
+            cookies=session.cookies,
+            params={
+                'intAccount': session.client.intAccount,
+                'sessionId': session.config.sessionId
+            },
+            json=products_ids
+        )
         try:
             check_response(response)
         except Exception:
@@ -583,12 +583,12 @@ async def get_company_profile(
     url = join_url(URLs.BASE, 'dgtbxdsservice/company-profile/v2', isin)
     async with httpx.AsyncClient() as client:
         response = await client.get(
-                url,
-                cookies=session.cookies,
-                params={
-                    'intAccount': session.client.intAccount,
-                    'sessionId': session.config.sessionId
-                    })
+            url,
+            cookies=session.cookies,
+            params={
+                'intAccount': session.client.intAccount,
+                'sessionId': session.config.sessionId
+            })
     check_response(response)
     LOGGER.debug(response.json())
     return response
@@ -600,23 +600,23 @@ async def get_news_by_company(
         limit: int = 10,
         languages: List[str] = ['en'],
         offset: int = 0
-        ):
+):
     """
     Get news for a company.
     """
     url = URLs.get_news_by_company_url(session)
     async with httpx.AsyncClient() as client:
         response = await client.get(
-                url,
-                cookies=session.cookies,
-                params={
-                    'isin': isin,
-                    'limit': limit,
-                    'languages': languages,
-                    'offset': offset,
-                    'intAccount': session.client.intAccount,
-                    'sessionId': session.config.sessionId
-                    })
+            url,
+            cookies=session.cookies,
+            params={
+                'isin': isin,
+                'limit': limit,
+                'languages': languages,
+                'offset': offset,
+                'intAccount': session.client.intAccount,
+                'sessionId': session.config.sessionId
+            })
     check_response(response)
     LOGGER.debug(response.json())
     return response
@@ -631,7 +631,7 @@ async def get_price_data(
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
-        ) -> httpx.Response:
+) -> httpx.Response:
     """
     Get price data for a company.
 
@@ -731,14 +731,14 @@ async def get_price_data(
     url = URLs.get_price_data_url(session)
     LOGGER.debug('get_price_data url| %s', url)
     params = {
-            'requestid': 1,
-            'resolution': resolution,
-            'culture': culture,
-            'period': period,
-            'series': f'price:{vwdIdentifierType}:{vwdId}',
-            'format': 'json',
-            'userToken': session.config.clientId
-            }
+        'requestid': 1,
+        'resolution': resolution,
+        'culture': culture,
+        'period': period,
+        'series': f'price:{vwdIdentifierType}:{vwdId}',
+        'format': 'json',
+        'userToken': session.config.clientId
+    }
     LOGGER.debug('get_price_data params| %s', params)
     async with httpx.AsyncClient() as client:
         response = await client.get(url,
@@ -752,7 +752,7 @@ async def get_price_data(
 async def get_trading_update(
         session: SessionCore,
         params: Dict[str, int]
-        ) -> httpx.Response:
+) -> httpx.Response:
     """
     Common call to target {tradingUrl}/v5/update/{intAccount}
 
@@ -858,7 +858,7 @@ async def search_product(
         searchText=search_txt,
         intAccount=session.client.intAccount,
         sessionId=session.config.sessionId
-            )
+    )
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
     LOGGER.debug("webapi.search_product params| %s", params)
@@ -877,4 +877,4 @@ __all__ = [
     get_news_by_company.__name__,
     get_company_profile.__name__,
     get_price_data.__name__,
-        ]
+]
