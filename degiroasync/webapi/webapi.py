@@ -553,7 +553,7 @@ async def get_products_info(
             url,
             cookies=session.cookies,
             params={
-                'intAccount': session.client.intAccount,
+                'intAccount': session.client.int_account,
                 'sessionId': session.config.sessionId
             },
             json=products_ids
@@ -586,7 +586,7 @@ async def get_company_profile(
             url,
             cookies=session.cookies,
             params={
-                'intAccount': session.client.intAccount,
+                'intAccount': session.client.int_account,
                 'sessionId': session.config.sessionId
             })
     check_response(response)
@@ -614,7 +614,7 @@ async def get_news_by_company(
                 'limit': limit,
                 'languages': languages,
                 'offset': offset,
-                'intAccount': session.client.intAccount,
+                'intAccount': session.client.int_account,
                 'sessionId': session.config.sessionId
             })
     check_response(response)
@@ -856,7 +856,7 @@ async def search_product(
         offset=offset,
         limit=limit,
         searchText=search_txt,
-        intAccount=session.client.intAccount,
+        intAccount=session.client.int_account,
         sessionId=session.config.sessionId
     )
     if product_type_id is not None:

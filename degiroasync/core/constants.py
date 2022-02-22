@@ -36,57 +36,6 @@ class _EnumBase(enum.Enum):
         return self.value.__str__()
 
 
-# Will be replaced by enum.StrEnum in Python 3.11
-# TODO: move to StrEnum and do a try/except ImportError to switch to stdlib
-# implementation when available.
-# class StrEnum(str, _EnumBase):
-#    """
-#    Base class for Enums that should behave as str.
-#
-#    Refer to example below for difference in behavior with other Enum based
-#    solutions.
-#
-#    >>> import enum
-#    >>> # Basic enum.Enum example
-#    >>> class Foo(enum.Enum):
-#    ...     A = 'foo'
-#    ...
-#    >>> Foo.A
-#    <Foo.A: 'foo'>
-#    >>> str(Foo.A)
-#    'Foo.A'
-#    >>> repr(Foo.A)
-#    "<Foo.A: 'foo'>"
-#    >>> type(Foo.A)
-#    <enum 'Foo'>
-#    >>> # Inheriting from str, enum.Enum
-#    >>> class Foo(str, enum.Enum):
-#    ...     A = 'foo'
-#    ...
-#    >>> Foo.A
-#    <Foo.A: 'foo'>
-#    >>> str(Foo.A)
-#    'Foo.A'
-#    >>> repr(Foo.A)
-#    "<Foo.A: 'foo'>"
-#    >>> type(Foo.A)
-#    <enum 'Foo'>
-#
-#    >>> # An StrEnum child can be used as a drop-in replacement for a str
-#    >>> class Foo(StrEnum):
-#    ...     A = 'foo'
-#    ...
-#    >>> Foo.A
-#    'foo'
-#    >>> str(Foo.A)
-#    'foo'
-#    >>> repr(Foo.A)
-#    "'foo'"
-#    >>> type(Foo.A)
-#    <enum 'Foo'>
-#    """
-
-
 class EnumInt(int, _EnumBase):
     """
     Base class for Enums that should behave as str.

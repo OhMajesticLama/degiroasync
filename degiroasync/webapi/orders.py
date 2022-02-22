@@ -90,7 +90,7 @@ async def confirm_order(
     url += f';{jsession_id}'
 
     params = dict(
-        intAccount=session.client.intAccount,
+        intAccount=session.client.int_account,
         sessionId=jsession_id
     )
     data = dict(
@@ -213,7 +213,7 @@ async def check_order(
 
     url = URLs.get_check_order_url(session)
     params = dict(
-        intAccount=session.client.intAccount,
+        intAccount=session.client.int_account,
         sessionId=jsessionid
     )
     data = dict(
@@ -287,7 +287,7 @@ async def get_orders_history(
     params = dict(
         fromDate=from_date,
         toDate=to_date,
-        intAccount=session.client.intAccount,
+        intAccount=session.client.int_account,
         sessionId=jsessionid
     )
 
@@ -332,7 +332,7 @@ async def get_transactions(
     params = dict(
         fromDate=from_date,
         toDate=to_date,
-        intAccount=session.client.intAccount,
+        intAccount=session.client.int_account,
         sessionId=jsessionid,
         groupTransactionsByOrder=False
     )

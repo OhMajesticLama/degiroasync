@@ -15,6 +15,8 @@ from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import check_session_config
 from ..core.helpers import check_response
 from ..core.helpers import join_url
+from ..core.helpers import camelcase_to_snake
+from ..core.helpers import camelcase_dict_to_snake
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
@@ -104,7 +106,7 @@ async def get_client_info(session: SessionCore) -> SessionCore:
             cookies=session._cookies)
 
     check_response(res)
-    session.client = PAClient(res.json()['data'])
+    session.client = PAClient(camelcase_dict_to_snake(res.json()['data']))
     return session
 
 
@@ -137,7 +139,7 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
     check_session_config(session)
     url = URLs.get_product_dictionary_url(session)
     params = dict(
-        intAccount=session.client.intAccount,
+        intAccount=session.client.int_account,
         sessionId=session.config.sessionId
     )
     async with httpx.AsyncClient() as client:

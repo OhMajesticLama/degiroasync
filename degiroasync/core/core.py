@@ -98,22 +98,22 @@ class PAClient:
     #    streetAddressNumber = Union[str, None]
     #    zip: 83300
     # }
-    bankAccount: Union[dict, None]
+    bank_account: Union[dict, None]
     # {
     #    bankAccountId = Union[str, None]
     #    bic = Union[str, None]
     #    iban = Union[str, None]
     #    status: VERIFIED
     # }
-    canUpgrade: Union[str, None]
-    clientRole: Union[str, None]
-    contractType: Union[str, None]
+    can_upgrade: Union[str, None]
+    client_role: Union[str, None]
+    contract_type: Union[str, None]
     culture: Union[str, None]
-    displayLanguage: Union[str, None]
-    displayName: Union[str, None]
-    effectiveClientRole: Union[str, None]
+    display_language: Union[str, None]
+    display_name: Union[str, None]
+    effective_client_role: Union[str, None]
     email: Union[str, None]
-    firstContact: Union[dict, None]
+    first_contact: Union[dict, None]
     # {
     #    countryOfBirth: Union[str, None]
     #    dateOfBirth: Union[str, None]
@@ -124,15 +124,15 @@ class PAClient:
     #    nationality: Union[str, None]
     #    placeOfBirth: Union[str, None]
     # }
-    flatexBankAccount: Union[dict, None]
+    flatex_bank_account: Union[dict, None]
     # {
     #    bic = Union[str, None]
     #    iban = Union[str, None]
     # }
     id: Union[str, None]
-    intAccount = Union[str, None]
-    isAllocationAvailable = Union[str, None]
-    isAmClientActive = Union[str, None]
+    int_account: Union[str, None]
+    is_allocation_available: Union[str, None]
+    is_am_client_active: Union[str, None]
 
     # def set_data(self, data: dict):
     #    check_keys(data, ('intAccount', 'id'))
@@ -193,7 +193,7 @@ class URLs:
 
         url = join_url(
             session.config.tradingUrl,
-            f'v5/update/{session.client.intAccount}',
+            f'v5/update/{session.client.int_account}',
             f';jsessionid={jsessionid}')
         LOGGER.debug('get_portfolio_url| %s', url)
         return url
@@ -325,7 +325,7 @@ class URLs:
     @classmethod
     def get_account_info_url(cls, session: SessionCore) -> str:
         check_session_client(session)
-        url = join_url(URLs.ACCOUNT_INFO, str(session.client.intAccount))
+        url = join_url(URLs.ACCOUNT_INFO, str(session.client.int_account))
         return cls._add_jsessionid(session, url)
 
     @classmethod
