@@ -158,7 +158,7 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
         countries = dictionary.countries
         self.assertIn('NL', (c.name for c in countries))
         exchanges = dictionary.exchanges
-        self.assertIn('XAMS', (e.micCode for e in exchanges))
+        self.assertIn('XAMS', (e.mic_code for e in exchanges))
 
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
     async def test_exchange_dictionary_exchange(self, get_dict_mock):
@@ -167,9 +167,9 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
         session = object()  # dummy is enough, we mocked the class
         dictionary = await degiroasync.api.ExchangeDictionary(session)
 
-        eam_exc = dictionary.exchange_by(hiqAbbr='EAM')
-        self.assertEqual(eam_exc.micCode, 'XAMS')
-        self.assertEqual(eam_exc.countryName, 'NL')
+        eam_exc = dictionary.exchange_by(hiq_abbr='EAM')
+        self.assertEqual(eam_exc.mic_code, 'XAMS')
+        self.assertEqual(eam_exc.country_name, 'NL')
 
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
     async def test_exchange_dictionary_country(self, get_dict_mock):
@@ -384,14 +384,14 @@ if RUN_INTEGRATION_TESTS:
             countries = dictionary.countries
             self.assertIn('NL', (c.name for c in countries))
             exchanges = dictionary.exchanges
-            self.assertIn('XAMS', (e.micCode for e in exchanges))
+            self.assertIn('XAMS', (e.mic_code for e in exchanges))
 
         async def test_product_dictionary_exchange_by(self):
             session = await self._login()
             dictionary = await degiroasync.api.ExchangeDictionary(session)
-            eam_exc = dictionary.exchange_by(hiqAbbr='EAM')
-            self.assertEqual(eam_exc.micCode, 'XAMS')
-            self.assertEqual(eam_exc.countryName, 'NL')
+            eam_exc = dictionary.exchange_by(hiq_abbr='EAM')
+            self.assertEqual(eam_exc.mic_code, 'XAMS')
+            self.assertEqual(eam_exc.country_name, 'NL')
 
     class TestDegiroasyncIntegrationOrders(
             _IntegrationLogin,

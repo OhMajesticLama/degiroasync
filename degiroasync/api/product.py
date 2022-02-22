@@ -555,7 +555,7 @@ async def search_product(
         Restricts search to one type of products.
     `by_exchange`
         Restricts results to products in a exchange. Can be either an Exchange
-        instance or an `hiqAbbr` (e.g. EPA for Paris, AEX for Amsterdam)
+        instance or an `hiq_abbr` (e.g. EPA for Paris, AEX for Amsterdam)
 
     Return a list of Product objects returned by Degiro for `search_txt`
     attribute.
@@ -578,7 +578,7 @@ async def search_product(
         elif isinstance(by_exchange, str):
             check_session_exchange_dictionary(session)
             exchange = session.exchange_dictionary.exchange_by(
-                hiqAbbr=by_exchange)
+                hiq_abbr=by_exchange)
             exchange_id = exchange.id
         else:
             raise TypeError(

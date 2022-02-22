@@ -8,6 +8,7 @@ from jsonloader import JSONclass
 from ..core import LOGGER_NAME
 from ..core import SessionCore
 from ..core import Credentials
+from ..core import camelcase_dict_to_snake
 from .. import webapi
 
 
@@ -33,9 +34,9 @@ class Exchange:
     name: str
     city: Union[str, None] = None
     code: Union[str, None] = None
-    countryName: str  # renamed from 'country' as it is country name
-    hiqAbbr: str
-    micCode: Union[str, None] = None
+    country_name: str  # renamed from 'country' as it is country name
+    hiq_abbr: str
+    mic_code: Union[str, None] = None
 
 
 class ExchangeDictionary:
@@ -84,7 +85,7 @@ class ExchangeDictionary:
             del exchange['country']
 
             # Register country
-            self._exchanges[exchange['id']] = Exchange(exchange)
+            self._exchanges[exchange['id']] = Exchange(camelcase_dict_to_snake(exchange))
 
         return self
 
@@ -106,11 +107,14 @@ class ExchangeDictionary:
             *,
             name: Union[str, None] = None,
             id: Union[int, None] = None,
-            hiqAbbr: Union[str, None] = None,
-            micCode: Union[str, None] = None) -> Exchange:
+            hiq_abbr: Union[str, None] = None,
+            mic_code: Union[str, None] = None) -> Exchange:
         """Get Exchange by *either* name, hiqAbbr (e.g. EPA),
         micCode (e.g. XPAR)."""
-        if sum(attr is not None for attr in (name, id, hiqAbbr, micCode)) != 1:
+        if sum(attr is not None for attr in (name,
+                                             id,
+                                             hiq_abbr,
+                                             mic_code)) != 1:
             raise AssertionError(
                 "Exactly one of (name, id, hiqAbbr, micCode) "
                 "must be not None.")
@@ -119,12 +123,12 @@ class ExchangeDictionary:
         for exc in self._exchanges.values():
             if name is not None and exc.name == name:
                 return exc
-            elif hiqAbbr is not None and exc.hiqAbbr == hiqAbbr:
+            elif hiq_abbr is not None and exc.hiq_abbr == hiq_abbr:
                 return exc
-            elif micCode is not None and exc.micCode == micCode:
+            elif mic_code is not None and exc.mic_code == mic_code:
                 return exc
         raise KeyError("No exchange found with search attributes: {}",
-                       (name, id, hiqAbbr, micCode))
+                       (name, id, hiq_abbr, mic_code))
 
     def country_by(
             self,
