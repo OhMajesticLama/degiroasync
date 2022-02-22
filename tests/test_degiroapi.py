@@ -53,54 +53,6 @@ del _env_var
 #############
 # Unittests #
 #############
-class TestDegiroAsyncHelpers(unittest.TestCase):
-    def test_join_url(self):
-        url = join_url('https://foo.bar', '/rest/of/url')
-        self.assertEqual(url, 'https://foo.bar/rest/of/url')
-        url = join_url('https://foo.bar/product', '/rest/of/url')
-        self.assertEqual(url, 'https://foo.bar/product/rest/of/url')
-        url = join_url('https://foo.bar/product/', '/rest/of/url')
-        self.assertEqual(url, 'https://foo.bar/product/rest/of/url')
-
-    def test_set_params(self):
-        class Foo:
-            pass
-
-        foo = Foo()
-
-        set_params(foo, [
-                 {'isAdded': True,
-                  'name': 'id',
-                  'value': '8614787'},
-                 {'isAdded': True,
-                  'name': 'positionType',
-                  'value': 'PRODUCT'},
-                 {'isAdded': True,
-                  'name': 'size',
-                  'value': 100},
-                 {'isAdded': True,
-                  'name': 'price',
-                  'value': 73.0},
-                 {'isAdded': True,
-                  'name': 'value',
-                  'value': 7300.0},
-            ])
-
-        self.assertEqual(foo.id, '8614787')
-        self.assertEqual(foo.positionType, 'PRODUCT')
-        self.assertEqual(foo.size, 100)
-        self.assertEqual(foo.price, 73.0)
-        self.assertEqual(foo.value, 7300.0)
-
-    def test_camelcase_to_snake(self):
-        inp = 'iAmCamelCase'
-        out = camelcase_to_snake(inp)
-        self.assertEqual(out, 'i_am_camel_case')
-
-    def test_camelcase_dict_to_snake(self):
-        d = {'fooBar': 2, 'camelCase': {'camelCase': 1}}
-        out = camelcase_dict_to_snake(d)
-        self.assertEqual(out, {'foo_bar': 2, 'camel_case': {'camelCase': 1}})
 
 
 class TestDegiroAsyncAPIHelpers(unittest.TestCase):

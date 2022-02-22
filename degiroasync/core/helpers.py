@@ -91,7 +91,6 @@ def lru_cache_timed(
                     time_key = 1
                 else:
                     time_key = (time.time() - first_start[0]) // seconds
-                LOGGER.debug("time_key %s", time_key)
 
                 return await _in(time_key, *args, **kwargs)
 
@@ -149,7 +148,12 @@ def camelcase_to_snake(text: str) -> str:
     >>> s = 'iAmCamelCase'
     >>> camelcase_to_snake(s)
     'i_am_camel_case'
+    >>> # Ignore fully uppercase text.
+    >>> camelcase_to_snake("ALL_CAPS")
+    'ALL_CAPS'
     """
+    if text.isupper():
+        return text
     return ''.join(map(lambda c: '_' + c.lower() if c.isupper() else c, text))
 
 
