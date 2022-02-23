@@ -222,11 +222,11 @@ if RUN_INTEGRATION_TESTS:
             session = await self._login()
             total = await degiroasync.api.get_portfolio_total(session)
             LOGGER.debug("test_get_portfolio_total: %s", total.__dict__)
-            self.assertIsNotNone(total.degiroCash)
-            self.assertIsNotNone(total.totalCash)
-            self.assertIsNotNone(total.freeSpaceNew)
-            self.assertIsNotNone(total.reportPortfValue)
-            self.assertIsNotNone(total.reportCashBal)
+            self.assertIsNotNone(total.degiro_cash)
+            self.assertIsNotNone(total.total_cash)
+            self.assertIsNotNone(total.free_space_new)
+            self.assertIsNotNone(total.report_portf_value)
+            self.assertIsNotNone(total.report_cash_bal)
 
         async def test_get_portfolio_products_info(self):
             session = await self._login()

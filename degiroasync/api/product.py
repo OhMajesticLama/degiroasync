@@ -257,25 +257,25 @@ class ProductGeneric(ProductBase):
 
 @JSONclass(annotations=True, annotations_type=True)
 class TotalPortfolio:
-    degiroCash: float
-    flatexCash: float
-    totalCash: float
-    totalDepositWithdrawal: float
-    todayDepositWithdrawal: float
-    cashFundCompensationCurrency: str
-    cashFundCompensation: float
-    cashFundCompensationWithdrawn: float
-    todayNonProductFees: float
-    freeSpaceNew: Dict[str, float]  # Currency: value
-    reportMargin: float
-    reportCreationTime: str
-    reportPortfValue: float
-    reportCashBal: float
-    reportNetliq: float
-    reportOverallMargin: float
-    reportTotalLongVal: float
-    reportDeficit: float
-    marginCallStatus: str
+    degiro_cash: float
+    flatex_cash: float
+    total_cash: float
+    total_deposit_withdrawal: float
+    today_deposit_withdrawal: float
+    cash_fund_compensation_currency: str
+    cash_fund_compensation: float
+    cash_fund_compensation_withdrawn: float
+    today_non_product_fees: float
+    free_space_new: Dict[str, float]  # Currency: value
+    report_margin: float
+    report_creation_time: str
+    report_portf_value: float
+    report_cash_bal: float
+    report_netliq: float
+    report_overall_margin: float
+    report_total_long_val: float
+    report_deficit: float
+    margin_call_status: str
     """
     Total Portfolio
 
@@ -325,16 +325,9 @@ async def get_portfolio_total(
 
     total_args = dict_from_attr_list(resp_json['totalPortfolio']['value'],
                                      ignore_error=True)
-    total_portfolio = TotalPortfolio(total_args)
+    total_portfolio = TotalPortfolio(camelcase_dict_to_snake(total_args))
 
     return total_portfolio
-
-# @JSONclass(annotations=True, annotations_type=True)
-# class PriceData:
-#    start: str
-#    end: str
-#    series: List[Dict[str, Union[list, float, str, int]]]
-#    resolution: str
 
 
 @JSONclass(annotations=True, annotations_type=True)

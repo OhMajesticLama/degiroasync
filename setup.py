@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.8.4",
+        version="0.8.5",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
