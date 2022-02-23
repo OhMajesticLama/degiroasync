@@ -107,5 +107,10 @@ class TestDegiroAsyncJoinUrl(unittest.TestCase):
 
     def test_camelcase_dict_to_snake(self):
         d = {'fooBar': 2, 'camelCase': {'camelCase': 1}}
-        out = camelcase_dict_to_snake(d)
+        out = camelcase_dict_to_snake(d, recursive=False)
         self.assertEqual(out, {'foo_bar': 2, 'camel_case': {'camelCase': 1}})
+
+    def test_camelcase_dict_to_snake_recursive(self):
+        d = {'fooBar': 2, 'camelCase': {'camelCase': 1}}
+        out = camelcase_dict_to_snake(d, recursive=True)
+        self.assertEqual(out, {'foo_bar': 2, 'camel_case': {'camel_case': 1}})

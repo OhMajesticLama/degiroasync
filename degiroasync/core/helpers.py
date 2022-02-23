@@ -158,7 +158,8 @@ def camelcase_to_snake(text: str) -> str:
 
 
 def camelcase_dict_to_snake(
-        dict_in: Dict[str, Any]) -> Dict[str, Any]:
+        dict_in: Dict[str, Any],
+        recursive: bool = True) -> Dict[str, Any]:
     """
     Convert keys of dictionary with `str` keys from camelCase to snake_case.
 
@@ -169,11 +170,20 @@ def camelcase_dict_to_snake(
     >>> camelcase_dict_to_snake(d)
     {'foo_bar': 2, 'camel_case': {'camelCase': 1}}
     """
-    return {
-        camelcase_to_snake(k): v
-        #     camelcase_dict_to_snake(v) if isinstance(v, dict) else v
-        for k, v in dict_in.items()
-    }
+    if not recursive:
+        return {
+            camelcase_to_snake(k): v
+            #     camelcase_dict_to_snake(v) if isinstance(v, dict) else v
+            for k, v in dict_in.items()
+        }
+    else:
+        return {
+            camelcase_to_snake(k):
+                camelcase_dict_to_snake(v, recursive=True)
+                    if isinstance(v, dict) else v
+            #     camelcase_dict_to_snake(v) if isinstance(v, dict) else v
+            for k, v in dict_in.items()
+        }
 
 
 def join_url(*sections):
