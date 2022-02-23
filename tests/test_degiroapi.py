@@ -457,7 +457,7 @@ if RUN_INTEGRATION_TESTS:
                 self.assertTrue(hasattr(trans, 'product'))
                 self.assertTrue(hasattr(trans, 'price'))
                 self.assertTrue(hasattr(trans, 'quantity'))
-                self.assertTrue(hasattr(trans, 'fxRate'))
+                self.assertTrue(hasattr(trans, 'fx_rate'))
 
 
 if __name__ == '__main__':

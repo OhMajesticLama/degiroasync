@@ -6,6 +6,7 @@ import asyncio
 import itertools
 
 from jsonloader import JSONclass
+from jsonloader import JSONWrapper
 
 from .product import ProductBase
 from .. import webapi
@@ -13,6 +14,7 @@ from ..core import SessionCore
 from ..core import ORDER
 from ..core import LOGGER_NAME
 from ..core import TRANSACTIONS
+from ..core import camelcase_dict_to_snake
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -49,9 +51,9 @@ class Transaction:
     quantity: float
     total: float
     transfered: bool
-    fxRate: float
-    totalInBaseCurrency: float
-    totalPlusFeeInBaseCurrency: float
+    fx_rate: float
+    total_in_base_currency: float
+    total_plus_fee_in_base_currency: float
 
 
 async def submit_order():
@@ -81,7 +83,7 @@ async def check_order(
         price=price
     )
     resp_json = response.json()
-    return resp_json
+    return JSONWrapper(camelcase_dict_to_snake(resp_json['data']))
 
 
 async def get_orders(
@@ -165,7 +167,7 @@ async def get_transactions(
             buysell={'B': ORDER.ACTION.BUY,
                      'S': ORDER.ACTION.SELL}[trans['buysell']],
         ))
-        return Transaction(trans)
+        return Transaction(camelcase_dict_to_snake(trans))
 
     transactions = await asyncio.gather(*[_build_transaction(p, t)
                                           for p, t in zip(products, data)])
