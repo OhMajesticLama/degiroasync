@@ -94,13 +94,13 @@ class PAClient:
     # {
     #    city = Union[str, None]
     #    country = Union[str, None]
-    #    streetAddress = Union[str, None]
-    #    streetAddressNumber = Union[str, None]
+    #    street_address = Union[str, None]
+    #    street_address_number = Union[str, None]
     #    zip: 83300
     # }
     bank_account: Union[dict, None]
     # {
-    #    bankAccountId = Union[str, None]
+    #    bank_account_id = Union[str, None]
     #    bic = Union[str, None]
     #    iban = Union[str, None]
     #    status: VERIFIED

@@ -29,10 +29,12 @@ This module provides 2 APIs:
   a consumer needs. This is the recommended choice to start.
 - `degiroasync.webapi`: API close to actual Degiro HTTP API. 
   This provides maximum flexibility and data availability, at the cost of
-  accessibility and checks.
+  less checks and more legwork to beused for higher-level logic.
 
 `degiroasync.api` is built on top of `degiroasync.webapi`: it should be easy
-to fall back to `webapi` should the need arise.
+to fall back to `webapi` should the need arise. For example, there is currently
+no call for `confirm_order` in `degiroasync.api` as the `webapi` one is fairly
+straightforward.
 
 
 | Feature             | degiroasync.api    | degiroasync.webapi |
