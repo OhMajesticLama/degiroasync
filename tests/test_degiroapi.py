@@ -294,6 +294,33 @@ if RUN_INTEGRATION_TESTS:
             price_data = await degiroasync.api.get_price_data(session, product)
             LOGGER.debug('test_get_price_data price_data 2| %s',
                          price_data)
+            self.assertGreaterEqual(len(price_data.price), 1)
+            self.assertGreaterEqual(len(price_data.date), 1)
+
+        async def test_get_price_data_symbol_exchange(self):
+            # First get product
+            session = await self._login()
+            symbol = 'FGR'
+            exchange = 'EPA'
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_symbol=symbol,
+                    by_exchange=exchange,
+                    product_type_id=PRODUCT.TYPEID.STOCK)
+            self.assertEqual(len(products), 1)
+            product = products[0]
+            await product.await_product_info()
+            self.assertEqual(symbol, product.info.symbol, product.info)
+
+            price_data = await degiroasync.api.get_price_data(session, product)
+            LOGGER.debug("test_get_price_data| %s", price_data.price)
+            LOGGER.debug("test_get_price_data| %s", price_data.date)
+            self.assertGreaterEqual(len(price_data.price), 1)
+            self.assertGreaterEqual(len(price_data.date), 1)
+
+                # We should only have airbus products here
+                #self.assertTrue('airbus' in product.info.name.lower(),
+                #               product.info)
 
 
         #async def test_get_price_data_bulk(self):

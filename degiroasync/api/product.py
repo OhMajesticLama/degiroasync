@@ -343,33 +343,33 @@ class PriceSeries:
     expires: str
 
 
-class PriceSeriesObject(PriceSeries):
-    """
-
-    Example JSON answer
-
-    """
-# Example JSON Answer
-# {'expires': '2022-02-04T19:31:38.7281028+01:00', 'data': {'issueId': 360114899, 'companyId': 1001, 'name': 'AIRBUS', 'identifier': 'issueid:360114899', 'isin': 'NL0000235190', 'alfa': 'AIR15598', 'market': 'XPAR', 'currency': 'EUR', 'type': 'AAN', 'quality': 'REALTIME', 'lastPrice': 110.32, 'lastTime': '2022-02-04T17:35:13', 'absDiff': -1.32, 'relDiff': -0.01182, 'highPrice': 112.16, 'highTime': '2022-02-04T09:01:36', 'lowPrice': 108.66, 'lowTime': '2022-02-04T14:34:47', 'openPrice': 111.94, 'openTime': '2022-02-04T09:00:12', 'closePrice': 111.94, 'closeTime': '2022-02-04T09:00:12', 'cumulativeVolume': 1209672.0, 'previousClosePrice': 111.64, 'previousCloseTime': '2022-02-03T17:36:47', 'tradingStartTime': '09:00:00', 'tradingEndTime': '17:40:00', 'tradingAddedTime': '00:10:00', 'lowPriceP1Y': 89.54, 'highPriceP1Y': 121.1, 'windowStart': '2022-02-04T00:00:00', 'windowEnd': '2022-02-04T17:35:13', 'windowFirst': '2022-02-04T09:00:00', 'windowLast': '2022-02-04T17:35:00', 'windowHighTime': '2022-02-04T09:01:00', 'windowHighPrice': 112.16, 'windowLowTime': '2022-02-04T14:34:00', 'windowLowPrice': 108.66, 'windowOpenTime': '2022-02-04T09:00:12', 'windowOpenPrice': 111.94, 'windowPreviousCloseTime': '2022-02-03T17:36:47', 'windowPreviousClosePrice': 111.64, 'windowTrend': -0.01182}, 'id': 'issueid:360114899', 'type': 'object'}
-    @JSONclass(annotations=True, annotations_type=True)
-    class Data:
-        issueId: str
-        companyId: Union[int, str]  # Depends on the alignment of planets.
-        name: str
-        currency: str
-        market: str
-        identifier: str
-        isin: str
-        alfa: str
-        openTime: str
-        closetime: str
-        lowTime: str
-        HighTime: str
-        tradingStartTime: str
-        tradingEndTime: str
-        windowPreviousClosePrice: float
-        windowLowPrice: float
-        windowHighPrice: float
+#class PriceSeriesObject(PriceSeries):
+#    """
+#
+#    Example JSON answer
+#
+#    """
+## Example JSON Answer
+## {'expires': '2022-02-04T19:31:38.7281028+01:00', 'data': {'issueId': 360114899, 'companyId': 1001, 'name': 'AIRBUS', 'identifier': 'issueid:360114899', 'isin': 'NL0000235190', 'alfa': 'AIR15598', 'market': 'XPAR', 'currency': 'EUR', 'type': 'AAN', 'quality': 'REALTIME', 'lastPrice': 110.32, 'lastTime': '2022-02-04T17:35:13', 'absDiff': -1.32, 'relDiff': -0.01182, 'highPrice': 112.16, 'highTime': '2022-02-04T09:01:36', 'lowPrice': 108.66, 'lowTime': '2022-02-04T14:34:47', 'openPrice': 111.94, 'openTime': '2022-02-04T09:00:12', 'closePrice': 111.94, 'closeTime': '2022-02-04T09:00:12', 'cumulativeVolume': 1209672.0, 'previousClosePrice': 111.64, 'previousCloseTime': '2022-02-03T17:36:47', 'tradingStartTime': '09:00:00', 'tradingEndTime': '17:40:00', 'tradingAddedTime': '00:10:00', 'lowPriceP1Y': 89.54, 'highPriceP1Y': 121.1, 'windowStart': '2022-02-04T00:00:00', 'windowEnd': '2022-02-04T17:35:13', 'windowFirst': '2022-02-04T09:00:00', 'windowLast': '2022-02-04T17:35:00', 'windowHighTime': '2022-02-04T09:01:00', 'windowHighPrice': 112.16, 'windowLowTime': '2022-02-04T14:34:00', 'windowLowPrice': 108.66, 'windowOpenTime': '2022-02-04T09:00:12', 'windowOpenPrice': 111.94, 'windowPreviousCloseTime': '2022-02-03T17:36:47', 'windowPreviousClosePrice': 111.64, 'windowTrend': -0.01182}, 'id': 'issueid:360114899', 'type': 'object'}
+#    @JSONclass(annotations=True, annotations_type=True)
+#    class Data:
+#        issueId: str
+#        companyId: Union[int, str]  # Depends on the alignment of planets.
+#        name: str
+#        currency: str
+#        market: str
+#        identifier: str
+#        isin: str
+#        alfa: str
+#        openTime: str
+#        closetime: str
+#        lowTime: str
+#        HighTime: str
+#        tradingStartTime: str
+#        tradingEndTime: str
+#        windowPreviousClosePrice: float
+#        windowLowPrice: float
+#        windowHighPrice: float
 
 
 @JSONclass(annotations=True, annotations_type=True)
@@ -378,7 +378,8 @@ class PriceSeriesTime:
     Converted Wrapper for PriceSeriestime for get_price_data.
     """
     times: str
-    data: Dict[str, List[Union[float, str]]]
+    price: List[float]
+    date: List[str]
     expires: str
 
 
@@ -427,6 +428,9 @@ async def get_price_data(
     if timeseries_ind < 0:
         raise ResponseError("No 'time' series found in answer.")
     converted_time_series = convert_time_series(resp_json['series'][ind])
+    converted_time_series['date'] = converted_time_series['data']['date']
+    converted_time_series['price'] = converted_time_series['data']['price']
+    del converted_time_series['data']
     return PriceSeriesTime(converted_time_series)
 
 
