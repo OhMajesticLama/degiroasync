@@ -60,17 +60,37 @@ async def submit_order():
     raise NotImplementedError
 
 
-@functools.wraps(webapi.check_order)
 async def check_order(
         session: SessionCore,
         *,
         product: ProductBase,
-        buy_sell: str,
+        buy_sell: ORDER.ACTION,
         time_type: ORDER.TIME,
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
 ) -> Any:
+    """
+    This must be called to obtain a confirmation_id prior to confirming an
+    order.
+
+    This can also be used to get an order fees before confirming the order.
+
+    >>>> ... # Get your products through search_product
+    >>>> check_order(
+    ...     product=product,
+    ...     buy_sell=ORDER.ACTION.SELL,
+    ...     time_type=ORDER.TIME,
+    ...     order_type=ORDER.TYPE,
+    ...     size=1,
+    ...     price=100
+    ... )
+    ...
+
+    This call is rate limited at the end-point level, tests would show the
+    call to be rate limited at 1 per second. Users should throttle their calls
+    to this function.
+    """
     assert buy_sell in ("BUY", "SELL")
 
     response = await webapi.check_order(
