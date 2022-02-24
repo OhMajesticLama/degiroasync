@@ -43,7 +43,7 @@ if __name__ == '__main__':
             ],
         extras_require={
             'dev': [
-                'nose2 >= 0.10.0',
+                'pytest >= 7.0.1',
                 'mypy >= 0.931',
                 'coverage >= 6.3',
                 'build >= 0.7.0',
@@ -58,6 +58,6 @@ if __name__ == '__main__':
             "Operating System :: OS Independent",
             "Development Status :: 2 - Pre-Alpha"
         ],
-        test_suite='nose2.collector',
-        tests_require=['nose2']
+        test_suite='pytest',
+        tests_require=['pytest']
     )
