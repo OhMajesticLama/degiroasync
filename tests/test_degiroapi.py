@@ -7,6 +7,7 @@ import asyncio
 import unittest.mock
 import sys
 import datetime
+from unittest.mock import MagicMock
 
 
 import degiroasync
@@ -14,9 +15,8 @@ import degiroasync.webapi
 import degiroasync.api
 import degiroasync.core
 import degiroasync.core.helpers
-from degiroasync.core import Credentials
-from degiroasync.core import SessionCore
 from degiroasync.core import join_url
+from degiroasync.core import SessionCore
 from degiroasync.core.helpers import set_params
 from degiroasync.core.helpers import camelcase_to_snake
 from degiroasync.core.helpers import camelcase_dict_to_snake
@@ -26,7 +26,8 @@ from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
 from degiroasync.api.product import convert_time_series
-from degiroasync.api import ProductBase
+#from degiroasync.api import ProductBase
+from degiroasync.api import Product
 from degiroasync.api import Stock
 from degiroasync.api import Currency
 from degiroasync.api import Order
@@ -185,6 +186,45 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(country.region.name, 'Europe')
 
 
+class TestProduct(unittest.IsolatedAsyncioTestCase):
+    """
+    Local tests for Product.
+    """
+    @unittest.mock.patch('degiroasync.webapi.get_products_info')
+    async def test_product(self, wapi_prodinfo_m):
+        # Mock get_products_info
+        resp = MagicMock()
+        resp.json = MagicMock(return_value={'data': {
+            '123': {
+                'id': '123',
+                'productTypeId': PRODUCT.TYPEID.STOCK,
+                'name': 'foo',
+                'symbol': 'FOO',
+                'currency': 'EUR',
+                'exchangeId': 'exid',
+            }
+            }})
+        wapi_prodinfo_m.return_value = resp
+
+        session = MagicMock()  # Don't care
+
+        # Test that degiroasync.api returns properly initiated products
+        products_gen = Product.init_batch(
+                session,
+                (
+                    {
+                        'id': '123',
+                        'additional': 123,
+                        'product_type_id': PRODUCT.TYPEID.STOCK
+                    },
+                ))
+        products = [p async for p in products_gen]
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0].base.id, '123')
+        self.assertEqual(products[0].info.name, 'foo')
+        self.assertEqual(products[0].info.symbol, 'FOO')
+
+
 #####################
 # Integration tests #
 #####################
@@ -240,7 +280,6 @@ if RUN_INTEGRATION_TESTS:
                     "fail. Otherwise: this is an issue to be fixed.")
             for product in products:
                 self.assertIsNotNone(product.base.id)
-                await product.await_product_info()
                 LOGGER.debug("test_get_portfolio_products_info2: %s",
                              pprint.pformat(product.info))
                 self.assertNotEqual(product.info, None)
@@ -265,7 +304,8 @@ if RUN_INTEGRATION_TESTS:
             # build the pipeline by awaiting on each product instead of a bulk
             # gather to not block execution while we wait for data on some
             # of the products.
-            await asyncio.gather(*[p.await_product_info() for p in products])
+            #await asyncio.gather(*[p.await_product_info() for p in products])
+            #products = [p async for p in products_gen]
             self.assertGreaterEqual(len(products), 1)
 
             LOGGER.debug('test_get_price_data products| %s',
@@ -309,7 +349,6 @@ if RUN_INTEGRATION_TESTS:
                     product_type_id=PRODUCT.TYPEID.STOCK)
             self.assertEqual(len(products), 1)
             product = products[0]
-            await product.await_product_info()
             self.assertEqual(symbol, product.info.symbol, product.info)
 
             price_data = await degiroasync.api.get_price_data(session, product)
@@ -346,7 +385,6 @@ if RUN_INTEGRATION_TESTS:
                     by_isin=isin)
             self.assertGreaterEqual(len(products), 1)
             for product in products:
-                await product.await_product_info()
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
 
@@ -357,7 +395,6 @@ if RUN_INTEGRATION_TESTS:
                                                             by_symbol=symbol)
             self.assertGreaterEqual(len(products), 1)
             for product in products:
-                await product.await_product_info()
                 self.assertEqual(symbol, product.info.symbol, product.info)
                 # We should only have airbus products here
                 #self.assertTrue('airbus' in product.info.name.lower(),
@@ -371,7 +408,6 @@ if RUN_INTEGRATION_TESTS:
                                                             by_exchange='EPA')
             self.assertGreaterEqual(len(products), 1)
             for product in products:
-                await product.await_product_info()
                 # We should only have airbus products here
                 self.assertTrue('general electric' in product.info.name.lower())
 
@@ -381,7 +417,6 @@ if RUN_INTEGRATION_TESTS:
                     by_text='airbus')
             self.assertGreaterEqual(len(products), 1)
             for product in products:
-                await product.await_product_info()
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
 
@@ -398,7 +433,6 @@ if RUN_INTEGRATION_TESTS:
             # work.
             self.assertEqual(len(products), 1)
             for product in products:
-                await product.await_product_info()
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
 
@@ -460,6 +494,6 @@ if RUN_INTEGRATION_TESTS:
                 self.assertTrue(hasattr(trans, 'fx_rate'))
 
 
-if __name__ == '__main__':
-    import nose2
-    nose2.main()
+#if __name__ == '__main__':
+#    import nose2
+#    nose2.main()

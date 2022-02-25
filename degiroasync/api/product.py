@@ -1,7 +1,9 @@
 from typing import Iterable, Any, List, Dict, Tuple, Union, ForwardRef, AnyStr
+from typing import Optional, AsyncGenerator
 import logging
 import pprint
 import asyncio
+import itertools
 import datetime
 try:
     from enum import StrEnum
@@ -34,54 +36,28 @@ from .session import check_session_exchange_dictionary
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 
-class ProductsInfo:
-    def __init__(self, session: SessionCore, products_ids: List[str]):
-        "Takes a non-awaited get_products_info call."
-        self.__awaitable = webapi.get_products_info(session,
-                                                    list(set(products_ids)))
-        self.__response = None
-        self.__awaitable_lock = asyncio.Lock()
-
-    async def get_response(self, product_id: Union[None, str] = None) -> Dict:
-        """
-        Return products_info for `product_id`, or all available products
-        if None is passed.
-        """
-        async with self.__awaitable_lock:
-            if self.__response is None:
-                resp = await self.__awaitable
-                self.__awaitable = None
-                helpers.check_response(resp)
-                self.__response = resp.json()
-                import pprint
-                LOGGER.debug("ProductsInfo.get_response: %s",
-                             pprint.pformat(self.__response))
-
-        if product_id is None:
-            return self.__response['data']
-        else:
-            return self.__response['data'][product_id]
-
-    async def terminate(self):
-        """
-        This method should be awaited when destroying the object for a clean
-        close.
-        """
-        if self.__response is None:
-            async with self.__awaitable_lock:
-                await self.__awaitable
-        return None
-
-
-class ProductBase:
+class Product:
+    # Initial implementation of ProductBase included deferred populating of
+    # Info to allow client for performance optimizations (e.g. use
+    # products before we have received an answer to the Info query).
+    # Low availability of guaranteed attributes at ProductBase.Base highlighted
+    # this solution to be impractical (need to await .await_product_info for
+    # every product) versus little gain as client consistently needed Info
+    # data to be able to either reuse and take a decision about the product.
+    #
+    # This second implementation cuts the optimisation opportunity to only
+    # leverage Base information to make it easier to use and reduce risk for
+    # client to trip downstream by forgetting to await product Info.
     @JSONclass(annotations=True, annotations_type=True)
     class Base:
+        # Attributes provided to init_batch will be populated on base
+        # attributte.
         id: str
-        product_type_id: int
 
+    @JSONclass(annotations=True, annotations_type=True)
     class Info:
         """
-        Must be overwritten and/or subclassed by subclasses of ProductBase.
+        Must be overwritten and/or subclassed by subclasses of Product.
         """
         name: str
         symbol: str
@@ -89,78 +65,31 @@ class ProductBase:
         exchange_id: str
         product_type_id: int
     base: Base
-    info: Union[None, Info] = None
+    info: Optional[Info] = None
 
-    def __init__(
-            self, *,
-            _product_info: ProductsInfo,
-            **attributes: Dict[str, Any]):
+    def __init__(self, *, force_init: bool = False):
         """
-        Consider using `Product.init_bulk` to instantiate Products:
-        API endpoint provides bulk request, batching will speed up your
-        requests.
+        Product should not be instantiatied directly, but instantiated
+        through the `Product.init_batch` factory. This allows to leverage
+        batches of Degiro APIs and relevant speciliazation.
 
-        id: str
-            `id` is `id` attribute as returned by DegiroAPI. It is used
-            to query Degiro endpoints for this product.
-        """
-        self.base = self.Base(camelcase_dict_to_snake(attributes))
-        self.__product_info_batch = _product_info
-        self.__product_info = None
+        Batching your requests will improve performance and lower
+        load on endpoint.
 
-    @staticmethod
-    def init_product(
-            *,
-            _product_info: ProductsInfo,
-            product_type_id: Union[int, None] = None,
-            **attributes: Dict[str, Any]):
+        force_init:
+            If this is set to True, allow init of product. Use only if you know
+            what you're doing.
         """
-        Initialize adequate product specialization based on productTypeId.
-        Default to ProductGeneric if no specialized implementation found for
-        provided productTypeId.
-        """
-        params = dict(product_type_id=product_type_id, **attributes)
-        LOGGER.debug("api.ProductBase.init_product| attributes %s", attributes)
-        # Some attributes are not returned in a consistent way.
-        # Manually fix the most important of them
-        force_types = (('id', str),)
-        for attr, loader in force_types:
-            if attr in params:
-                params[attr] = loader(params[attr])
-
-        cls = {
-            PRODUCT.TYPEID.CURRENCY: Currency,
-            PRODUCT.TYPEID.STOCK: Stock
-        }.get(
-            product_type_id,
-            ProductGeneric
-        )
-        LOGGER.debug("api.ProductBase.init_product| class %s", cls)
-        return cls(_product_info=_product_info,
-                   **params)
-
-    async def await_product_info(self) -> None:
-        """
-        Ensure we have received product_info attributes by awaiting this
-        method.
-        """
-        if self.__product_info is None:
-            self.__product_info = await self.__product_info_batch.get_response(
-                self.base.id)
-            LOGGER.debug("ProductsInfo.await_product_info: %s",
-                         self.__product_info)
-            self.info = self.Info(camelcase_dict_to_snake(self.__product_info))
-            # Unreference batch when we don't need it anymore
-            self.__product_info_batch = None
-        return
+        if not force_init:
+            raise NotImplementedError("Please use ProductBase.init_batch.")
 
     @classmethod
-    def init_bulk(
+    async def init_batch(
             cls,
             session: SessionCore,
             attributes_iter: Iterable[Dict[str, Any]],
-            batch_size=50
-    ) -> List[ForwardRef('ProductBase')]:
+            size=50
+    ) -> AsyncGenerator[ForwardRef('Product'), None]:
         """
         Bulk init Product instances.
 
@@ -168,49 +97,114 @@ class ProductBase:
         for Products.
 
         attributes_iter:
-            Base attributes for products, at the minimum must contains 'id'
+            At the minimum must provides 'id' and 'product_type_id'.
+            All attributes provided will be set to the Product.base
+            oject.
 
-        Returns a List of Product instances
+        Returns an iterable of Product instances
+
+        >>>> import asyncio
+        >>>> products_attrs = (
+        ....             {'id': 1, 'product_type_id': PRODUCT.TYPEID.STOCK},
+        ....             {'id': 2, 'product_type_id': PRODUCT.TYPEID.STOCK},
+        ....             {'id': 3, 'product_type_id': PRODUCT.TYPEID.STOCK},
+        ....     )
+        >>>> products_gen = Product.init_batch(session, products_attrs)
+        >>>> # At this stage, we have an awaitable for each product.
+        >>>> # All products information may not be available at the same time
+        >>>> # if init_batch was provided more products than the `size`
+        >>>> # parameter.
+        >>>> products = [p async for p in products_gen]
         """
-        instances = []
         attributes_batch = []
+        batches_awt = []
 
         for ind, attributes in enumerate(attributes_iter, 1):
+            # Check that minimum keys are in attributes
+            attributes = camelcase_dict_to_snake(attributes)
+            Product.Base(attributes)
             attributes_batch.append(attributes)
-            if ind % batch_size == 0:
+            if ind % size == 0:
                 products_batch = cls._create_batch(session, attributes_batch)
-                instances.extend(products_batch)
+                batches_awt.append(products_batch)
                 attributes_batch.clear()
 
         if len(attributes_batch):
-            instances.extend(cls._create_batch(session, attributes_batch))
-        return instances
+            batches_awt.append(cls._create_batch(session, attributes_batch))
+        for batch_awt in batches_awt:
+            batch = await batch_awt
+            for product in batch:
+                yield product
 
-    @staticmethod
-    def _create_batch(
+        #return itertools.chain(*(await b for b in batches_awt))
+
+    @classmethod
+    async def _create_batch(
+            cls,
             session: SessionCore,
             attributes_batch: Iterable[Dict[str, Any]]
-    ) -> Iterable[ForwardRef('ProductBase')]:
+    ) -> Iterable[ForwardRef('Product')]:
         """
         Create Products and their common ProductsInfo.
         Returns an Iterable of Product instances.
         """
-        ids_batch = [attrs['id'] for attrs in attributes_batch]
-        products_info_batch = ProductsInfo(session, ids_batch)
+        attributes_batch, attributes_batch2 = itertools.tee(attributes_batch)
 
-        products_batch = map(
-            lambda attrs: ProductBase.init_product(
-                _product_info=products_info_batch,
-                **camelcase_dict_to_snake(attrs)),
-            attributes_batch)
-        return products_batch
+        ids_batch = (attrs['id'] for attrs in attributes_batch)
+        del attributes_batch
+        ids_batch = list(set(ids_batch))  # no duplicate.
+        resp = await webapi.get_products_info(session, ids_batch)
+        products_info = camelcase_dict_to_snake(resp.json())
+        # Info is in ['data'][product_id]
+        products_info = products_info['data']
+
+        return cls.__products_from_attrs(
+            attributes_batch2,
+            products_info
+                )
+
+    @classmethod
+    def __products_from_attrs(
+            cls,
+            products_base_iter: Iterable[Dict[str, Any]],
+            products_info: Dict[str, Any]):
+        """
+        Instantiate products from attributes and product_info.
+        """
+        products_dict = {}
+
+        # Instantiate products
+        for product_base in products_base_iter:
+            product_id = product_base['id']
+            if product_id in products_dict:
+                instance = products_dict[product_id]
+            else:
+                #info = products_inf[product_base['id']]
+                info = cls.Info(camelcase_dict_to_snake(
+                    products_info[product_base['id']]))
+                product_type_id = info.product_type_id
+                #product_type_id = product_base.get('product_type_id', None)
+                # Get specialized class if there is one implemented
+                inst_cls = {
+                    PRODUCT.TYPEID.CURRENCY: Currency,
+                    PRODUCT.TYPEID.STOCK: Stock
+                }.get(
+                    product_type_id,
+                    ProductGeneric
+                )
+                LOGGER.debug(
+                        "api.Product.init_product| type_id %s class %s",
+                        product_type_id, cls)
+                instance = inst_cls(force_init=True)
+                instance.base = inst_cls.Base(product_base)
+                instance.info = info
+                products_dict[product_id] = instance
+            yield instance
 
 
-class Currency(ProductBase):
-    @JSONclass(annotations=True, annotations_type=True)
-    class Info(ProductBase.Info):
+class Currency(Product):
+    class Info(Product.Info):
         "Store Info calls return."
-        # Must await .await_product_info() before use
         isin: str
         symbol: str
         name: str
@@ -219,11 +213,9 @@ class Currency(ProductBase):
         tradable: bool
 
 
-class Stock(ProductBase):
-    @JSONclass(annotations=True, annotations_type=True)
-    class Info(ProductBase.Info):
+class Stock(Product):
+    class Info(Product.Info):
         "Store Info calls return."
-        # Must await .await_product_info() before use
         isin: str
         symbol: str
         name: str
@@ -239,16 +231,13 @@ class Stock(ProductBase):
         VWDKEY = 'vwdkey'
 
 
-class ProductGeneric(ProductBase):
-    @JSONclass(annotations=True, annotations_type=True)
+class ProductGeneric(Product):
     class Base:
         id: str
         product_type_id: Union[None, int]  # sometimes not returned by API.
 
-    @JSONclass(annotations=True, annotations_type=True)
-    class Info(ProductBase.Info):
+    class Info(Product.Info):
         "Store Info calls return."
-        # Must await .await_product_info() before use
         isin: str
         symbol: str
         name: str
@@ -288,7 +277,7 @@ class TotalPortfolio:
 
 async def get_portfolio(
         session: SessionCore
-) -> Iterable[ProductBase]:
+) -> List[Product]:
     """
     Returns Products in portfolio. Refer to  `Products` classes for minimum
     available attributes.
@@ -303,9 +292,9 @@ async def get_portfolio(
                        for v in portf_json]
     LOGGER.debug("api.get_portfolio| %s", pprint.pformat(portf_dict_json))
 
-    portfolio = ProductBase.init_bulk(session, portf_dict_json)
+    portfolio = Product.init_batch(session, portf_dict_json)
 
-    return portfolio
+    return [p async for p in portfolio]
 
 
 async def get_portfolio_total(
@@ -334,35 +323,6 @@ async def get_portfolio_total(
 class PriceSeries:
     type: str
     expires: str
-
-
-#class PriceSeriesObject(PriceSeries):
-#    """
-#
-#    Example JSON answer
-#
-#    """
-## Example JSON Answer
-## {'expires': '2022-02-04T19:31:38.7281028+01:00', 'data': {'issueId': 360114899, 'companyId': 1001, 'name': 'AIRBUS', 'identifier': 'issueid:360114899', 'isin': 'NL0000235190', 'alfa': 'AIR15598', 'market': 'XPAR', 'currency': 'EUR', 'type': 'AAN', 'quality': 'REALTIME', 'lastPrice': 110.32, 'lastTime': '2022-02-04T17:35:13', 'absDiff': -1.32, 'relDiff': -0.01182, 'highPrice': 112.16, 'highTime': '2022-02-04T09:01:36', 'lowPrice': 108.66, 'lowTime': '2022-02-04T14:34:47', 'openPrice': 111.94, 'openTime': '2022-02-04T09:00:12', 'closePrice': 111.94, 'closeTime': '2022-02-04T09:00:12', 'cumulativeVolume': 1209672.0, 'previousClosePrice': 111.64, 'previousCloseTime': '2022-02-03T17:36:47', 'tradingStartTime': '09:00:00', 'tradingEndTime': '17:40:00', 'tradingAddedTime': '00:10:00', 'lowPriceP1Y': 89.54, 'highPriceP1Y': 121.1, 'windowStart': '2022-02-04T00:00:00', 'windowEnd': '2022-02-04T17:35:13', 'windowFirst': '2022-02-04T09:00:00', 'windowLast': '2022-02-04T17:35:00', 'windowHighTime': '2022-02-04T09:01:00', 'windowHighPrice': 112.16, 'windowLowTime': '2022-02-04T14:34:00', 'windowLowPrice': 108.66, 'windowOpenTime': '2022-02-04T09:00:12', 'windowOpenPrice': 111.94, 'windowPreviousCloseTime': '2022-02-03T17:36:47', 'windowPreviousClosePrice': 111.64, 'windowTrend': -0.01182}, 'id': 'issueid:360114899', 'type': 'object'}
-#    @JSONclass(annotations=True, annotations_type=True)
-#    class Data:
-#        issueId: str
-#        companyId: Union[int, str]  # Depends on the alignment of planets.
-#        name: str
-#        currency: str
-#        market: str
-#        identifier: str
-#        isin: str
-#        alfa: str
-#        openTime: str
-#        closetime: str
-#        lowTime: str
-#        HighTime: str
-#        tradingStartTime: str
-#        tradingEndTime: str
-#        windowPreviousClosePrice: float
-#        windowLowPrice: float
-#        windowHighPrice: float
 
 
 @JSONclass(annotations=True, annotations_type=True)
@@ -398,7 +358,6 @@ async def get_price_data(
         raise NotImplementedError(
             "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
             "supported by get_price_data")
-    await product.await_product_info()
     resp = await webapi.get_price_data(
         session,
         vwdId=product.info.vwd_id,
@@ -500,7 +459,7 @@ def convert_time_series(
 
 async def get_price_data_batch(
         session: SessionCore,
-        products: Union[Iterable[ProductBase], ProductBase],
+        products: Union[Iterable[Product], Product],
         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
         period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
         timezone: str = 'Europe/Paris',
@@ -513,7 +472,7 @@ async def get_price_data_batch(
     >>>>
     """
     raise NotImplementedError  # Add helper around _get_price_data
-    if isinstance(products, ProductBase):
+    if isinstance(products, Product):
         products = [products]
 
     for product in products:
@@ -522,7 +481,6 @@ async def get_price_data_batch(
             raise NotImplementedError(
                 "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
                 "supported by get_price_data_bulk")
-        await product.await_product_info()
         vwdId = product.vwdId
         prices_req.append(webapi.get_price_data(
             session,
@@ -542,7 +500,7 @@ async def search_product(
         by_symbol: Union[str, None] = None,
         by_exchange: Union[str, Exchange, None] = None,
         product_type_id: Union[PRODUCT.TYPEID, None] = PRODUCT.TYPEID.STOCK,
-        max_iter: Union[int, None] = 1000) -> List[ProductBase]:
+        max_iter: Union[int, None] = 1000) -> List[Product]:
     """
     Access `product_search` endpoint.
 
@@ -616,9 +574,10 @@ async def search_product(
             products_json = resp_json['products']
             LOGGER.debug("api.search_product n_products| %s",
                          products_json)
-            batch = ProductBase.init_bulk(session,
-                                          filter(__custom_filter,
-                                                 products_json))
+            batch_gen = Product.init_batch(session,
+                                      filter(__custom_filter,
+                                             products_json))
+            batch = [p async for p in batch_gen]
             # This could be optimized later on with a generator class to be
             # able to yield data as soon as we receive it while still not
             # blocking further calls to be launched, should it be needed.
@@ -647,8 +606,8 @@ __all__ = [
         # PriceData,
         Stock,
         Currency,
-        ProductBase,
-
+        #ProductBase,
+        Product,
         get_portfolio,
         get_price_data,
         search_product

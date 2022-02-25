@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import List, Dict, Any, Iterable, Callable, Union, Coroutine
+from typing import Optional
 import logging
 import sys
 import concurrent.futures
@@ -18,6 +19,23 @@ from .constants import LOGGER_NAME
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
+#from aio_throttle import Throttler
+#
+#
+#def throttle(
+#        func: Optional[Callable] = None,
+#        capacity_limit: int,
+#        queue_limit: int = 0,
+#	consumer_quotas: Union[List[aio_throttle.quotas.ThrottleCapacityQuota[str]], NoneType] = None,
+#    	priority_quotas: Union[List[aio_throttle.quotas.ThrottleCapacityQuota[aio_throttle.base.ThrottlePriority]], NoneType] = None,
+#    	quotas: Union[List[aio_throttle.quotas.ThrottleQuota], NoneType] = None,
+#        **kwargs
+#        ):
+#    if func is None:
+#        return lambda f: throttle(f, **kwargs)
+#    else:
+#        throttler = Throttler()
+#        pass
 
 class ResponseError(Exception):
     "Raised when bad response has been received from server."

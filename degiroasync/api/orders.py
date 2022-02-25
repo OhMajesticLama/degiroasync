@@ -8,7 +8,8 @@ import itertools
 from jsonloader import JSONclass
 from jsonloader import JSONWrapper
 
-from .product import ProductBase
+#from .product import ProductBase
+from .product import Product
 from .. import webapi
 from ..core import SessionCore
 from ..core import ORDER
@@ -44,7 +45,7 @@ class Order:
 @JSONclass(annotations=True, annotations_type=True)
 class Transaction:
     id: str
-    product: ProductBase
+    product: Product
     date: datetime.datetime
     buysell: ORDER.ACTION
     price: float
@@ -63,7 +64,7 @@ async def submit_order():
 async def check_order(
         session: SessionCore,
         *,
-        product: ProductBase,
+        product: Product,
         buy_sell: ORDER.ACTION,
         time_type: ORDER.TIME,
         order_type: ORDER.TYPE,
@@ -174,12 +175,13 @@ async def get_transactions(
         to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT)
     )
     data = resp.json()['data'].copy()
-    products = ProductBase.init_bulk(
+    products_gen = Product.init_batch(
         session,
         map(lambda t: {'id': str(t['productId'])}, data))
+    products = [p async for p in products_gen]
+    del products_gen
 
     async def _build_transaction(prod, trans):
-        await prod.await_product_info()
         trans.update(dict(
             id=str(trans['id']),
             product=prod,
@@ -192,18 +194,3 @@ async def get_transactions(
     transactions = await asyncio.gather(*[_build_transaction(p, t)
                                           for p, t in zip(products, data)])
     return transactions
-    # for prod, trans in zip(products, data):
-    # await prod.await_product_info()
-    # trans.update(dict(
-    #    id=str(trans['id']),
-    #    product=prod,
-    #    date=datetime.datetime.strptime(trans['date']),
-    #    buysell={'B': ORDER.ACTION.BUY,
-    #             'S': ORDER.ACTION.SELL}[trans['buysell']],
-    #    counterParty={
-    #        'MK': TRANSACTIONS.COUNTERPARTY.MARKET,
-    #        'GR': TRANSACTIONS.COUNTERPARTY.GROUP,
-    #        'DG': TRANSACTIONS.COUNTERPARTY.DEGIRO
-    #        }
-    #        ))
-    #transaction = Transaction(trans)

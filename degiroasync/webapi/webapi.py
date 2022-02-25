@@ -565,7 +565,7 @@ async def get_products_info(
             LOGGER.error('get_products_info error| %s', response.json())
             raise
         LOGGER.debug('get_products_info|', response.json())
-        return response
+    return response
 
 
 async def get_company_profile(

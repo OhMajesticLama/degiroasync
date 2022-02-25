@@ -239,7 +239,6 @@ if RUN_INTEGRATION_TESTS:
             self.assertEqual(len(products), 1,
                              "We should only have one product here")
             product = products[0]
-            await product.await_product_info()
             # Reminder: typeId = 1 is STOCK
             LOGGER.debug("test_check_order| product: %s . %s . %s . %s",
                          product.info.symbol,
