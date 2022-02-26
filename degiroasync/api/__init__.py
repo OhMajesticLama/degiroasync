@@ -16,7 +16,8 @@ from .product import search_product
 from .product import Stock
 from .product import Currency
 #from .product import ProductBase
-from .product import Product
+from .product import ProductBase
+from .product import ProductFactory
 from .product import ProductGeneric
 from .product import PriceSeriesTime
 from .product import TotalPortfolio
@@ -42,8 +43,7 @@ __all__ = [obj.__name__ for obj in (
     PriceSeriesTime,
     Stock,
     Currency,
-#    ProductBase,
-    Product,
+    ProductBase,
     ProductGeneric,
 
     get_portfolio,

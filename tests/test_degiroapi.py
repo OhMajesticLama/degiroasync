@@ -26,8 +26,8 @@ from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
 from degiroasync.webapi import get_news_by_company
 from degiroasync.api.product import convert_time_series
-#from degiroasync.api import ProductBase
-from degiroasync.api import Product
+from degiroasync.api import ProductBase
+from degiroasync.api import ProductFactory
 from degiroasync.api import Stock
 from degiroasync.api import Currency
 from degiroasync.api import Order
@@ -211,7 +211,7 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         session = MagicMock()  # Don't care
 
         # Test that degiroasync.api returns properly initiated products
-        products_gen = Product.init_batch(
+        products_gen = ProductFactory.init_batch(
                 session,
                 (
                     {
@@ -245,7 +245,7 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         wapi_prodinfo_m.return_value = resp
 
         # Test that degiroasync.api returns properly initiated products
-        products_gen = Product.init_batch(
+        products_gen = ProductFactory.init_batch(
                 MagicMock(),  # Don't care about session here
                 [
                     {

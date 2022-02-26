@@ -8,8 +8,8 @@ import itertools
 from jsonloader import JSONclass
 from jsonloader import JSONWrapper
 
-#from .product import ProductBase
-from .product import Product
+from .product import ProductBase
+from .product import ProductFactory
 from .. import webapi
 from ..core import SessionCore
 from ..core import ORDER
@@ -45,7 +45,7 @@ class Order:
 @JSONclass(annotations=True, annotations_type=True)
 class Transaction:
     id: str
-    product: Product
+    product: ProductBase
     date: datetime.datetime
     buysell: ORDER.ACTION
     price: float
@@ -64,7 +64,7 @@ async def submit_order():
 async def check_order(
         session: SessionCore,
         *,
-        product: Product,
+        product: ProductBase,
         buy_sell: ORDER.ACTION,
         time_type: ORDER.TIME,
         order_type: ORDER.TYPE,
@@ -175,7 +175,7 @@ async def get_transactions(
         to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT)
     )
     data = resp.json()['data'].copy()
-    products_gen = Product.init_batch(
+    products_gen = ProductFactory.init_batch(
         session,
         map(lambda t: {'id': str(t['productId'])}, data))
     products = [p async for p in products_gen]

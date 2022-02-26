@@ -36,53 +36,7 @@ from .session import check_session_exchange_dictionary
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 
-class Product:
-    # Initial implementation of ProductBase included deferred populating of
-    # Info to allow client for performance optimizations (e.g. use
-    # products before we have received an answer to the Info query).
-    # Low availability of guaranteed attributes at ProductBase.Base highlighted
-    # this solution to be impractical (need to await .await_product_info for
-    # every product) versus little gain as client consistently needed Info
-    # data to be able to either reuse and take a decision about the product.
-    #
-    # This second implementation cuts the optimisation opportunity to only
-    # leverage Base information to make it easier to use and reduce risk for
-    # client to trip downstream by forgetting to await product Info.
-    @JSONclass(annotations=True, annotations_type=True)
-    class Base:
-        # Attributes provided to init_batch will be populated on base
-        # attributte.
-        id: str
-
-    @JSONclass(annotations=True, annotations_type=True)
-    class Info:
-        """
-        Must be overwritten and/or subclassed by subclasses of Product.
-        """
-        name: str
-        symbol: str
-        currency: str
-        exchange_id: str
-        product_type_id: int
-    base: Base
-    info: Info
-
-    def __init__(self, *, force_init: bool = False):
-        """
-        Product should not be instantiatied directly, but instantiated
-        through the `Product.init_batch` factory. This allows to leverage
-        batches of Degiro APIs and relevant speciliazation.
-
-        Batching your requests will improve performance and lower
-        load on endpoint.
-
-        force_init:
-            If this is set to True, allow init of product. Use only if you know
-            what you're doing.
-        """
-        if not force_init:
-            raise NotImplementedError("Please use ProductBase.init_batch.")
-
+class ProductFactory:
     @classmethod
     async def init_batch(
             cls,
@@ -109,7 +63,7 @@ class Product:
         ....             {'id': 2, 'product_type_id': PRODUCT.TYPEID.STOCK},
         ....             {'id': 3, 'product_type_id': PRODUCT.TYPEID.STOCK},
         ....     )
-        >>>> products_gen = Product.init_batch(session, products_attrs)
+        >>>> products_gen = ProductFactory.init_batch(session, products_attrs)
         >>>> # At this stage, we have an awaitable for each product.
         >>>> # All products information may not be available at the same time
         >>>> # if init_batch was provided more products than the `size`
@@ -122,7 +76,7 @@ class Product:
         for ind, attributes in enumerate(attributes_iter, 1):
             # Check that minimum keys are in attributes
             attributes = camelcase_dict_to_snake(attributes)
-            Product.Base(attributes)
+            ProductBase.Base(attributes)
             attributes_batch.append(attributes)
             if ind % size == 0:
                 LOGGER.debug("init_batch| attributes_batch %s",
@@ -145,7 +99,7 @@ class Product:
             cls,
             session: SessionCore,
             attributes_batch: Iterable[Dict[str, Any]]
-    ) -> Iterable[ForwardRef('Product')]:
+    ) -> Iterable[ForwardRef('ProductBase')]:
         """
         Create Products and their common ProductsInfo.
         Returns an Iterable of Product instances.
@@ -200,7 +154,7 @@ class Product:
                     ProductGeneric
                 )
                 LOGGER.debug(
-                        "api.Product.init_product| type_id %s class %s",
+                        "api.ProductFactory.init_product| type_id %s class %s",
                         product_type_id, inst_cls)
                 info = inst_cls.Info(camelcase_dict_to_snake(
                     products_info[product_id]))
@@ -211,8 +165,57 @@ class Product:
             yield instance
 
 
-class Currency(Product):
-    class Info(Product.Info):
+class ProductBase:
+    # Initial implementation of ProductBase included deferred populating of
+    # Info to allow client for performance optimizations (e.g. use
+    # products before we have received an answer to the Info query).
+    # Low availability of guaranteed attributes at ProductBase.Base highlighted
+    # this solution to be impractical (need to await .await_product_info for
+    # every product) versus little gain as client consistently needed Info
+    # data to be able to either reuse and take a decision about the product.
+    #
+    # This second implementation cuts the optimisation opportunity to only
+    # leverage Base information to make it easier to use and reduce risk for
+    # client to trip downstream by forgetting to await product Info.
+    @JSONclass(annotations=True, annotations_type=True)
+    class Base:
+        # Attributes provided to init_batch will be populated on base
+        # attributte.
+        id: str
+
+    @JSONclass(annotations=True, annotations_type=True)
+    class Info:
+        """
+        Must be overwritten and/or subclassed by subclasses of Product.
+        """
+        name: str
+        symbol: str
+        currency: str
+        exchange_id: str
+        product_type_id: int
+    base: Base
+    info: Info
+
+    def __init__(self, *, force_init: bool = False):
+        """
+        Product should not be instantiatied directly, but instantiated
+        through the `Product.init_batch` factory. This allows to leverage
+        batches of Degiro APIs and relevant speciliazation.
+
+        Batching your requests will improve performance and lower
+        load on endpoint.
+
+        force_init:
+            If this is set to True, allow init of product. Use only if you know
+            what you're doing.
+        """
+        if not force_init:
+            raise NotImplementedError("Please use ProductFactory.init_batch.")
+
+
+
+class Currency(ProductBase):
+    class Info(ProductBase.Info):
         "Store Info calls return."
         isin: str
         symbol: str
@@ -221,8 +224,8 @@ class Currency(Product):
         tradable: bool
 
 
-class Stock(Product):
-    class Info(Product.Info):
+class Stock(ProductBase):
+    class Info(ProductBase.Info):
         "Store Info calls return."
         isin: str
         symbol: str
@@ -239,11 +242,11 @@ class Stock(Product):
         VWDKEY = 'vwdkey'
 
 
-class ProductGeneric(Product):
-    class Base(Product.Info):
+class ProductGeneric(ProductBase):
+    class Base(ProductBase.Info):
         id: str
 
-    class Info(Product.Info):
+    class Info(ProductBase.Info):
         "Store Info calls return."
         isin: str
         symbol: str
@@ -284,7 +287,7 @@ class TotalPortfolio:
 
 async def get_portfolio(
         session: SessionCore
-) -> List[Product]:
+) -> List[ProductBase]:
     """
     Returns Products in portfolio. Refer to  `Products` classes for minimum
     available attributes.
@@ -299,7 +302,7 @@ async def get_portfolio(
                        for v in portf_json]
     LOGGER.debug("api.get_portfolio| %s", pprint.pformat(portf_dict_json))
 
-    portfolio = Product.init_batch(session, portf_dict_json)
+    portfolio = ProductFactory.init_batch(session, portf_dict_json)
 
     return [p async for p in portfolio]
 
@@ -466,7 +469,7 @@ def convert_time_series(
 
 async def get_price_data_batch(
         session: SessionCore,
-        products: Union[Iterable[Product], Product],
+        products: Union[Iterable[ProductBase], ProductBase],
         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
         period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
         timezone: str = 'Europe/Paris',
@@ -479,7 +482,7 @@ async def get_price_data_batch(
     >>>>
     """
     raise NotImplementedError  # Add helper around _get_price_data
-    if isinstance(products, Product):
+    if isinstance(products, ProductBase):
         products = [products]
 
     for product in products:
@@ -507,7 +510,7 @@ async def search_product(
         by_symbol: Optional[str] = None,
         by_exchange: Union[str, Exchange, None] = None,
         product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
-        max_iter: Union[int, None] = 1000) -> List[Product]:
+        max_iter: Union[int, None] = 1000) -> List[ProductBase]:
     """
     Access `product_search` endpoint.
 
@@ -526,7 +529,7 @@ async def search_product(
         Pull `max_iter` pages of results. If `None`, don't stop until end is
         reached.
 
-    Return a list of Product objects returned by Degiro for `search_txt`
+    Return a list of ProductBase objects returned by Degiro for `search_txt`
     attribute.
     """
     if sum(k is not None for k in (by_text, by_isin, by_symbol)) != 1:
@@ -586,9 +589,10 @@ async def search_product(
             products_json = resp_json['products']
             LOGGER.debug("api.search_product n_products| %s",
                          products_json)
-            batch_gen = Product.init_batch(session,
-                                      filter(__custom_filter,
-                                             products_json))
+            batch_gen = ProductFactory.init_batch(
+                    session,
+                    filter(__custom_filter,
+                           products_json))
             batch = [p async for p in batch_gen]
             # This could be optimized later on with a generator class to be
             # able to yield data as soon as we receive it while still not
@@ -618,8 +622,7 @@ __all__ = [
         # PriceData,
         Stock,
         Currency,
-        #ProductBase,
-        Product,
+        ProductBase,
         get_portfolio,
         get_price_data,
         search_product
