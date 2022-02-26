@@ -197,11 +197,13 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         resp.json = MagicMock(return_value={'data': {
             '123': {
                 'id': '123',
-                'productTypeId': PRODUCT.TYPEID.STOCK,
+                'product_type_id': 'UNKNOWNPRODUCTID',
                 'name': 'foo',
                 'symbol': 'FOO',
                 'currency': 'EUR',
                 'exchangeId': 'exid',
+                'tradable': True,
+                'isin': 'isinexample',
             }
             }})
         wapi_prodinfo_m.return_value = resp
@@ -215,12 +217,47 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
                     {
                         'id': '123',
                         'additional': 123,
-                        'product_type_id': PRODUCT.TYPEID.STOCK
                     },
                 ))
         products = [p async for p in products_gen]
         self.assertEqual(len(products), 1)
         self.assertEqual(products[0].base.id, '123')
+        self.assertEqual(products[0].info.name, 'foo')
+        self.assertEqual(products[0].info.symbol, 'FOO')
+
+    @unittest.mock.patch('degiroasync.webapi.get_products_info')
+    async def test_product_no_batch(self, wapi_prodinfo_m):
+        # Same as test_product but with size=1 to test corner case.
+        # Mock get_products_info
+        resp = MagicMock()
+        resp.json = MagicMock(return_value={'data': {
+            '123': {
+                'id': '123',
+                'product_type_id': 'UNKNOWNPRODUCTID',
+                'name': 'foo',
+                'symbol': 'FOO',
+                'currency': 'EUR',
+                'exchangeId': 'exid',
+                'tradable': True,
+                'isin': 'isinexample',
+            }
+            }})
+        wapi_prodinfo_m.return_value = resp
+
+        # Test that degiroasync.api returns properly initiated products
+        products_gen = Product.init_batch(
+                MagicMock(),  # Don't care about session here
+                [
+                    {
+                        'id': '123',
+                        'additional': 123,
+                    },
+                ],
+                size=1)
+        products = [p async for p in products_gen]
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0].base.id, '123')
+        self.assertEqual(products[0].base.additional, 123)
         self.assertEqual(products[0].info.name, 'foo')
         self.assertEqual(products[0].info.symbol, 'FOO')
 

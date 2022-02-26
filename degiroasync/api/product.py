@@ -65,7 +65,7 @@ class Product:
         exchange_id: str
         product_type_id: int
     base: Base
-    info: Optional[Info] = None
+    info: Info
 
     def __init__(self, *, force_init: bool = False):
         """
@@ -125,18 +125,20 @@ class Product:
             Product.Base(attributes)
             attributes_batch.append(attributes)
             if ind % size == 0:
-                products_batch = cls._create_batch(session, attributes_batch)
+                LOGGER.debug("init_batch| attributes_batch %s",
+                             attributes_batch)
+                products_batch = cls._create_batch(session,
+                                                   attributes_batch.copy())
                 batches_awt.append(products_batch)
                 attributes_batch.clear()
 
         if len(attributes_batch):
             batches_awt.append(cls._create_batch(session, attributes_batch))
+        LOGGER.debug('init_batch| batches_awt %s', batches_awt)
         for batch_awt in batches_awt:
             batch = await batch_awt
             for product in batch:
                 yield product
-
-        #return itertools.chain(*(await b for b in batches_awt))
 
     @classmethod
     async def _create_batch(
@@ -148,20 +150,25 @@ class Product:
         Create Products and their common ProductsInfo.
         Returns an Iterable of Product instances.
         """
-        attributes_batch, attributes_batch2 = itertools.tee(attributes_batch)
-
-        ids_batch = (attrs['id'] for attrs in attributes_batch)
+        attributes_batch1, attributes_batch2 = itertools.tee(attributes_batch)
         del attributes_batch
+
+        ids_batch = (attrs['id'] for attrs in attributes_batch1)
+        del attributes_batch1
+
+        # 2022.01: Endpoint errors out on duplicate. Remove them.
         ids_batch = list(set(ids_batch))  # no duplicate.
+
         resp = await webapi.get_products_info(session, ids_batch)
         products_info = camelcase_dict_to_snake(resp.json())
         # Info is in ['data'][product_id]
         products_info = products_info['data']
+        LOGGER.debug('_create_batch| products_info %s', products_info)
 
         return cls.__products_from_attrs(
-            attributes_batch2,
-            products_info
-                )
+                attributes_batch2,
+                products_info
+            )
 
     @classmethod
     def __products_from_attrs(
@@ -171,19 +178,19 @@ class Product:
         """
         Instantiate products from attributes and product_info.
         """
+        LOGGER.debug("__products_from_attrs| products_info %s",
+                     products_info)
         products_dict = {}
 
         # Instantiate products
         for product_base in products_base_iter:
+            LOGGER.debug("__products_from_attrs| product_base %s",
+                         product_base)
             product_id = product_base['id']
             if product_id in products_dict:
                 instance = products_dict[product_id]
             else:
-                #info = products_inf[product_base['id']]
-                info = cls.Info(camelcase_dict_to_snake(
-                    products_info[product_base['id']]))
-                product_type_id = info.product_type_id
-                #product_type_id = product_base.get('product_type_id', None)
+                product_type_id = products_info[product_id]['product_type_id']
                 # Get specialized class if there is one implemented
                 inst_cls = {
                     PRODUCT.TYPEID.CURRENCY: Currency,
@@ -194,7 +201,9 @@ class Product:
                 )
                 LOGGER.debug(
                         "api.Product.init_product| type_id %s class %s",
-                        product_type_id, cls)
+                        product_type_id, inst_cls)
+                info = inst_cls.Info(camelcase_dict_to_snake(
+                    products_info[product_id]))
                 instance = inst_cls(force_init=True)
                 instance.base = inst_cls.Base(product_base)
                 instance.info = info
@@ -208,8 +217,7 @@ class Currency(Product):
         isin: str
         symbol: str
         name: str
-        vwd_id: Union[str, None] = None  # not set for non-tradable
-        product_type: str
+        vwd_id: Optional[str] = None  # not set if non-tradable
         tradable: bool
 
 
@@ -219,22 +227,21 @@ class Stock(Product):
         isin: str
         symbol: str
         name: str
-        vwd_id: Union[AnyStr, None] = None  # not set for non-tradable
-        vwd_identifier_type: Union[AnyStr, None] = None  # not set for non-tradable
+        vwd_id: Optional[AnyStr] = None  # not set if non-tradable
+        vwd_identifier_type: Optional[AnyStr] = None  # not set if non-tradable
         product_type: str
         tradable: bool
         category: str
-        # feedQuality: str  # Not always available
+        # feed_quality: str  # Not always available
 
-    class VwdIdentifierTypes(StrEnum):
+    class VWDIDTYPES(StrEnum):
         ISSUEID = 'issueId'
         VWDKEY = 'vwdkey'
 
 
 class ProductGeneric(Product):
-    class Base:
+    class Base(Product.Info):
         id: str
-        product_type_id: Union[None, int]  # sometimes not returned by API.
 
     class Info(Product.Info):
         "Store Info calls return."
@@ -495,11 +502,11 @@ async def get_price_data_batch(
 async def search_product(
         session: Session,
         *,
-        by_text: Union[str, None] = None,
-        by_isin: Union[str, None] = None,
-        by_symbol: Union[str, None] = None,
+        by_text: Optional[str] = None,
+        by_isin: Optional[str] = None,
+        by_symbol: Optional[str] = None,
         by_exchange: Union[str, Exchange, None] = None,
-        product_type_id: Union[PRODUCT.TYPEID, None] = PRODUCT.TYPEID.STOCK,
+        product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
         max_iter: Union[int, None] = 1000) -> List[Product]:
     """
     Access `product_search` endpoint.
@@ -508,11 +515,16 @@ async def search_product(
     This is done because endpoint API doesn't return expected results
     with both text and ISIN search.
 
-    `product_type_id`
+    product_type_id:
         Restricts search to one type of products.
-    `by_exchange`
+
+    by_exchange:
         Restricts results to products in a exchange. Can be either an Exchange
-        instance or an `hiq_abbr` (e.g. EPA for Paris, AEX for Amsterdam)
+        instance or an `hiq_abbr` str (e.g. EPA for Paris, AEX for Amsterdam)
+
+    max_iter:
+        Pull `max_iter` pages of results. If `None`, don't stop until end is
+        reached.
 
     Return a list of Product objects returned by Degiro for `search_txt`
     attribute.
