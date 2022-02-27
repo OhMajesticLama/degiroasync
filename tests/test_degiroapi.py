@@ -75,7 +75,7 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
                             'totalTradedSize': 10,
                             'type': 'CREATED',
                             'isActive': True,
-                            'status': '',
+                            'status': 'CONFIRMED',
                         }
                     ]
                 }
@@ -96,7 +96,7 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
                             'totalTradedSize': 50,
                             'type': 'CREATED',
                             'isActive': True,
-                            'status': '',
+                            'status': 'CONFIRMED',
                         }
                     ]
             })
