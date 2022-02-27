@@ -1,5 +1,5 @@
-from typing import Any, Union, List, Dict, Tuple
-import functools
+from typing import Any, Union, List, Dict, Tuple, Optional
+#import functools
 import datetime
 import logging
 import asyncio
@@ -14,7 +14,6 @@ from .. import webapi
 from ..core import SessionCore
 from ..core import ORDER
 from ..core import LOGGER_NAME
-from ..core import TRANSACTIONS
 from ..core import camelcase_dict_to_snake
 
 
@@ -24,17 +23,17 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 @JSONclass(annotations=True, annotations_type=True)
 class Order:
     created: str
-    orderId: str
-    productId: str
+    order_id: Optional[str] = None  # Can be None if STATUS == REJECTED
+    product_id: str
     size: Union[float, int]
     price: float
-    buysell: ORDER.ACTION  # 'B' or 'S'
-    orderTypeId: int
-    orderTimeTypeId: int
-    currentTradedSize: int
-    totalTradedSize: int
+    buysell: ORDER.ACTION
+    order_type_id: int
+    order_time_type_id: int
+    current_traded_size: int
+    total_traded_size: int
     type: str  # 'CREATED' or ...?
-    isActive: bool
+    is_active: bool
     status: str  # 'REJECTED' or ...?
     # product: Union[ProductBase, None] = None  # do we want to reinstantiate
     # products here or let user?
@@ -140,15 +139,20 @@ async def get_orders(
     orders_history_dict = orders_history_resp.json()['data']
     LOGGER.debug("get_orders orders_dict| %s", orders_dict)
     LOGGER.debug("get_orders orders_history_dict| %s", orders_history_dict)
+    # Ensure types expected types & set constants.
     for order in itertools.chain(orders_dict, orders_history_dict):
         order['productId'] = str(order['productId'])
         order['buysell'] = {
             'B': ORDER.ACTION.BUY,
             'S': ORDER.ACTION.SELL
         }[order['buysell']]
+        order['status'] = {
+            'CONFIRMED': ORDER.STATUS.CONFIRMED,
+            'REJECTED': ORDER.STATUS.REJECTED
+                }[order['status']]
     return (
-        [Order(o) for o in orders_dict],
-        [Order(o) for o in orders_history_dict]
+        [Order(camelcase_dict_to_snake(o)) for o in orders_dict],
+        [Order(camelcase_dict_to_snake(o)) for o in orders_history_dict]
     )
 
 
@@ -166,7 +170,7 @@ async def get_transactions(
     to_date:
         Request transactions to `to_date`. Defaults to today.
     """
-    to_date = to_date or datetime.datetime.today()
+    to_date = to_date or datetime.datetime.now()
     from_date = from_date or to_date - datetime.timedelta(days=7)
 
     resp = await webapi.get_transactions(

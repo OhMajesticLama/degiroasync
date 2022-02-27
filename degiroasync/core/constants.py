@@ -131,8 +131,12 @@ class ORDER:
         DAY = 1
         PERMANENT = 3
 
+    class STATUS(StrEnum):
+        CONFIRMED = 'CONFIRMED'
+        REJECTED = 'REJECTED'
 
-class TRANSACTIONS:
+
+class TRANSACTION:
     class TYPEID(EnumInt):
         pass
 

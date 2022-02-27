@@ -11,21 +11,22 @@ from degiroasync.core import set_params
 
 class TestLRUCacheTimed(unittest.IsolatedAsyncioTestCase):
     async def test_cached_time_async(self):
+        delay = 0.1  # in s
 
-        @degiroasync.core.lru_cache_timed(seconds=1.5)
+        @degiroasync.core.lru_cache_timed(seconds=delay*1.1)
         async def dummy():
-            await asyncio.sleep(1)
+            await asyncio.sleep(delay)
             return 2
 
         start = time.time()
         res = await dummy()
         self.assertEqual(res, 2)
-        self.assertGreaterEqual(time.time() - start, 1)
+        self.assertGreaterEqual(time.time() - start, delay)
 
         start2 = time.time()
         res = await dummy()
         self.assertEqual(res, 2)
-        self.assertLessEqual(time.time() - start2, 0.5,
+        self.assertLessEqual(time.time() - start2, delay*0.5,
                              "Looks like result was not cached.")
 
         await asyncio.sleep(1)
@@ -33,30 +34,31 @@ class TestLRUCacheTimed(unittest.IsolatedAsyncioTestCase):
         start3 = time.time()
         res = await dummy()
         self.assertEqual(res, 2)
-        self.assertGreaterEqual(time.time() - start3, 1,
+        self.assertGreaterEqual(time.time() - start3, delay,
                                 "Looks like old cached result was not removed."
                                 )
 
     async def test_cached_time_sync(self):
+        delay = 0.1  # in s
 
-        @degiroasync.core.lru_cache_timed(seconds=1.5)
+        @degiroasync.core.lru_cache_timed(seconds=delay*1.5)
         def dummy():
-            time.sleep(1)
+            time.sleep(delay)
             return 1
 
         start = time.time()
         dummy()
-        self.assertGreaterEqual(time.time() - start, 1)
+        self.assertGreaterEqual(time.time() - start, delay)
 
         start2 = time.time()
         dummy()
-        self.assertLessEqual(time.time() - start2, 0.5,
+        self.assertLessEqual(time.time() - start2, delay * 0.5,
                              "Looks like result was not cached.")
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(delay)
         start3 = time.time()
         dummy()
-        self.assertGreaterEqual(time.time() - start3, 1,
+        self.assertGreaterEqual(time.time() - start3, delay,
                                 "Looks like old cached result was not removed."
                                 )
 

@@ -31,6 +31,7 @@ from degiroasync.api import ProductFactory
 from degiroasync.api import Stock
 from degiroasync.api import Currency
 from degiroasync.api import Order
+from degiroasync.api import ORDER
 from degiroasync.core.constants import PRODUCT
 
 from .test_degirowebapi import _get_credentials
@@ -54,6 +55,70 @@ del _env_var
 #############
 # Unittests #
 #############
+
+class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.get_orders_mock = MagicMock()
+        self.get_orders_mock.json = MagicMock(return_value={
+                'orders': {
+                    'value': [
+                        {
+                            'created': '2022-02-23 09:00:00 CET',
+                            'orderId': 'weiurpoiwejaklsj',
+                            'productId': '123123',
+                            'size': 50,
+                            'price': 100.2,
+                            'buysell': 'B',
+                            'orderTypeId': 1,
+                            'orderTimeTypeId': 1,
+                            'currentTradedSize': 10,
+                            'totalTradedSize': 10,
+                            'type': 'CREATED',
+                            'isActive': True,
+                            'status': '',
+                        }
+                    ]
+                }
+            })
+        self.get_orders_history_mock = MagicMock()
+        self.get_orders_history_mock.json = MagicMock(return_value={
+                'data': [
+                        {
+                            'created': '2022-02-23 09:00:00 CET',
+                            'orderId': 'weiurpoiwejaklsj',
+                            'productId': '123123',
+                            'size': 50,
+                            'price': 100.2,
+                            'buysell': 'B',
+                            'orderTypeId': 1,
+                            'orderTimeTypeId': 1,
+                            'currentTradedSize': 50,
+                            'totalTradedSize': 50,
+                            'type': 'CREATED',
+                            'isActive': True,
+                            'status': '',
+                        }
+                    ]
+            })
+
+    @unittest.mock.patch('degiroasync.webapi.get_orders_history')
+    @unittest.mock.patch('degiroasync.webapi.get_orders')
+    async def test_get_orders(self,
+                              get_orders_m,
+                              get_orders_history_m):
+        get_orders_m.return_value = self.get_orders_mock
+        get_orders_history_m.return_value = self.get_orders_history_mock
+        orders, orders_h = await degiroasync.api.get_orders(MagicMock())
+
+        self.assertEqual(len(orders), 1)
+        self.assertEqual(len(orders_h), 1)
+        order = orders[0]
+        orderh = orders_h[0]
+
+        for o in (order, orderh):
+            self.assertEqual(order.order_id, 'weiurpoiwejaklsj')
+            self.assertEqual(order.size, 50)
+            self.assertEqual(order.buysell, ORDER.ACTION.BUY)
 
 
 class TestDegiroAsyncAPIHelpers(unittest.TestCase):

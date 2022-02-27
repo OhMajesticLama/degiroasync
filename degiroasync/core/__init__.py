@@ -6,7 +6,7 @@ from .helpers import camelcase_to_snake
 from .helpers import camelcase_dict_to_snake
 from .helpers import set_params
 from .constants import ORDER
-from .constants import TRANSACTIONS
+from .constants import TRANSACTION
 from .core import check_session_client
 from .core import check_session_config
 
