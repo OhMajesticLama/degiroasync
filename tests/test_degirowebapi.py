@@ -169,8 +169,50 @@ if RUN_INTEGRATION_TESTS:
             self.assertEqual(response.status_code, 200)
             resp_json = response.json()
             LOGGER.debug(resp_json)
-            self.assertTrue('series' in resp_json)
-            self.assertTrue('data' in resp_json['series'][0])
+            self.assertIn('series', resp_json)
+            self.assertIn('data', resp_json['series'][0])
+
+        async def test_get_price_data_month(self):
+            session = await self._login()
+
+            vwdId = '360114899'
+
+            response = await degiroasync.webapi.get_price_data(
+                    session,
+                    vwdId=vwdId,
+                    period=PRICE.PERIOD.P1MONTH,
+                    resolution=PRICE.RESOLUTION.PT1M,
+                    vwdIdentifierType='issueid')
+            LOGGER.debug('get_price_data_month| response: %s',
+                         response.content)
+            self.assertEqual(response.status_code, 200)
+            resp_json = response.json()
+            LOGGER.debug(resp_json)
+            self.assertIn('resolution', resp_json)
+            self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1M)
+            self.assertIn('series', resp_json)
+            self.assertIn('data', resp_json['series'][0])
+
+        async def test_get_price_data_month_pt1d(self):
+            session = await self._login()
+
+            vwdId = '360114899'
+
+            response = await degiroasync.webapi.get_price_data(
+                    session,
+                    vwdId=vwdId,
+                    period=PRICE.PERIOD.P1MONTH,
+                    resolution=PRICE.RESOLUTION.PT1D,
+                    vwdIdentifierType='issueid')
+            LOGGER.debug('get_price_data_month_pt1d| response: %s',
+                         response.content)
+            self.assertEqual(response.status_code, 200)
+            resp_json = response.json()
+            LOGGER.debug(resp_json)
+            self.assertIn('resolution', resp_json)
+            self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1D)
+            self.assertIn('series', resp_json)
+            self.assertIn('data', resp_json['series'][0])
 
         async def test_search_product(self):
             session = await self._login()

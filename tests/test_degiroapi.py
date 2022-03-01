@@ -33,6 +33,7 @@ from degiroasync.api import Currency
 from degiroasync.api import Order
 from degiroasync.api import ORDER
 from degiroasync.core.constants import PRODUCT
+from degiroasync.core.constants import PRICE
 
 from .test_degirowebapi import _get_credentials
 
@@ -459,9 +460,66 @@ if RUN_INTEGRATION_TESTS:
             self.assertGreaterEqual(len(price_data.price), 1)
             self.assertGreaterEqual(len(price_data.date), 1)
 
-                # We should only have airbus products here
-                #self.assertTrue('airbus' in product.info.name.lower(),
-                #               product.info)
+            date = price_data.date
+            price = price_data.price
+            self.assertEqual(len(date), len(price))
+
+        async def test_get_price_data_day_resolution(self):
+            session = await self._login()
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_isin='NL0000235190',
+                    product_type_id=PRODUCT.TYPEID.STOCK
+                    )
+            #products_awaitable = [p.await_product_info() for p in products]
+            #LOGGER.debug('test_get_price_data products_awaitable| %s', products_awaitable)
+
+            # In a context where we'd want to optimize, we want to
+            # build the pipeline by awaiting on each product instead of a bulk
+            # gather to not block execution while we wait for data on some
+            # of the products.
+            #await asyncio.gather(*[p.await_product_info() for p in products])
+            #products = [p async for p in products_gen]
+            self.assertEqual(len(products), 1)
+            product = products[0]
+
+            LOGGER.debug('test_get_price_data_day_resolution| product %s',
+                         pprint.pformat(product.__dict__))
+
+            self.assertEqual(product.info.product_type_id,
+                             PRODUCT.TYPEID.STOCK)
+
+            price_data = await degiroasync.api.get_price_data(
+                    session,
+                    product,
+                    resolution=PRICE.RESOLUTION.PT1D,
+                    period=PRICE.PERIOD.P1MONTH,
+                    )
+            LOGGER.debug('test_get_price_data_day_resolution| price_data %s',
+                         price_data)
+            self.assertGreaterEqual(len(price_data.price), 1)
+            self.assertGreaterEqual(len(price_data.date), 1)
+            date_series = price_data.date
+            price_series = price_data.price
+            self.assertEqual(len(date_series), len(price_series))
+            LOGGER.debug("test_get_price_data_day_resolution| "
+                         "date_series len %s", len(date_series))
+            self.assertGreaterEqual(
+                    len(date_series), 15,
+                    "We should have daily data for a month with one sample "
+                    "per day.")
+
+            # We entered PT1D resolution, check that we have one data point
+            # per day at most
+            start = datetime.datetime.now() - datetime.timedelta(days=31)
+            prior_day = datetime.datetime(start.year, start.month, start.day)
+            for date_str in date_series:
+                date = datetime.datetime.fromisoformat(date_str)
+                day = datetime.datetime(date.year, date.month, date.day)
+                delta_days = (day - prior_day).days()
+                self.assertGreaterEqual(delta_days, 1)
+
+                prior_day = day
 
 
         #async def test_get_price_data_bulk(self):

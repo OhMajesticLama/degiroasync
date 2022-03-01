@@ -449,7 +449,7 @@ def convert_time_series(
         if key not in data_series:
             raise KeyError(f'{key} not found in data_series {data_series}')
 
-    resolution_whitelist = (PRICE.RESOLUTION.PT1M,)
+    resolution_whitelist = (PRICE.RESOLUTION.PT1M, PRICE.RESOLUTION.PT1D)
     if resolution_t not in resolution_whitelist:
         raise NotImplementedError("convert_time_series has not been tested "
                                   "with resolutions other than {}. "
@@ -464,11 +464,19 @@ def convert_time_series(
     data_out['type'] = 'time'
     data_out['resolution'] = resolution_t
     data_out['times'] = time_t
+    # Multiplier to get time delta (in minutes) from time index
+    # returned by API.
+    time_multiplier: int = {
+        PRICE.RESOLUTION.PT1M: 1,
+        PRICE.RESOLUTION.PT1D: 60*24
+        }[resolution_t]
 
     start_date = datetime.datetime.fromisoformat(time_t)
     for kv in data_series['data']:
         data_new['price'].append(kv[1])
-        measure_date = start_date + datetime.timedelta(minutes=kv[0])
+        time_ind = kv[0]
+        time_delta = time_ind * time_multiplier
+        measure_date = start_date + datetime.timedelta(minutes=time_delta)
         data_new['date'].append(measure_date.isoformat())
     return data_out
 
