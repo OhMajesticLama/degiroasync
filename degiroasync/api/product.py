@@ -449,9 +449,15 @@ def convert_time_series(
         if key not in data_series:
             raise KeyError(f'{key} not found in data_series {data_series}')
 
-    if resolution_t != PRICE.RESOLUTION.PT1M:
+    resolution_whitelist = (PRICE.RESOLUTION.PT1M,)
+    if resolution_t not in resolution_whitelist:
         raise NotImplementedError("convert_time_series has not been tested "
-                                  "with other resolutions than PT1M.")
+                                  "with resolutions other than {}. "
+                                  "Received resolution: {}".format(
+                                        resolution_whitelist,
+                                        resolution_t
+                                        )
+                                  )
 
     data_new = {'price': [], 'date': []}
     data_out['data'] = data_new

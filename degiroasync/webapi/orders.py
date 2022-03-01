@@ -274,6 +274,32 @@ async def get_orders_history(
         Date in format DD/MM/YYYY. Raise ValueError if incorrect format.
     to_date:
         Date in format DD/MM/YYYY. Raise ValueError if incorrect format.
+
+    Example return in json():
+    ```
+    {
+        'data': {
+            [
+                {
+                    'created': '2021-11-05T11:56:33+01:00',
+                    'orderId': 'asdfjkhrewqrkljh',
+                    'productId': 12341234,
+                    'size': 100,
+                    'price': 390,
+                    'buysell': 'B',
+                    'orderTypeId': 1,
+                    'stopPrice': 0,
+                    'currentTradedSize': 0,
+                    'totalTradedSize': 0,
+                    'type': 'CREATE',
+                    'status': 'CONFIRMED',
+                    'last': '2021-11-6T12:33:23+01:00',
+                    'isActive': True
+                }
+            ]
+        }
+    }
+    ```
     """
     check_session_config(session)
     check_session_client(session)
@@ -319,6 +345,33 @@ async def get_transactions(
     to_date:
         Date in format DD/MM/YYYY. Raise ValueError if incorrect format.
 
+    Example return in json():
+    ```
+    {
+        'data': {
+            [
+                {
+                    'id': 123123,
+                    'productId': 12341234,
+                    'date': '2021-11-05T11:56:33+01:00',
+                    'buysell': 'B',
+                    'price': 39,
+                    'quantity': 100,
+                    'total': -3900,
+                    'orderTypeId': 1,
+                    'counterParty': 1,
+                    'transfered': False,
+                    'fxRate': 0,
+                    'totalInBaseCurrency': -3900,
+                    'feeInBaseCurrency': -12,
+                    'totalPlusFeeInBaseCurrency': -3912,
+                    'transactionTypeId': -3912,
+                    'tradingVenue': -3912,
+                }
+            ]
+        }
+    }
+    ```
     """
     check_session_config(session)
     check_session_client(session)
