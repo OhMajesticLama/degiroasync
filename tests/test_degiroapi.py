@@ -653,6 +653,28 @@ if RUN_INTEGRATION_TESTS:
                 self.assertTrue(hasattr(trans, 'quantity'))
                 self.assertTrue(hasattr(trans, 'fx_rate'))
 
+        async def test_check_orders(self):
+            session = await self._login()
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_symbol='AIR',
+                    by_exchange='EPA',
+                    product_type_id=PRODUCT.TYPEID.STOCK
+            )
+            self.assertEqual(len(products), 1)
+
+            product = products[0]
+            order = await degiroasync.api.check_order(
+                    session,
+                    product=product,
+                    buy_sell=ORDER.ACTION.BUY,
+                    time_type=ORDER.TIME.DAY,
+                    order_type=ORDER.TYPE.LIMITED,
+                    size=1,
+                    price=80
+            )
+            self.assertIn('confirmation_id', order)
+            self.assertIsInstance(order, Order)
 
 #if __name__ == '__main__':
 #    import nose2

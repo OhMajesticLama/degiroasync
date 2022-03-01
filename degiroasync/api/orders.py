@@ -69,7 +69,7 @@ async def check_order(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-) -> Any:
+) -> Order:
     """
     This must be called to obtain a confirmation_id prior to confirming an
     order.
@@ -103,7 +103,7 @@ async def check_order(
         price=price
     )
     resp_json = response.json()
-    return JSONWrapper(camelcase_dict_to_snake(resp_json['data']))
+    return Order(camelcase_dict_to_snake(resp_json['data']))
 
 
 async def get_orders(
