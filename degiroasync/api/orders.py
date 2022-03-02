@@ -69,7 +69,7 @@ async def check_order(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-) -> Order:
+    ) -> Dict[str, Any]:
     """
     This must be called to obtain a confirmation_id prior to confirming an
     order.
@@ -87,9 +87,18 @@ async def check_order(
     ... )
     ...
 
-    This call is rate limited at the end-point level, tests would show the
-    call to be rate limited at 1 per second. Users should throttle their calls
-    to this function.
+
+    WARNING: This call is rate limited at the end-point level, tests would show
+    the call to be rate limited at 1 per second. Users should throttle their
+    calls to this function.
+
+    Example return:
+    {
+        'confirmation_id': '0f404158-3628-414b-87fc-91e2ab2ba1ee',
+        'free_space_new': 62283.1,
+        'transaction_fee': 0.5,
+        'show_ex_ante_report_link': True
+    })
     """
     assert buy_sell in ("BUY", "SELL")
 
@@ -103,7 +112,7 @@ async def check_order(
         price=price
     )
     resp_json = response.json()
-    return Order(camelcase_dict_to_snake(resp_json['data']))
+    return camelcase_dict_to_snake(resp_json['data'])
 
 
 async def get_orders(
