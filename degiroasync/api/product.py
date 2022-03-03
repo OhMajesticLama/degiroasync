@@ -36,6 +36,54 @@ from .session import check_session_exchange_dictionary
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 
+class ProductBase:
+    # Initial implementation of ProductBase included deferred populating of
+    # Info to allow client for performance optimizations (e.g. use
+    # products before we have received an answer to the Info query).
+    # Low availability of guaranteed attributes at ProductBase.Base highlighted
+    # this solution to be impractical (need to await .await_product_info for
+    # every product) versus little gain as client consistently needed Info
+    # data to be able to either reuse and take a decision about the product.
+    #
+    # This second implementation cuts the optimisation opportunity to only
+    # leverage Base information to make it easier to use and reduce risk for
+    # client to trip downstream by forgetting to await product Info.
+    @JSONclass(annotations=True, annotations_type=True)
+    class Base:
+        # Attributes provided to init_batch will be populated on base
+        # attributte.
+        id: str
+
+    @JSONclass(annotations=True, annotations_type=True)
+    class Info:
+        """
+        Must be overwritten and/or subclassed by subclasses of Product.
+        """
+        name: str
+        symbol: str
+        currency: str
+        exchange_id: str
+        product_type_id: int
+    base: Base
+    info: Info
+
+    def __init__(self, *, force_init: bool = False):
+        """
+        Product should not be instantiatied directly, but instantiated
+        through the `Product.init_batch` factory. This allows to leverage
+        batches of Degiro APIs and relevant speciliazation.
+
+        Batching your requests will improve performance and lower
+        load on endpoint.
+
+        force_init:
+            If this is set to True, allow init of product. Use only if you know
+            what you're doing.
+        """
+        if not force_init:
+            raise NotImplementedError("Please use ProductFactory.init_batch.")
+
+
 class ProductFactory:
     @classmethod
     async def init_batch(
@@ -43,7 +91,7 @@ class ProductFactory:
             session: SessionCore,
             attributes_iter: Iterable[Dict[str, Any]],
             size=50
-    ) -> AsyncGenerator[ForwardRef('Product'), None]:
+    ) -> AsyncGenerator[ProductBase, None]:
         """
         Bulk init Product instances.
 
@@ -89,17 +137,25 @@ class ProductFactory:
         if len(attributes_batch):
             batches_awt.append(cls._create_batch(session, attributes_batch))
         LOGGER.debug('init_batch| batches_awt %s', batches_awt)
-        for batch_awt in batches_awt:
-            batch = await batch_awt
-            for product in batch:
-                yield product
+        ind = 0
+        try:
+            for ind, batch_awt in enumerate(batches_awt):
+                batch = await batch_awt
+                for product in batch:
+                    yield product
+        except Exception:
+            # avoid never awaited coroutine in above generator was never
+            # fully consumed
+            for i in range(ind + 1, len(batches_awt)):
+                await batches_awt[i]
+            raise
 
     @classmethod
     async def _create_batch(
             cls,
             session: SessionCore,
             attributes_batch: Iterable[Dict[str, Any]]
-    ) -> Iterable[ForwardRef('ProductBase')]:
+    ) -> Iterable[ProductBase]:
         """
         Create Products and their common ProductsInfo.
         Returns an Iterable of Product instances.
@@ -163,55 +219,6 @@ class ProductFactory:
                 instance.info = info
                 products_dict[product_id] = instance
             yield instance
-
-
-class ProductBase:
-    # Initial implementation of ProductBase included deferred populating of
-    # Info to allow client for performance optimizations (e.g. use
-    # products before we have received an answer to the Info query).
-    # Low availability of guaranteed attributes at ProductBase.Base highlighted
-    # this solution to be impractical (need to await .await_product_info for
-    # every product) versus little gain as client consistently needed Info
-    # data to be able to either reuse and take a decision about the product.
-    #
-    # This second implementation cuts the optimisation opportunity to only
-    # leverage Base information to make it easier to use and reduce risk for
-    # client to trip downstream by forgetting to await product Info.
-    @JSONclass(annotations=True, annotations_type=True)
-    class Base:
-        # Attributes provided to init_batch will be populated on base
-        # attributte.
-        id: str
-
-    @JSONclass(annotations=True, annotations_type=True)
-    class Info:
-        """
-        Must be overwritten and/or subclassed by subclasses of Product.
-        """
-        name: str
-        symbol: str
-        currency: str
-        exchange_id: str
-        product_type_id: int
-    base: Base
-    info: Info
-
-    def __init__(self, *, force_init: bool = False):
-        """
-        Product should not be instantiatied directly, but instantiated
-        through the `Product.init_batch` factory. This allows to leverage
-        batches of Degiro APIs and relevant speciliazation.
-
-        Batching your requests will improve performance and lower
-        load on endpoint.
-
-        force_init:
-            If this is set to True, allow init of product. Use only if you know
-            what you're doing.
-        """
-        if not force_init:
-            raise NotImplementedError("Please use ProductFactory.init_batch.")
-
 
 
 class Currency(ProductBase):
