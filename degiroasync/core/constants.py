@@ -111,21 +111,28 @@ class ORDER:
     class TYPE(EnumInt):
         """
         LIMITED:
-            This is the "Limit" field value in the web trader.
+            This is the "Limit" field value of "Order type" in the web trader.
 
         MARKET:
-            This is the "Market" field value in the web trader.
+            This is the "Market" field value of "Order type" in the web trader.
 
         STOP_LOSS:
-            This is the "Stop Loss" field value in the web trader.
+            This is the "Stop Loss" field value of "Order type" in the web
+            trader.
 
         STOP_LIMITED:
-            This is the "Stop Limited" field value in the web trader.
+            This is the "Stop Limited" field value of "Order type" in the web
+            trader.
+
+        AMOUNT:
+            This is the "Amount" field value of "Order type" in the web trader.
+            It's used for investment funds.
         """
         LIMITED = 0
         STOP_LIMITED = 1
         MARKET_ORDER = 2
         STOP_LOSS = 3
+        AMOUNT = 4
 
     class TIME(EnumInt):
         DAY = 1
