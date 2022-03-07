@@ -98,7 +98,11 @@ async def check_order(
         'free_space_new': 62283.1,
         'transaction_fee': 0.5,
         'show_ex_ante_report_link': True
-    })
+    }
+
+    In the case of a SELL order, the parameter 'transaction_opposite_fee'
+    has also been observed. It does not seem to serve a differente purpose
+    than transaction_fee.
     """
     assert buy_sell in ("BUY", "SELL")
 

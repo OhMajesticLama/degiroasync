@@ -159,6 +159,9 @@ class SessionCore:
     def cookies(self, cookies: dict):
         self._cookies = httpx.Cookies(cookies)
 
+    def __hash__(self):
+        return hash(self.__dict__.values())
+
 
 class URLs:
     BASE = 'https://trader.degiro.nl'
