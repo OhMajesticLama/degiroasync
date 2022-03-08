@@ -69,7 +69,7 @@ async def check_order(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-    ) -> Dict[str, Any]:
+        ) -> Dict[str, Any]:
     """
     This must be called to obtain a confirmation_id prior to confirming an
     order.
@@ -106,7 +106,7 @@ async def check_order(
     """
     assert buy_sell in ("BUY", "SELL")
 
-    response = await webapi.check_order(
+    resp_json = await webapi.check_order(
         session=session,
         product_id=product.base.id,
         buy_sell=buy_sell,
@@ -115,7 +115,6 @@ async def check_order(
         size=size,
         price=price
     )
-    resp_json = response.json()
     return camelcase_dict_to_snake(resp_json['data'])
 
 
@@ -148,8 +147,8 @@ async def get_orders(
             to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT))
     )
 
-    orders_dict = orders_current_resp.json()['orders']['value']
-    orders_history_dict = orders_history_resp.json()['data']
+    orders_dict = orders_current_resp['orders']['value']
+    orders_history_dict = orders_history_resp['data']
     LOGGER.debug("get_orders orders_dict| %s", orders_dict)
     LOGGER.debug("get_orders orders_history_dict| %s", orders_history_dict)
     # Ensure types expected types & set constants.
@@ -191,7 +190,7 @@ async def get_transactions(
         from_date=from_date.strftime(webapi.ORDER_DATE_FORMAT),
         to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT)
     )
-    data = resp.json()['data'].copy()
+    data = resp['data'].copy()
     products_gen = ProductFactory.init_batch(
         session,
         map(lambda t: {'id': str(t['productId'])}, data))

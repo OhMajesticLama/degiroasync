@@ -2,7 +2,6 @@ from typing import Iterable, Any, List, Dict, Tuple, Union, ForwardRef, AnyStr
 from typing import Optional, AsyncGenerator
 import logging
 import pprint
-import asyncio
 import itertools
 import datetime
 try:
@@ -17,6 +16,7 @@ except ImportError:
             return str.__str__(self)
 
 from jsonloader import JSONclass
+from more_itertools import unique_everseen
 
 from ..core.constants import PRODUCT
 from ..core.constants import PRICE
@@ -27,7 +27,6 @@ from ..core import Credentials, SessionCore, Config
 from ..core import check_session_client, check_session_config
 from ..core.helpers import dict_from_attr_list
 from ..core.helpers import camelcase_dict_to_snake
-from ..core import helpers
 from .session import Session
 from .session import Exchange
 from .session import check_session_exchange_dictionary
@@ -170,7 +169,7 @@ class ProductFactory:
         ids_batch = list(set(ids_batch))  # no duplicate.
 
         resp = await webapi.get_products_info(session, ids_batch)
-        products_info = camelcase_dict_to_snake(resp.json())
+        products_info = camelcase_dict_to_snake(resp)
         # Info is in ['data'][product_id]
         products_info = products_info['data']
         LOGGER.debug('_create_batch| products_info %s', products_info)
@@ -302,8 +301,7 @@ async def get_portfolio(
     check_session_client(session)
     check_session_config(session)
 
-    resp = await webapi.get_portfolio(session)
-    resp_json = resp.json()
+    resp_json = await webapi.get_portfolio(session)
     portf_json = resp_json['portfolio']['value']
     portf_dict_json = [dict_from_attr_list(v['value'], ignore_error=True)
                        for v in portf_json]
@@ -324,8 +322,7 @@ async def get_portfolio_total(
     check_session_client(session)
     check_session_config(session)
 
-    resp = await webapi.get_portfolio_total(session)
-    resp_json = resp.json()
+    resp_json = await webapi.get_portfolio_total(session)
 
     LOGGER.debug("api.get_portfolio_total| %s", resp_json)
 
@@ -375,7 +372,7 @@ async def get_price_data(
         raise NotImplementedError(
             "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
             "supported by get_price_data")
-    resp = await webapi.get_price_data(
+    resp_json = await webapi.get_price_data(
         session,
         vwdId=product.info.vwd_id,
         vwdIdentifierType=product.info.vwd_identifier_type,
@@ -384,7 +381,6 @@ async def get_price_data(
         timezone=timezone,
         culture=culture,
         data_type=data_type)
-    resp_json = resp.json()
     LOGGER.debug("api.get_price_data resp_json| %s", resp_json)
     timeseries_ind = -1
     objectseries_ind = -1
@@ -502,7 +498,7 @@ async def get_price_data_batch(
 
     >>>>
     """
-    raise NotImplementedError  # Add helper around _get_price_data
+    raise NotImplementedError()  # Add helper around _get_price_data
     if isinstance(products, ProductBase):
         products = [products]
 
@@ -548,7 +544,7 @@ async def search_product(
 
     max_iter:
         Pull `max_iter` pages of results. If `None`, don't stop until end is
-        reached.
+        reached. Default value: 1000.
 
     Return a list of ProductBase objects returned by Degiro for `search_txt`
     attribute.
@@ -597,13 +593,12 @@ async def search_product(
     iter_n = 0
     while iter_n < max_iter or max_iter is None:
         iter_n += 1
-        resp = await webapi.search_product(
+        resp_json = await webapi.search_product(
             session,
             by_text,
             product_type_id=product_type_id,
             limit=limit,
             offset=offset)
-        resp_json = resp.json()
         LOGGER.debug("api.search_product response| %s",
                      pprint.pformat(resp_json))
         if 'products' in resp_json:
@@ -628,7 +623,8 @@ async def search_product(
         else:
             LOGGER.debug("No 'products' key in response. Stop.")
             break
-    return products
+    # return a unique list
+    return list(unique_everseen(products, lambda p: p.info.id))
 
 
 __all__ = [

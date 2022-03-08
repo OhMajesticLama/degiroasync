@@ -57,10 +57,12 @@ del _env_var
 # Unittests #
 #############
 
+
 class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.get_orders_mock = MagicMock()
-        self.get_orders_mock.json = MagicMock(return_value={
+        #self.get_orders_mock.json = MagicMock(return_value={
+        self._orders_dummy = {
                 'orders': {
                     'value': [
                         {
@@ -80,9 +82,10 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
                         }
                     ]
                 }
-            })
+            }
         self.get_orders_history_mock = MagicMock()
-        self.get_orders_history_mock.json = MagicMock(return_value={
+        #self.get_orders_history_mock.json = MagicMock(return_value={
+        self._orders_history_dummy = {
                 'data': [
                         {
                             'created': '2022-02-23 09:00:00 CET',
@@ -100,15 +103,15 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
                             'status': 'CONFIRMED',
                         }
                     ]
-            })
+            }
 
     @unittest.mock.patch('degiroasync.webapi.get_orders_history')
     @unittest.mock.patch('degiroasync.webapi.get_orders')
     async def test_get_orders(self,
                               get_orders_m,
                               get_orders_history_m):
-        get_orders_m.return_value = self.get_orders_mock
-        get_orders_history_m.return_value = self.get_orders_history_mock
+        get_orders_m.return_value = self._orders_dummy
+        get_orders_history_m.return_value = self._orders_history_dummy
         orders, orders_h = await degiroasync.api.get_orders(MagicMock())
 
         self.assertEqual(len(orders), 1)
@@ -166,8 +169,9 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
     "Unittest for api.ExchangeDictionary"
     def setUp(self):
         resp_mock = unittest.mock.MagicMock()
-        resp_mock.json = unittest.mock.MagicMock()
-        resp_mock.json.return_value = {
+        #resp_mock.json = unittest.mock.MagicMock()
+        #resp_mock.return_value = {
+        self._product_dictionary_dummy = {
                 "regions": [
                     {
                         "id": 1,
@@ -216,7 +220,7 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
     async def test_exchange_dictionary_attributes(self, get_dict_mock):
         # Mock webapi.get_product_dictionary
-        get_dict_mock.return_value = self.get_product_dictionary_mock
+        get_dict_mock.return_value = self._product_dictionary_dummy
         session = object()  # dummy is enough, we mocked the class
         dictionary = await degiroasync.api.ExchangeDictionary(session)
 
@@ -230,7 +234,7 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
     async def test_exchange_dictionary_exchange(self, get_dict_mock):
         # Mock webapi.get_product_dictionary
-        get_dict_mock.return_value = self.get_product_dictionary_mock
+        get_dict_mock.return_value = self._product_dictionary_dummy
         session = object()  # dummy is enough, we mocked the class
         dictionary = await degiroasync.api.ExchangeDictionary(session)
 
@@ -241,7 +245,7 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
     async def test_exchange_dictionary_country(self, get_dict_mock):
         # Mock webapi.get_product_dictionary
-        get_dict_mock.return_value = self.get_product_dictionary_mock
+        get_dict_mock.return_value = self._product_dictionary_dummy
         session = object()  # dummy is enough, we mocked the class
         dictionary = await degiroasync.api.ExchangeDictionary(session)
 
@@ -258,21 +262,19 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
     """
     @unittest.mock.patch('degiroasync.webapi.get_products_info')
     async def test_product(self, wapi_prodinfo_m):
-        # Mock get_products_info
-        resp = MagicMock()
-        resp.json = MagicMock(return_value={'data': {
-            '123': {
-                'id': '123',
-                'product_type_id': 'UNKNOWNPRODUCTID',
-                'name': 'foo',
-                'symbol': 'FOO',
-                'currency': 'EUR',
-                'exchangeId': 'exid',
-                'tradable': True,
-                'isin': 'isinexample',
+        wapi_prodinfo_m.return_value = {'data': {
+                '123': {
+                    'id': '123',
+                    'product_type_id': 'UNKNOWNPRODUCTID',
+                    'name': 'foo',
+                    'symbol': 'FOO',
+                    'currency': 'EUR',
+                    'exchangeId': 'exid',
+                    'tradable': True,
+                    'isin': 'isinexample',
+                }
             }
-            }})
-        wapi_prodinfo_m.return_value = resp
+        }
 
         session = MagicMock()  # Don't care
 
@@ -295,20 +297,32 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
     async def test_product_no_batch(self, wapi_prodinfo_m):
         # Same as test_product but with size=1 to test corner case.
         # Mock get_products_info
-        resp = MagicMock()
-        resp.json = MagicMock(return_value={'data': {
-            '123': {
-                'id': '123',
-                'product_type_id': 'UNKNOWNPRODUCTID',
-                'name': 'foo',
-                'symbol': 'FOO',
-                'currency': 'EUR',
-                'exchangeId': 'exid',
-                'tradable': True,
-                'isin': 'isinexample',
+        #resp = MagicMock()
+        #resp.json = MagicMock(return_value={'data': {
+        #    '123': {
+        #        'id': '123',
+        #        'product_type_id': 'UNKNOWNPRODUCTID',
+        #        'name': 'foo',
+        #        'symbol': 'FOO',
+        #        'currency': 'EUR',
+        #        'exchangeId': 'exid',
+        #        'tradable': True,
+        #        'isin': 'isinexample',
+        #    }
+        #    }})
+        wapi_prodinfo_m.return_value = {'data': {
+                '123': {
+                    'id': '123',
+                    'product_type_id': 'UNKNOWNPRODUCTID',
+                    'name': 'foo',
+                    'symbol': 'FOO',
+                    'currency': 'EUR',
+                    'exchangeId': 'exid',
+                    'tradable': True,
+                    'isin': 'isinexample',
+                }
             }
-            }})
-        wapi_prodinfo_m.return_value = resp
+        }
 
         # Test that degiroasync.api returns properly initiated products
         products_gen = ProductFactory.init_batch(
@@ -394,11 +408,13 @@ if RUN_INTEGRATION_TESTS:
     class TestDegiroasyncIntegrationPrice(
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
+
         async def test_get_price_data(self):
             session = await self._login()
             products = await degiroasync.api.search_product(
                     session,
-                    by_isin='NL0000235190'
+                    by_isin='NL0000235190',
+                    product_type_id=PRODUCT.TYPEID.STOCK
                     )
             #products_awaitable = [p.await_product_info() for p in products]
             #LOGGER.debug('test_get_price_data products_awaitable| %s', products_awaitable)
@@ -409,7 +425,7 @@ if RUN_INTEGRATION_TESTS:
             # of the products.
             #await asyncio.gather(*[p.await_product_info() for p in products])
             #products = [p async for p in products_gen]
-            self.assertGreaterEqual(len(products), 1)
+            self.assertGreaterEqual(len(products), 1, products)
 
             LOGGER.debug('test_get_price_data products| %s',
                          tuple(p.__dict__ for p in products))
@@ -469,9 +485,11 @@ if RUN_INTEGRATION_TESTS:
             products = await degiroasync.api.search_product(
                     session,
                     by_isin='NL0000235190',
+                    by_exchange='EPA',
                     product_type_id=PRODUCT.TYPEID.STOCK
                     )
-            #products_awaitable = [p.await_product_info() for p in products]
+            LOGGER.debug('test_get_price_data_day_resolution| products %s',
+                         pprint.pformat([p.__dict__ for p in products]))
             #LOGGER.debug('test_get_price_data products_awaitable| %s', products_awaitable)
 
             # In a context where we'd want to optimize, we want to
@@ -516,7 +534,7 @@ if RUN_INTEGRATION_TESTS:
             for date_str in date_series:
                 date = datetime.datetime.fromisoformat(date_str)
                 day = datetime.datetime(date.year, date.month, date.day)
-                delta_days = (day - prior_day).days()
+                delta_days = (day - prior_day).days
                 self.assertGreaterEqual(delta_days, 1)
 
                 prior_day = day
@@ -664,7 +682,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertEqual(len(products), 1)
 
             product = products[0]
-            order = await degiroasync.api.check_order(
+            order_check = await degiroasync.api.check_order(
                     session,
                     product=product,
                     buy_sell=ORDER.ACTION.BUY,
@@ -673,8 +691,7 @@ if RUN_INTEGRATION_TESTS:
                     size=1,
                     price=80
             )
-            self.assertIn('confirmation_id', order)
-            self.assertIsInstance(order, Order)
+            self.assertIn('confirmation_id', order_check)
 
 #if __name__ == '__main__':
 #    import nose2

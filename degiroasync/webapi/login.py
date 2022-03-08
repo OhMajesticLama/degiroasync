@@ -11,6 +11,7 @@ import httpx
 
 from ..core.constants import LOGGER_NAME
 from ..core.constants import LOGIN
+from ..core.constants import TIMEOUT
 from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import check_session_config
 from ..core.helpers import check_response
@@ -38,9 +39,10 @@ async def login(
         "isPassCodeReset": '',
         "queryParams": {"reason": "session_expired"}
     }
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+        LOGGER.debug("login| url %s", url)
         response = await client.post(url, data=json.dumps(payload))
-        LOGGER.debug(response.__dict__)
+        LOGGER.debug("login| response %s", response.__dict__)
 
         response_load = response.json()
 
@@ -83,7 +85,7 @@ async def get_config(session: SessionCore) -> SessionCore:
     Populate session with configuration
     """
     _check_active_session(session)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         res = await client.get(URLs.CONFIG, cookies=session._cookies)
 
     check_response(res)
@@ -99,7 +101,7 @@ async def get_client_info(session: SessionCore) -> SessionCore:
     Get client information.
     """
     url = URLs.get_client_info_url(session)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         res = await client.get(
             url,
             params={'sessionId': session._cookies[session.JSESSIONID]},
@@ -115,15 +117,15 @@ async def get_account_info(session: SessionCore) -> SessionCore:
 
     """
     _check_active_session(session)
-    #url = join_url(URLs.ACCOUNT_INFO, str(session.client.intAccount))
-    #url = '/'.join((URLs.ACCOUNT_INFO, session.client.intAccount))
     url = URLs.get_account_info_url(session)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         res = await client.get(url,
                                cookies=session._cookies
                                )
     check_response(res)
-    return res
+    res_json = res.json()
+    LOGGER.debug("get_account_info| res_json %s", res_json)
+    return res_json
 
 
 async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
@@ -142,14 +144,14 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
         intAccount=session.client.int_account,
         sessionId=session.config.session_id
     )
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(url,
                                     cookies=session._cookies,
                                     params=params
                                     )
     check_response(response)
     LOGGER.debug("webapi.get_product_dictionary response| %s", response.json())
-    return response
+    return response.json()
 
 
 ###########

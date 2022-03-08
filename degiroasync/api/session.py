@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Dict, Any
 import functools
 import logging
 import pprint
@@ -53,11 +53,13 @@ class ExchangeDictionary:
     countries: List[Country]
     regions: List[Region]
 
+    _exchanges: Dict[str, Any]
+
     async def __new__(cls, session: SessionCore):
         self = super().__new__(cls)
 
-        resp = await webapi.get_product_dictionary(session)
-        product_dictionary = resp.json()
+        product_dictionary = await webapi.get_product_dictionary(session)
+        #product_dictionary = resp.json()
         LOGGER.debug("api.ExchangeDictionary| %s",
                      pprint.pformat(product_dictionary))
         self._regions = {p['id']: Region(p)
@@ -85,7 +87,8 @@ class ExchangeDictionary:
             del exchange['country']
 
             # Register country
-            self._exchanges[exchange['id']] = Exchange(camelcase_dict_to_snake(exchange))
+            self._exchanges[exchange['id']] = Exchange(
+                    camelcase_dict_to_snake(exchange))
 
         return self
 

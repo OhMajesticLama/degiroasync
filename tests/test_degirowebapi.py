@@ -99,9 +99,7 @@ if RUN_INTEGRATION_TESTS:
         async def test_porfolio(self):
             session = await self._login()
 
-            response = await degiroasync.webapi.get_portfolio(session)
-            self.assertEqual(response.status_code, 200)
-            resp_json = response.json()
+            resp_json = await degiroasync.webapi.get_portfolio(session)
             LOGGER.debug("test_portfolio| %s", resp_json)
             self.assertTrue('portfolio' in resp_json)
             self.assertTrue('value' in resp_json['portfolio'])
@@ -109,38 +107,36 @@ if RUN_INTEGRATION_TESTS:
         async def test_porfolio_total(self):
             session = await self._login()
 
-            response = await degiroasync.webapi.get_portfolio_total(session)
-            resp_json = response.json()
+            resp_json = await degiroasync.webapi.get_portfolio_total(session)
             LOGGER.debug("test_portfolio_total| %s", resp_json)
-            self.assertIn(response.status_code, (200, 201))
+            #self.assertIn(response.status_code, (200, 201))
             self.assertTrue('totalPortfolio' in resp_json)
             self.assertTrue('value' in resp_json['totalPortfolio'])
 
         async def test_get_products_info(self):
             session = await self._login()
 
-            response = await degiroasync.webapi.get_portfolio(session)
-            portfolio = response.json()['portfolio']
+            resp_json = await degiroasync.webapi.get_portfolio(session)
+            portfolio = resp_json['portfolio']
             product_ids = filter(lambda x: x is not None,
                                  (product.get('id')
                                   for product in portfolio['value']))
             response = await get_products_info(session,
                                                [p for p in product_ids])
-            self.assertEqual(response.status_code, 200)
+            #self.assertEqual(response.status_code, 200)
+            self.assertIsInstance(response, dict)
 
             response = await degiroasync.webapi.get_products_info(session,
                                                                   ["72906"])
-            self.assertEqual(response.status_code, 200)
+            self.assertIsInstance(response, dict)
             LOGGER.debug('webapi.test_get_products_info| %s',
-                         pprint.pformat(response.json()))
+                         pprint.pformat(response))
 
         async def test_get_company_profile(self):
             session = await self._login()
 
             isin = "FR0010242511"
-            response = await get_company_profile(session, isin)
-            resp_json = response.json()
-            self.assertEqual(response.status_code, 200)
+            resp_json = await get_company_profile(session, isin)
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('businessSummary' in resp_json['data'], resp_json)
             LOGGER.debug('webapi.test_get_company_profile| %s',
@@ -150,9 +146,7 @@ if RUN_INTEGRATION_TESTS:
             session = await self._login()
 
             isin = "FR0010242511"
-            response = await get_news_by_company(session, isin)
-            resp_json = response.json()
-            self.assertEqual(response.status_code, 200)
+            resp_json = await get_news_by_company(session, isin)
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('items' in resp_json['data'], resp_json)
 
@@ -161,13 +155,11 @@ if RUN_INTEGRATION_TESTS:
 
             vwdId = '360114899'
 
-            response = await degiroasync.webapi.get_price_data(
+            resp_json = await degiroasync.webapi.get_price_data(
                     session,
                     vwdId=vwdId,
                     vwdIdentifierType='issueid')
-            LOGGER.debug('get_price_data response: %s', response.content)
-            self.assertEqual(response.status_code, 200)
-            resp_json = response.json()
+            LOGGER.debug('get_price_data response: %s', resp_json)
             LOGGER.debug(resp_json)
             self.assertIn('series', resp_json)
             self.assertIn('data', resp_json['series'][0])
@@ -177,16 +169,12 @@ if RUN_INTEGRATION_TESTS:
 
             vwdId = '360114899'
 
-            response = await degiroasync.webapi.get_price_data(
+            resp_json = await degiroasync.webapi.get_price_data(
                     session,
                     vwdId=vwdId,
                     period=PRICE.PERIOD.P1MONTH,
                     resolution=PRICE.RESOLUTION.PT1M,
                     vwdIdentifierType='issueid')
-            LOGGER.debug('get_price_data_month| response: %s',
-                         response.content)
-            self.assertEqual(response.status_code, 200)
-            resp_json = response.json()
             LOGGER.debug(resp_json)
             self.assertIn('resolution', resp_json)
             self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1M)
@@ -198,16 +186,14 @@ if RUN_INTEGRATION_TESTS:
 
             vwdId = '360114899'
 
-            response = await degiroasync.webapi.get_price_data(
+            resp_json = await degiroasync.webapi.get_price_data(
                     session,
                     vwdId=vwdId,
                     period=PRICE.PERIOD.P1MONTH,
                     resolution=PRICE.RESOLUTION.PT1D,
                     vwdIdentifierType='issueid')
             LOGGER.debug('get_price_data_month_pt1d| response: %s',
-                         response.content)
-            self.assertEqual(response.status_code, 200)
-            resp_json = response.json()
+                         resp_json)
             LOGGER.debug(resp_json)
             self.assertIn('resolution', resp_json)
             self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1D)
@@ -218,9 +204,9 @@ if RUN_INTEGRATION_TESTS:
             session = await self._login()
 
             search = "AIRBUS"
-            response = await degiroasync.webapi.search_product(session, search)
-            resp_json = response.json()
-            self.assertEqual(response.status_code, 200, resp_json)
+            resp_json = await degiroasync.webapi.search_product(
+                    session,
+                    search)
             self.assertIn('products', resp_json, resp_json)
             self.assertGreaterEqual(len(resp_json['products']), 1)
             self.assertIn('id', resp_json['products'][0], resp_json)
@@ -230,8 +216,7 @@ if RUN_INTEGRATION_TESTS:
         async def test_product_dictionary(self):
             session = await self._login()
 
-            response = await degiroasync.webapi.get_product_dictionary(session)
-            resp_json = response.json()
+            resp_json = await degiroasync.webapi.get_product_dictionary(session)
 
             self.assertIn('exchanges', resp_json)
             self.assertIn('countries', resp_json)
@@ -255,10 +240,8 @@ if RUN_INTEGRATION_TESTS:
         async def test_get_orders(self):
             session = await self._login()
 
-            response = await degiroasync.webapi.get_orders(session)
-            resp_json = response.json()
+            resp_json = await degiroasync.webapi.get_orders(session)
             LOGGER.debug("test_get_orders| %s", pprint.pformat(resp_json))
-            self.assertIn(response.status_code, (200, 201))
             self.assertIn('orders', resp_json)
             self.assertIn('value', resp_json['orders'])
 
@@ -290,7 +273,7 @@ if RUN_INTEGRATION_TESTS:
 
             # This will *not* place the order: it would have to be confirmed
             # with `confirm_order` call.
-            response = await degiroasync.webapi.check_order(
+            resp_json = await degiroasync.webapi.check_order(
                     session,
                     product_id=product.base.id,
                     buy_sell=ORDER.ACTION.BUY,
@@ -299,9 +282,7 @@ if RUN_INTEGRATION_TESTS:
                     size=1,
                     price=50
                     )
-            resp_json = response.json()
             LOGGER.debug("test_check_order| %s", pprint.pformat(resp_json))
-            self.assertIn(response.status_code, (200, 201))
             self.assertIn('data', resp_json)
             self.assertIn('confirmationId', resp_json['data'])
             self.assertIn('freeSpaceNew', resp_json['data'])
@@ -309,8 +290,7 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_get_account_info(self):
             session = await self._login()
-            resp = await degiroasync.webapi.get_account_info(session)
-            resp_json = resp.json()
+            resp_json = await degiroasync.webapi.get_account_info(session)
             LOGGER.debug("test_get_account_info| response: %s", resp_json)
 
             self.assertIn('data', resp_json)
@@ -324,12 +304,11 @@ if RUN_INTEGRATION_TESTS:
             to_date = datetime.datetime.today()
             from_date = datetime.datetime.today() - datetime.timedelta(days=7)
             date_format = degiroasync.webapi.orders.ORDER_DATE_FORMAT
-            resp = await degiroasync.webapi.get_orders_history(
+            resp_json = await degiroasync.webapi.get_orders_history(
                     session,
                     from_date=from_date.strftime(date_format),
                     to_date=to_date.strftime(date_format)
                     )
-            resp_json = resp.json()
             LOGGER.debug("test_get_orders_history| response: %s", resp_json)
 
             self.assertIn('data', resp_json)
@@ -364,12 +343,11 @@ if RUN_INTEGRATION_TESTS:
             to_date = datetime.datetime.today()
             from_date = datetime.datetime.today() - datetime.timedelta(days=7)
             date_format = degiroasync.webapi.orders.ORDER_DATE_FORMAT
-            resp = await degiroasync.webapi.get_transactions(
+            resp_json = await degiroasync.webapi.get_transactions(
                     session,
                     from_date=from_date.strftime(date_format),
                     to_date=to_date.strftime(date_format)
                     )
-            resp_json = resp.json()
             LOGGER.debug("test_get_orders_history| response: %s", resp_json)
 
             self.assertIn('data', resp_json)

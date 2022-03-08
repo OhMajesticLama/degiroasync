@@ -198,3 +198,7 @@ class PRICE:
     class TYPE(StrEnum):
         PRICE = 'price'
         OHLC = 'ohlc'
+
+
+# HTTP Requests global timeout, in seconds
+TIMEOUT: float = 20

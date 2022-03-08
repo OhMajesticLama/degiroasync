@@ -27,19 +27,18 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.12.5",
+        version="0.13.0",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
-        #url="https://github.com/OhMajesticLama/degiroasync",
-        #scripts=[],  # we'll want a helper script that runs integration tests
-                      # to help users detecting API changes.
+        url="https://github.com/OhMajesticLama/degiroasync",
         packages=setuptools.find_packages(),
         install_requires=[
             'httpx >= 0.21.3',
             'jsonloader >= 0.7.0',
             'typeguard >= 2.13.3',
-            'asyncstdlib >= 3.10.3'
+            'asyncstdlib >= 3.10.3',
+            'more_itertools >= 8.12.0'
             ],
         extras_require={
             'dev': [

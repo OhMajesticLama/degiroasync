@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, Dict, Any
 import datetime
 
 import httpx
@@ -9,6 +9,7 @@ from ..core import SessionCore
 from ..core import URLs
 from ..core import constants
 from ..core import ORDER
+from ..core.constants import TIMEOUT
 from ..core import join_url
 from ..core import check_session_client
 from ..core import check_session_config
@@ -101,7 +102,7 @@ async def confirm_order(
         timeType=time_type
     )
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.post(
             url,
             params=params,
@@ -110,7 +111,7 @@ async def confirm_order(
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("check_order| %s", resp_json)
-    return response
+    return resp_json
 
 
 def _order_calls_check(
@@ -149,7 +150,7 @@ async def check_order(
         order_type: ORDER.TYPE,
         size: int,
         price: Union[float, None] = None,
-) -> httpx.Response:
+) -> Dict[str, Any]:
     """
     Start the placing order process. This is used to retrieve order
     cost for instance and is mandatory to actually place an order with
@@ -225,7 +226,7 @@ async def check_order(
         timeType=time_type
     )
     LOGGER.debug("check_order data| %s", data)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.post(
             url,
             params=params,
@@ -238,10 +239,10 @@ async def check_order(
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("check_order| %s", resp_json)
-    return response
+    return response.json()
 
 
-async def get_orders(session: SessionCore) -> httpx.Response:
+async def get_orders(session: SessionCore) -> Dict[str, Any]:
     """
     Get current and historical orders.
 
@@ -266,7 +267,7 @@ async def get_orders_history(
         session: SessionCore,
         from_date: str,
         to_date: str,
-) -> httpx.Response:
+) -> Dict[str, Any]:
     """
     Get historical orders for session.
 
@@ -317,7 +318,7 @@ async def get_orders_history(
         sessionId=jsessionid
     )
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(
             url,
             params=params,
@@ -329,14 +330,14 @@ async def get_orders_history(
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("get_orders_history| %s", resp_json)
-    return response
+    return response.json()
 
 
 async def get_transactions(
         session: SessionCore,
         from_date: str,
         to_date: str,
-) -> httpx.Response:
+) -> Dict[str, Any]:
     """
     Get transactions for session.
 
@@ -391,7 +392,7 @@ async def get_transactions(
     )
 
     LOGGER.debug('get_transactions params| %s', params)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(
             url,
             params=params,
@@ -403,4 +404,4 @@ async def get_transactions(
     check_response(response)
     resp_json = response.json()
     LOGGER.debug("get_transactions response| %s", resp_json)
-    return response
+    return resp_json

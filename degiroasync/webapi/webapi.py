@@ -9,13 +9,14 @@ from ..core import check_session_config
 from ..core.constants import LOGGER_NAME
 from ..core.constants import PRICE
 from ..core.constants import PRODUCT
+from ..core.constants import TIMEOUT
 from ..core.helpers import check_response
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 
-async def get_portfolio(session: SessionCore) -> httpx.Response:
+async def get_portfolio(session: SessionCore) -> Dict[str, Any]:
     """
     Get portfolio web call.
 
@@ -529,7 +530,7 @@ async def get_portfolio(session: SessionCore) -> httpx.Response:
         params={'portfolio': 0})
 
 
-async def get_portfolio_total(session: SessionCore) -> httpx.Response:
+async def get_portfolio_total(session: SessionCore) -> Dict[str, Any]:
     return await get_trading_update(
         session,
         params={'totalPortfolio': 0})
@@ -537,7 +538,7 @@ async def get_portfolio_total(session: SessionCore) -> httpx.Response:
 
 async def get_products_info(
         session: SessionCore,
-        products_ids: List[str]) -> httpx.Response:
+        products_ids: List[str]) -> Dict[str, Any]:
     """
     Get Product info Web API call.
     """
@@ -548,7 +549,7 @@ async def get_products_info(
     LOGGER.debug('get_products_info products_ids| %s', products_ids)
     url = join_url(session.config.product_search_url,
                    'v5/products/info')
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.post(
             url,
             cookies=session.cookies,
@@ -561,16 +562,17 @@ async def get_products_info(
         try:
             check_response(response)
         except Exception:
+            LOGGER.error('get_products_info response| %s', response)
             LOGGER.error('get_products_info error| %s', products_ids)
             LOGGER.error('get_products_info error| %s', response.json())
             raise
         LOGGER.debug('get_products_info|', response.json())
-    return response
+    return response.json()
 
 
 async def get_company_profile(
         session: SessionCore,
-        isin: str) -> httpx.Response:
+        isin: str) -> Dict[str, Any]:
     """
     Get company profile.
 
@@ -581,7 +583,7 @@ async def get_company_profile(
     # Look for dgtbxdsservice in network logs for financial statements etc.
     # might have intraday data as well
     url = join_url(URLs.BASE, 'dgtbxdsservice/company-profile/v2', isin)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(
             url,
             cookies=session.cookies,
@@ -591,7 +593,7 @@ async def get_company_profile(
             })
     check_response(response)
     LOGGER.debug(response.json())
-    return response
+    return response.json()
 
 
 async def get_news_by_company(
@@ -600,12 +602,12 @@ async def get_news_by_company(
         limit: int = 10,
         languages: List[str] = ['en'],
         offset: int = 0
-):
+) -> Dict[str, Any]:
     """
     Get news for a company.
     """
     url = URLs.get_news_by_company_url(session)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(
             url,
             cookies=session.cookies,
@@ -618,8 +620,9 @@ async def get_news_by_company(
                 'sessionId': session.config.session_id
             })
     check_response(response)
-    LOGGER.debug(response.json())
-    return response
+    resp_json = response.json()
+    LOGGER.debug("get_news_by_company| %s", resp_json)
+    return resp_json
 
 
 async def get_price_data(
@@ -631,7 +634,7 @@ async def get_price_data(
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
-) -> httpx.Response:
+) -> Dict[str, Any]:
     """
     Get price data for a company.
 
@@ -740,19 +743,20 @@ async def get_price_data(
         'userToken': session.config.client_id
     }
     LOGGER.debug('get_price_data params| %s', params)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(url,
                                     cookies=session.cookies,
                                     params=params)
     check_response(response)
-    LOGGER.debug('get_price_data response| %s', response.json())
-    return response
+    resp_json = response.json()
+    LOGGER.debug('get_price_data response| %s', resp_json)
+    return resp_json
 
 
 async def get_trading_update(
         session: SessionCore,
         params: Dict[str, int]
-) -> httpx.Response:
+) -> Dict[str, Any]:
     """
     Common call to target {tradingUrl}/v5/update/{intAccount}
 
@@ -771,14 +775,14 @@ async def get_trading_update(
         Executed transactions.
     """
     url = URLs.get_portfolio_url(session)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(url,
                                     cookies=session._cookies,
                                     params=params)
 
     check_response(response)
     LOGGER.debug("get_trading_update| %s", response.json())
-    return response
+    return response.json()
 
 
 async def search_product(
@@ -786,7 +790,7 @@ async def search_product(
         search_txt: str,
         product_type_id: Union[PRODUCT.TYPEID, None] = None,
         limit: int = 10,
-        offset: int = 0) -> httpx.Response:
+        offset: int = 0) -> Dict[str, Any]:
     """
     Access `product_search` endpoint.
 
@@ -862,13 +866,13 @@ async def search_product(
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
     LOGGER.debug("webapi.search_product params| %s", params)
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         response = await client.get(url,
                                     cookies=session._cookies,
                                     params=params)
     check_response(response)
     LOGGER.debug("webapi.search_product response| %s", response.json())
-    return response
+    return response.json()
 
 
 __all__ = [
