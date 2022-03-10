@@ -36,8 +36,6 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 #        throttler = Throttler()
 #        pass
 
-class ResponseError(Exception):
-    "Raised when bad response has been received from server."
 
 
 class CoroCache:

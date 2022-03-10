@@ -56,7 +56,10 @@ class Transaction:
     total_plus_fee_in_base_currency: float
 
 
-async def submit_order():
+async def confirm_order():
+    """
+    Not implemented. Use webapi.confirm_order.
+    """
     raise NotImplementedError
 
 
@@ -162,9 +165,12 @@ async def get_orders(
             'CONFIRMED': ORDER.STATUS.CONFIRMED,
             'REJECTED': ORDER.STATUS.REJECTED
                 }[order['status']]
+    # 2022.03 mypy does not handle __new__ well, ignore for now.
     return (
-        [Order(camelcase_dict_to_snake(o)) for o in orders_dict],
-        [Order(camelcase_dict_to_snake(o)) for o in orders_history_dict]
+        [Order(camelcase_dict_to_snake(o))  # type: ignore
+            for o in orders_dict],
+        [Order(camelcase_dict_to_snake(o))  # type: ignore
+            for o in orders_history_dict]
     )
 
 

@@ -25,6 +25,10 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 LOGGER.setLevel(logging.DEBUG)
 
 
+class ResponseError(Exception):
+    "Raised when bad response has been received from server."
+
+
 @dataclasses.dataclass
 class Credentials:
     """

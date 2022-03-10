@@ -200,5 +200,9 @@ class PRICE:
         OHLC = 'ohlc'
 
 
+class POSITION:
+    class TYPE(StrEnum):
+        PRODUCT = 'PRODUCT'
+
 # HTTP Requests global timeout, in seconds
 TIMEOUT: float = 20

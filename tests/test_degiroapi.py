@@ -265,7 +265,7 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         wapi_prodinfo_m.return_value = {'data': {
                 '123': {
                     'id': '123',
-                    'product_type_id': 'UNKNOWNPRODUCTID',
+                    'product_type_id': 99,
                     'name': 'foo',
                     'symbol': 'FOO',
                     'currency': 'EUR',
@@ -313,7 +313,7 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         wapi_prodinfo_m.return_value = {'data': {
                 '123': {
                     'id': '123',
-                    'product_type_id': 'UNKNOWNPRODUCTID',
+                    'product_type_id': 99,
                     'name': 'foo',
                     'symbol': 'FOO',
                     'currency': 'EUR',
@@ -387,15 +387,16 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_get_portfolio_products_info(self):
             session = await self._login()
-            products = await degiroasync.api.get_portfolio(session)
+            positions = await degiroasync.api.get_portfolio(session)
             LOGGER.debug("test_get_portfolio_products_info: %s",
-                         pprint.pformat(tuple(p.__dict__ for p in products)))
+                         pprint.pformat(tuple(p.__dict__ for p in positions)))
 
             self.assertGreaterEqual(
-                    len(products), 1,
+                    len(positions), 1,
                     "If there is no product in portfolio, this is expected to "
                     "fail. Otherwise: this is an issue to be fixed.")
-            for product in products:
+            for pos in positions:
+                product = pos.product
                 self.assertIsNotNone(product.base.id)
                 LOGGER.debug("test_get_portfolio_products_info2: %s",
                              pprint.pformat(product.info))

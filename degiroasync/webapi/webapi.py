@@ -563,11 +563,13 @@ async def get_products_info(
             check_response(response)
         except Exception:
             LOGGER.error('get_products_info response| %s', response)
-            LOGGER.error('get_products_info error| %s', products_ids)
-            LOGGER.error('get_products_info error| %s', response.json())
+            LOGGER.error('get_products_info url| %s', url)
+            LOGGER.error('get_products_info products_ids| %s', products_ids)
+            LOGGER.error('get_products_info products_ids| %s', products_ids)
             raise
-        LOGGER.debug('get_products_info|', response.json())
-    return response.json()
+        resp_json = response.json()
+        LOGGER.debug('get_products_info|', resp_json)
+    return resp_json
 
 
 async def get_company_profile(

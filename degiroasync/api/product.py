@@ -1,5 +1,5 @@
 from typing import Iterable, Any, List, Dict, Tuple, Union, ForwardRef, AnyStr
-from typing import Optional, AsyncGenerator
+from typing import Optional, AsyncGenerator, Sequence
 import logging
 import pprint
 import itertools
@@ -20,6 +20,7 @@ from more_itertools import unique_everseen
 
 from ..core.constants import PRODUCT
 from ..core.constants import PRICE
+from ..core.constants import POSITION
 from .. import webapi
 from ..core import LOGGER_NAME
 from ..core import ResponseError
@@ -62,7 +63,7 @@ class ProductBase:
         symbol: str
         currency: str
         exchange_id: str
-        product_type_id: int
+        product_type_id: Union[PRODUCT.TYPEID, int]  # is int for unknown types
     base: Base
     info: Info
 
@@ -197,9 +198,22 @@ class ProductFactory:
                          product_base)
             product_id = product_base['id']
             if product_id in products_dict:
+                # Don't instantiate twice the same product: point to the
+                # already instantiated one.
                 instance = products_dict[product_id]
             else:
-                product_type_id = products_info[product_id]['product_type_id']
+                product_info = products_info[product_id]
+                LOGGER.debug("__products_from_attrs| product_info %s",
+                             product_info)
+                try:
+                    product_info['product_type_id'] = PRODUCT.TYPEID(
+                        product_info['product_type_id']
+                        )
+                except ValueError:
+                    # Let int live its life, it'll be a generic product.
+                    pass
+
+                product_type_id = product_info['product_type_id']
                 # Get specialized class if there is one implemented
                 inst_cls = {
                     PRODUCT.TYPEID.CURRENCY: Currency,
@@ -211,8 +225,8 @@ class ProductFactory:
                 LOGGER.debug(
                         "api.ProductFactory.init_product| type_id %s class %s",
                         product_type_id, inst_cls)
-                info = inst_cls.Info(camelcase_dict_to_snake(
-                    products_info[product_id]))
+                info = inst_cls.Info(
+                        camelcase_dict_to_snake(product_info))
                 instance = inst_cls(force_init=True)
                 instance.base = inst_cls.Base(product_base)
                 instance.info = info
@@ -228,6 +242,7 @@ class Currency(ProductBase):
         name: str
         vwd_id: Optional[str] = None  # not set if non-tradable
         tradable: bool
+        product_type_id: PRODUCT.TYPEID
 
 
 class Stock(ProductBase):
@@ -239,6 +254,7 @@ class Stock(ProductBase):
         vwd_id: Optional[AnyStr] = None  # not set if non-tradable
         vwd_identifier_type: Optional[AnyStr] = None  # not set if non-tradable
         product_type: str
+        product_type_id: PRODUCT.TYPEID
         tradable: bool
         category: str
         # feed_quality: str  # Not always available
@@ -291,9 +307,33 @@ class TotalPortfolio:
     """
 
 
+@JSONclass(annotations=True, annotations_type=True)
+class Position:
+    """
+    A position on a product, returned by get_portfolio.
+    """
+    product: ProductBase
+    size: Union[int, float]
+    price: float
+    value: float
+    position_type: Union[POSITION.TYPE, str]
+    break_even_price: float
+    average_fx_rate: Union[float, int]
+    realized_product_pl: float
+    today_realized_product_pl: float
+    realized_fx_pl: Union[float, int]
+    today_realized_fx_pl: Union[float, int]
+    pl_base: Dict[str, float]
+    today_pl_base: Dict[str, float]
+    portfolio_value_correction: Union[float, int]
+
+    # Example camel case JSON:
+# {'id': '8217023', 'position_type': 'PRODUCT', 'size': 70, 'price': 55.39, 'value': 3877.3, 'pl_base': {'EUR': -4796.53}, 'today_pl_base': {'EUR': -3877.3}, 'portfolio_value_correction': 0, 'break_even_price': 68.36, 'average_fx_rate': 1, 'realized_product_pl': -11.33, 'realized_fx_pl': 0, 'today_realized_product_pl': 0.0, 'today_realized_fx_pl': 0}
+
+
 async def get_portfolio(
         session: SessionCore
-) -> List[ProductBase]:
+) -> Sequence[Position]:
     """
     Returns Products in portfolio. Refer to  `Products` classes for minimum
     available attributes.
@@ -303,13 +343,27 @@ async def get_portfolio(
 
     resp_json = await webapi.get_portfolio(session)
     portf_json = resp_json['portfolio']['value']
-    portf_dict_json = [dict_from_attr_list(v['value'], ignore_error=True)
-                       for v in portf_json]
+    portf_dict_json = [
+            camelcase_dict_to_snake(
+                dict_from_attr_list(v['value'], ignore_error=True))
+            for v in portf_json]
     LOGGER.debug("api.get_portfolio| %s", pprint.pformat(portf_dict_json))
 
-    portfolio = ProductFactory.init_batch(session, portf_dict_json)
+    portfolio = ProductFactory.init_batch(
+            session,
+            ({'id': p['id']} for p in portf_dict_json))
 
-    return [p async for p in portfolio]
+    products = {p.info.id: p async for p in portfolio}
+    for portf in portf_dict_json:
+        portf['product'] = products[portf['id']]
+        try:
+            portf['position_type'] = POSITION.TYPE(portf['position_type'])
+        except ValueError:
+            # Let str value
+            LOGGER.info("POSITION TYPE %s unknown. Leave as is.",
+                        portf['position_type'])
+        del portf['id']
+    return [Position(portf) for portf in portf_dict_json]
 
 
 async def get_portfolio_total(

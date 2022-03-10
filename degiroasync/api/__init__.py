@@ -1,4 +1,3 @@
-from .orders import submit_order
 from .orders import check_order
 from .orders import get_orders
 from .orders import get_transactions
@@ -12,10 +11,8 @@ from .product import get_portfolio
 from .product import get_portfolio_total
 from .product import get_price_data
 from .product import search_product
-#from .product import PriceData
 from .product import Stock
 from .product import Currency
-#from .product import ProductBase
 from .product import ProductBase
 from .product import ProductFactory
 from .product import ProductGeneric
@@ -25,6 +22,7 @@ from ..core import Credentials
 from ..core.constants import PRODUCT
 from ..core.constants import PRICE
 from ..core.constants import ORDER
+from ..core.constants import POSITION
 
 
 __all__ = [obj.__name__ for obj in (
@@ -51,7 +49,6 @@ __all__ = [obj.__name__ for obj in (
     TotalPortfolio,
 
     # Order
-    submit_order,
     check_order,
     get_orders,
     get_transactions,
@@ -59,5 +56,7 @@ __all__ = [obj.__name__ for obj in (
 
     # Constants
     PRODUCT,
-    PRICE
+    ORDER,
+    PRICE,
+    POSITION
 )]
