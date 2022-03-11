@@ -9,7 +9,7 @@ from .constants import TRANSACTION
 from .constants import POSITION
 from .core import check_session_client
 from .core import check_session_config
-from .core import ResponseError
+from .constants import ResponseError
 
 
 # TODO: __all__ = [

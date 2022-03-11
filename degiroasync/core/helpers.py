@@ -11,31 +11,11 @@ import time
 import asyncstdlib.functools as afunctools
 import httpx
 
-#from .core import Session
-#from .core import ResponseError
 from .constants import LOGGER_NAME
+from .constants import ResponseError
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
-
-#from aio_throttle import Throttler
-#
-#
-#def throttle(
-#        func: Optional[Callable] = None,
-#        capacity_limit: int,
-#        queue_limit: int = 0,
-#	consumer_quotas: Union[List[aio_throttle.quotas.ThrottleCapacityQuota[str]], NoneType] = None,
-#    	priority_quotas: Union[List[aio_throttle.quotas.ThrottleCapacityQuota[aio_throttle.base.ThrottlePriority]], NoneType] = None,
-#    	quotas: Union[List[aio_throttle.quotas.ThrottleQuota], NoneType] = None,
-#        **kwargs
-#        ):
-#    if func is None:
-#        return lambda f: throttle(f, **kwargs)
-#    else:
-#        throttler = Throttler()
-#        pass
-
 
 
 class CoroCache:

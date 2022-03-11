@@ -14,6 +14,10 @@ except ImportError:
 LOGGER_NAME = 'degiroasync'
 
 
+class ResponseError(Exception):
+    "Raised when bad response has been received from server."
+
+
 class _EnumBase(enum.Enum):
     """
     Base class for Enums that should behave as str or other types.
