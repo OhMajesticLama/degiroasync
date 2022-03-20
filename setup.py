@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.13.0",
+        version="0.14.0",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
@@ -35,7 +35,7 @@ if __name__ == '__main__':
         packages=setuptools.find_packages(),
         install_requires=[
             'httpx >= 0.21.3',
-            'jsonloader >= 0.7.0',
+            'jsonloader >= 0.8.1',
             'typeguard >= 2.13.3',
             'asyncstdlib >= 3.10.3',
             'more_itertools >= 8.12.0'
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
             "Operating System :: OS Independent",
-            "Development Status :: 2 - Pre-Alpha"
+            "Development Status :: 3 - Alpha"
         ],
         test_suite='pytest',
         tests_require=['pytest']

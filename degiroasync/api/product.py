@@ -88,7 +88,7 @@ class ProductFactory:
     @classmethod
     async def init_batch(
             cls,
-            session: SessionCore,
+            session: Session,
             attributes_iter: Iterable[Dict[str, Any]],
             size=50
     ) -> AsyncGenerator[ProductBase, None]:
@@ -153,7 +153,7 @@ class ProductFactory:
     @classmethod
     async def _create_batch(
             cls,
-            session: SessionCore,
+            session: Session,
             attributes_batch: Iterable[Dict[str, Any]]
     ) -> Iterable[ProductBase]:
         """
@@ -176,6 +176,7 @@ class ProductFactory:
         LOGGER.debug('_create_batch| products_info %s', products_info)
 
         return cls.__products_from_attrs(
+                session,
                 attributes_batch2,
                 products_info
             )
@@ -183,6 +184,7 @@ class ProductFactory:
     @classmethod
     def __products_from_attrs(
             cls,
+            session: Session,
             products_base_iter: Iterable[Dict[str, Any]],
             products_info: Dict[str, Any]):
         """
@@ -225,8 +227,8 @@ class ProductFactory:
                 LOGGER.debug(
                         "api.ProductFactory.init_product| type_id %s class %s",
                         product_type_id, inst_cls)
-                info = inst_cls.Info(
-                        camelcase_dict_to_snake(product_info))
+                product_info = camelcase_dict_to_snake(product_info)
+                info = inst_cls.Info(product_info)
                 instance = inst_cls(force_init=True)
                 instance.base = inst_cls.Base(product_base)
                 instance.info = info
@@ -265,7 +267,7 @@ class Stock(ProductBase):
 
 
 class ProductGeneric(ProductBase):
-    class Base(ProductBase.Info):
+    class Base(ProductBase.Base):
         id: str
 
     class Info(ProductBase.Info):

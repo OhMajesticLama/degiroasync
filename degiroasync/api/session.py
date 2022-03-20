@@ -2,11 +2,14 @@ from typing import Union, List, Dict, Any
 import functools
 import logging
 import pprint
+import copy
 
 from jsonloader import JSONclass
 
 from ..core import LOGGER_NAME
 from ..core import SessionCore
+from ..core import Config
+from ..core import PAClient
 from ..core import Credentials
 from ..core import camelcase_dict_to_snake
 from .. import webapi
@@ -45,7 +48,6 @@ class ExchangeDictionary:
 
     >>>> exchangedict = await ExchangeDictionary(session)
     >>>> exchangedict.exchange_by(hiqAbbr='EPA')
-    {''}  # TODO
 
     """
 
@@ -148,15 +150,35 @@ class ExchangeDictionary:
 
 
 class Session(SessionCore):
-    exchange_dictionary: Union[ExchangeDictionary, None] = None
+    config: Config
+    client: PAClient
+    exchange_dictionary: ExchangeDictionary
+
+    def __init__(self,
+                 session_core: SessionCore,
+                 exchange_dictionary: ExchangeDictionary):
+        """
+        Use `api.login` to get a populated Session instance.
+
+        Build a `Session` instance from a `SessionCore` and an
+        exchange_dictionary.
+        """
+        LOGGER.debug("Session.__init__: session_core %s", session_core)
+        if session_core.config is None:
+            raise AssertionError("session_core.config not set.")
+        if session_core.client is None:
+            raise AssertionError("session_core.client not set.")
+        self.__dict__.update(copy.copy(session_core.__dict__))
+        self.config = session_core.config
+        self.client = session_core.client
+        self.exchange_dictionary = exchange_dictionary
 
 
-async def get_exchange_dictionary(session: Session) -> Session:
+async def get_exchange_dictionary(session: Session) -> ExchangeDictionary:
     """
     Populate session with exchange_dictionary.
     """
-    session.exchange_dictionary = await ExchangeDictionary(session)
-    return session
+    return await ExchangeDictionary(session)
 
 
 async def login(
@@ -176,12 +198,15 @@ async def login(
 
     If no `session` is provided, create one.
     """
-    if session is None:
-        session = Session()
-    await webapi.login(credentials, session)
-    await webapi.get_config(session)
-    await webapi.get_client_info(session)
-    await get_exchange_dictionary(session)
+    session_core = await webapi.login(credentials)
+    await webapi.get_config(session_core)
+    await webapi.get_client_info(session_core)
+    exchange_dictionary = await get_exchange_dictionary(session_core)
+    if session is not None:
+        session.__dict__.update(copy.deepcopy(session_core))
+        session.exchange_dictionary = exchange_dictionary
+    else:
+        return Session(session_core, exchange_dictionary)
     return session
 
 
@@ -193,5 +218,4 @@ def check_session_exchange_dictionary(session: Session):
     if session.exchange_dictionary is None:
         raise AssertionError(
             "session.exchange_dictionary is not set. "
-            "Use api.login to build your session or call "
-            "api.get_exchange_dictionary on it.")
+            "Use api.login to build your session or call ")

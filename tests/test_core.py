@@ -13,7 +13,7 @@ class TestLRUCacheTimed(unittest.IsolatedAsyncioTestCase):
     async def test_cached_time_async(self):
         delay = 0.1  # in s
 
-        @degiroasync.core.lru_cache_timed(seconds=delay*1.1)
+        @degiroasync.core.lru_cache_timed(seconds=delay*1.2)
         async def dummy():
             await asyncio.sleep(delay)
             return 2
@@ -29,7 +29,7 @@ class TestLRUCacheTimed(unittest.IsolatedAsyncioTestCase):
         self.assertLessEqual(time.time() - start2, delay*0.5,
                              "Looks like result was not cached.")
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(10*delay)
 
         start3 = time.time()
         res = await dummy()

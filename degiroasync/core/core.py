@@ -12,7 +12,7 @@ except ImportError:
         def __str__(self):
             return str.__str__(self)
 
-from typing import Union
+from typing import Union, Optional
 
 import httpx
 from jsonloader import JSONclass
@@ -23,7 +23,6 @@ from .constants import PRODUCT
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 LOGGER.setLevel(logging.DEBUG)
-
 
 
 @dataclasses.dataclass
@@ -106,7 +105,7 @@ class PAClient:
     #    iban = Union[str, None]
     #    status: VERIFIED
     # }
-    can_upgrade: Union[str, None]
+    can_upgrade: Union[bool, None]
     client_role: Union[str, None]
     contract_type: Union[str, None]
     culture: Union[str, None]
@@ -131,9 +130,9 @@ class PAClient:
     #    iban = Union[str, None]
     # }
     id: Union[str, None]
-    int_account: Union[str, None]
-    is_allocation_available: Union[str, None]
-    is_am_client_active: Union[str, None]
+    int_account: Union[int, None]
+    is_allocation_available: Union[bool, None]
+    is_am_client_active: Union[bool, None]
 
     # def set_data(self, data: dict):
     #    check_keys(data, ('intAccount', 'id'))
@@ -145,8 +144,8 @@ class PAClient:
 class SessionCore:
     JSESSIONID = 'JSESSIONID'
 
-    config: Union[Config, None] = None
-    client: Union[PAClient, None] = None
+    config: Optional[Config] = None
+    client: Optional[PAClient] = None
 
     # Cookies
     # Wrap to not leak httpx

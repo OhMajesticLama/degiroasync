@@ -108,7 +108,10 @@ async def get_client_info(session: SessionCore) -> SessionCore:
             cookies=session._cookies)
 
     check_response(res)
-    session.client = PAClient(camelcase_dict_to_snake(res.json()['data']))
+    resp_data = res.json()['data']
+    if 'id' in resp_data:
+        resp_data['id'] = str(resp_data['id'])
+    session.client = PAClient(camelcase_dict_to_snake(resp_data))
     return session
 
 

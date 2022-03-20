@@ -2,6 +2,7 @@ from .orders import check_order
 from .orders import get_orders
 from .orders import get_transactions
 from .orders import Order
+from .orders import Transaction
 from .session import Session
 from .session import login
 from .session import get_exchange_dictionary
@@ -33,10 +34,12 @@ __all__ = [obj.__name__ for obj in (
     get_exchange_dictionary,
     ExchangeDictionary,
     Exchange, Region, Country,
+
     # Product
     search_product,
     get_portfolio,
     get_price_data,
+
     # PriceData,
     PriceSeriesTime,
     Stock,
@@ -53,6 +56,7 @@ __all__ = [obj.__name__ for obj in (
     get_orders,
     get_transactions,
     Order,
+    Transaction,
 
     # Constants
     PRODUCT,

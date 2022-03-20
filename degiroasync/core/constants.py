@@ -40,7 +40,7 @@ class _EnumBase(enum.Enum):
         return self.value.__str__()
 
 
-class EnumInt(int, _EnumBase):
+class IntEnum(int, _EnumBase):
     """
     Base class for Enums that should behave as str.
 
@@ -74,7 +74,7 @@ class EnumInt(int, _EnumBase):
     <enum 'Foo'>
 
     >>> # An StrEnum child can be used as a drop-in replacement for an int
-    >>> class Foo(EnumInt):
+    >>> class Foo(IntEnum):
     ...     A = 1
     ...
     >>> Foo.A
@@ -88,7 +88,7 @@ class EnumInt(int, _EnumBase):
     """
 
 
-class LOGIN(EnumInt):
+class LOGIN(IntEnum):
     TOTP_NEEDED = 6
 
 
@@ -112,7 +112,7 @@ class ORDER:
         BUY = 'BUY'
         SELL = 'SELL'
 
-    class TYPE(EnumInt):
+    class TYPE(IntEnum):
         """
         LIMITED:
             This is the "Limit" field value of "Order type" in the web trader.
@@ -138,7 +138,7 @@ class ORDER:
         STOP_LOSS = 3
         AMOUNT = 4
 
-    class TIME(EnumInt):
+    class TIME(IntEnum):
         DAY = 1
         PERMANENT = 3
 
@@ -148,7 +148,7 @@ class ORDER:
 
 
 class TRANSACTION:
-    class TYPEID(EnumInt):
+    class TYPEID(IntEnum):
         pass
 
     class COUNTERPARTY(StrEnum):
@@ -158,7 +158,7 @@ class TRANSACTION:
 
 
 class PRODUCT:
-    class TYPEID(EnumInt):
+    class TYPEID(IntEnum):
         STOCK = 1
         BONDS = 2
         FUTURES = 7

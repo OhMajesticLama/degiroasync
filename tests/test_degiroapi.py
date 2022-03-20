@@ -32,6 +32,7 @@ from degiroasync.api import Stock
 from degiroasync.api import Currency
 from degiroasync.api import Order
 from degiroasync.api import ORDER
+from degiroasync.api import Exchange
 from degiroasync.core.constants import PRODUCT
 from degiroasync.core.constants import PRICE
 
@@ -260,8 +261,9 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
     """
     Local tests for Product.
     """
+    @unittest.mock.patch('degiroasync.api.ExchangeDictionary.exchange_by')
     @unittest.mock.patch('degiroasync.webapi.get_products_info')
-    async def test_product(self, wapi_prodinfo_m):
+    async def test_product(self, wapi_prodinfo_m, exchange_by_m):
         wapi_prodinfo_m.return_value = {'data': {
                 '123': {
                     'id': '123',
@@ -275,6 +277,13 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
                 }
             }
         }
+        exchange_by_m.return_value = Exchange(dict(
+            id='idex',
+            name='EuroNext',
+            country_name='France',
+            hiq_abbr='EPA'
+            )
+        )
 
         session = MagicMock()  # Don't care
 
@@ -661,10 +670,11 @@ if RUN_INTEGRATION_TESTS:
                     to_date=to_date
                     )
             LOGGER.debug("test_get_transactions results| %s", transactions)
-            if not len(transactions):
-                LOGGER.warning(
-                        "No transaction found in the last two years. "
-                        "It's possible the account had no activity.")
+            self.assertGreaterEqual(
+                    len(transactions), 1,
+                    "No transaction found in the last 2 years. "
+                    "It's possible the account had no activity."
+                    )
 
             for trans in transactions:
                 self.assertTrue(hasattr(trans, 'product'))

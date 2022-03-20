@@ -254,7 +254,8 @@ if RUN_INTEGRATION_TESTS:
             # to manage. Future improvement opportunit for this test: implement
             # required query and filter here using only webapi.
             from degiroasync import api
-            await api.get_exchange_dictionary(session)
+            session.exchange_dictionary = await api.get_exchange_dictionary(
+                    session)
             products = await api.search_product(
                     session,
                     by_symbol="AIR",
@@ -287,6 +288,24 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('confirmationId', resp_json['data'])
             self.assertIn('freeSpaceNew', resp_json['data'])
             self.assertIn('transactionFee', resp_json['data'])
+
+            resp_json = await degiroasync.webapi.check_order(
+                    session,
+                    product_id=product.base.id,
+                    buy_sell=ORDER.ACTION.SELL,
+                    time_type=ORDER.TIME.DAY,
+                    order_type=ORDER.TYPE.LIMITED,
+                    size=1,
+                    price=50
+                    )
+            LOGGER.debug("test_check_order| %s", pprint.pformat(resp_json))
+            self.assertIn('data', resp_json)
+            self.assertIn('confirmationId', resp_json['data'])
+            self.assertIn('freeSpaceNew', resp_json['data'])
+            self.assertTrue(
+                    'transactionFee' in resp_json['data']
+                    or 'transactionOppositeFee' in resp_json['data'],
+                    resp_json['data'])
 
         async def test_get_account_info(self):
             session = await self._login()

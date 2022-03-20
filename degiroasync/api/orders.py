@@ -13,6 +13,7 @@ from .product import ProductFactory
 from .. import webapi
 from ..core import SessionCore
 from ..core import ORDER
+from ..core import TRANSACTION
 from ..core import LOGGER_NAME
 from ..core import camelcase_dict_to_snake
 
@@ -54,6 +55,11 @@ class Transaction:
     fx_rate: float
     total_in_base_currency: float
     total_plus_fee_in_base_currency: float
+    total_plus_all_fees_in_base_currency: float
+    transaction_type_id: Union[TRANSACTION.TYPEID, int]
+
+# Raw JSON Example
+# {"id":335133383,"productId":8615503,"date":"2022-02-27T00:00:00+01:00","buysell":"S","price":134.6600,"quantity":-40,"total":5386.4000000000,"transfered":true,"fxRate":0,"nettFxRate":0,"grossFxRate":0,"autoFxFeeInBaseCurrency":0,"totalInBaseCurrency":5386.4000000000,"totalFeesInBaseCurrency":0,"totalPlusFeeInBaseCurrency":5386.4000000000,"totalPlusAllFeesInBaseCurrency":5386.4000000000,"transactionTypeId":20
 
 
 async def confirm_order():
@@ -107,7 +113,7 @@ async def check_order(
     has also been observed. It does not seem to serve a differente purpose
     than transaction_fee.
     """
-    assert buy_sell in ("BUY", "SELL")
+    assert isinstance(buy_sell, ORDER.ACTION)
 
     resp_json = await webapi.check_order(
         session=session,
@@ -125,7 +131,7 @@ async def get_orders(
         session: SessionCore,
         from_date: Union[datetime.datetime, None] = None,
         to_date: Union[datetime.datetime, None] = None,
-) -> Tuple[List[Order]]:
+        ) -> Tuple[List[Order]]:
     """
     Get current orders and history.
 
@@ -178,7 +184,7 @@ async def get_transactions(
         session: SessionCore,
         from_date: Union[datetime.datetime, None] = None,
         to_date: Union[datetime.datetime, None] = None
-) -> List[Order]:
+        ) -> List[Transaction]:
     """
     Get transactions for `session`.
 
