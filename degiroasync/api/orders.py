@@ -1,12 +1,10 @@
 from typing import Any, Union, List, Dict, Tuple, Optional
-#import functools
 import datetime
 import logging
 import asyncio
 import itertools
 
 from jsonloader import JSONclass
-from jsonloader import JSONWrapper
 
 from .product import ProductBase
 from .product import ProductFactory
@@ -59,7 +57,7 @@ class Transaction:
     transaction_type_id: Union[TRANSACTION.TYPEID, int]
 
 # Raw JSON Example
-# {"id":335133383,"productId":8615503,"date":"2022-02-27T00:00:00+01:00","buysell":"S","price":134.6600,"quantity":-40,"total":5386.4000000000,"transfered":true,"fxRate":0,"nettFxRate":0,"grossFxRate":0,"autoFxFeeInBaseCurrency":0,"totalInBaseCurrency":5386.4000000000,"totalFeesInBaseCurrency":0,"totalPlusFeeInBaseCurrency":5386.4000000000,"totalPlusAllFeesInBaseCurrency":5386.4000000000,"transactionTypeId":20
+# {"id":335133382,"productId":8615503,"date":"2022-02-26T00:00:00+01:00","buysell":"S","price":134.6600,"quantity":-40,"total":5386.4000000000,"transfered":true,"fxRate":0,"nettFxRate":0,"grossFxRate":0,"autoFxFeeInBaseCurrency":0,"totalInBaseCurrency":5386.4000000000,"totalFeesInBaseCurrency":0,"totalPlusFeeInBaseCurrency":5386.4000000000,"totalPlusAllFeesInBaseCurrency":5386.4000000000,"transactionTypeId":20
 
 
 async def confirm_order():

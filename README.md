@@ -1,14 +1,10 @@
 # DegiroAsync
 
-*Current version is _ALPHA_ level of quality:
+Current version is _ALPHA_ level of quality:
 - essential features are still missing, see supported features section.
 - external interface is still subject to change, even between minor version.
 - while there are integration tests, coverage of integration and unit tests is
- not yet where it needs to be.
-
-DO NOT USE IN PRODUCTION. You have been warned.
- While in this _ALPHA_ state, code is made available in case it can be of use
- for proof-of-concepts, .*
+  not yet where it needs to be.
 
 
 This project aims to provide an *unofficial* API for Degiro platform that works
@@ -29,7 +25,7 @@ This module provides 2 APIs:
   a consumer needs. This is the recommended choice to start.
 - `degiroasync.webapi`: API close to actual Degiro HTTP API. 
   This provides maximum flexibility and data availability, at the cost of
-  less checks and more legwork to beused for higher-level logic.
+  less checks and more legwork to be used for higher-level logic.
 
 `degiroasync.api` is built on top of `degiroasync.webapi`: it should be easy
 to fall back to `webapi` should the need arise. For example, there is currently
@@ -98,16 +94,24 @@ product is running and passing adequate tests before running it in production.
 
 ### User installation
 ```
-# This is an ALPHA
+# This is an ALPHA version. See disclaimers above.
+# Create a virtualenv or equivalent, depending on your tool of choice
 python3 -m virtualenv venv
 . venv/bin/activate
-pip3 install .
+# Install from PyPI
+pip3 install degiroasync
 ```
 
-### Deveveloper installation
+### Developer installation
 ```
+# Clone this repository
+git clone https://github.com/OhMajesticLama/degiroasync
+
+# Create a virtualenv or equivalent, depending on your tool of choice
 python3 -m virtualenv venv
 . venv/bin/activate
+
+# Install with dev dependencies
 pip3 install -e .[dev]
 ```
 
@@ -146,9 +150,9 @@ DEGIRO_TOTP_SECRET  # Only if the account requires 2FA for login
 
 ```
 # Unittests only
-DEGIROASYNC_INTEGRATION=0 nose2 -t .
+DEGIROASYNC_INTEGRATION=0 pytest --color yes
 # Integration tests & Unittests
-DEGIROASYNC_INTEGRATION=1 nose2 -t .
+DEGIROASYNC_INTEGRATION=1 pytest --color yes
 ```
 
 ### Tests coverage
@@ -158,9 +162,8 @@ For example, leverage `coverage` module:
 
 ## Other Python Degiro Libraries
 
-Check-out those other Python Degiro libraries (updated in 2021) to assess which
-best fits your needs:
+Check-out those other Python Degiro libraries - non-exhaustive list - to assess
+which best fits your needs:
 - https://github.com/Chavithra/degiro-connector
 - https://github.com/lolokraus/DegiroAPI
 - https://github.com/bramton/degiro 
-

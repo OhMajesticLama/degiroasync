@@ -4,6 +4,7 @@ __pycache__
 *activate*
 *.dump
 *.swp
+gitstat-report
 
 # Distribution / packaging 
 .Python build/ 

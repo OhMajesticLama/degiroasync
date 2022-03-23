@@ -27,10 +27,11 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.14.0",
+        version="0.14.1",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
+        long_description_content_type='text/markdown',
         url="https://github.com/OhMajesticLama/degiroasync",
         packages=setuptools.find_packages(),
         install_requires=[
@@ -47,6 +48,8 @@ if __name__ == '__main__':
                 'coverage >= 6.3',
                 'build >= 0.7.0',
                 'flake8 >= 4.0.1',
+                'twine >= 3.8.0',
+                'sphinx >= 4.4.0',
                 'ipython',
                 'ipdb'
                 ]
