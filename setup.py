@@ -58,7 +58,9 @@ if __name__ == '__main__':
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
             "Operating System :: OS Independent",
-            "Development Status :: 3 - Alpha"
+            "Development Status :: 3 - Alpha",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            "Intended Audience :: Developers",
         ],
         test_suite='pytest',
         tests_require=['pytest']
