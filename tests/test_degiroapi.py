@@ -703,7 +703,3 @@ if RUN_INTEGRATION_TESTS:
                     price=80
             )
             self.assertIn('confirmation_id', order_check)
-
-#if __name__ == '__main__':
-#    import nose2
-#    nose2.main()

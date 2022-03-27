@@ -372,7 +372,6 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('data', resp_json)
             data = resp_json['data']
             for order in data:
-                self.assertIn('created', order)
                 self.assertIn('orderId', order)
                 self.assertIn('productId', order)
                 self.assertIn('size', order)
