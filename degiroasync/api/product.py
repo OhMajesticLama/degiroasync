@@ -540,39 +540,39 @@ def convert_time_series(
     return data_out
 
 
-async def get_price_data_batch(
-        session: SessionCore,
-        products: Union[Iterable[ProductBase], ProductBase],
-        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
-        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
-        timezone: str = 'Europe/Paris',
-        culture: str = 'fr-FR',
-        data_type: PRICE.TYPE = PRICE.TYPE.PRICE
-):
-    """
-    Get price data for products. Be mindful that not all product types will
+# async def get_price_data_batch(
+#         session: SessionCore,
+#         products: Union[Iterable[ProductBase], ProductBase],
+#         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
+#         period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
+#         timezone: str = 'Europe/Paris',
+#         culture: str = 'fr-FR',
+#         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
+# ):
+#     """
+#     Get price data for products. Be mindful that not all product types will
 
-    >>>>
-    """
-    raise NotImplementedError()  # Add helper around _get_price_data
-    if isinstance(products, ProductBase):
-        products = [products]
+#     >>>>
+#     """
+#     raise NotImplementedError()  # Add helper around _get_price_data
+#     if isinstance(products, ProductBase):
+#         products = [products]
 
-    for product in products:
-        # Ensure product got results of product_info
-        if product.productTypeId != PRODUCT.TYPEID.STOCK:
-            raise NotImplementedError(
-                "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
-                "supported by get_price_data_bulk")
-        vwdId = product.vwdId
-        prices_req.append(webapi.get_price_data(
-            session,
-            vwdId,
-            resolution=resolution,
-            period=period,
-            timezone=timezone,
-            culture=culture,
-            data_type=data_type))
+#     for product in products:
+#         # Ensure product got results of product_info
+#         if product.productTypeId != PRODUCT.TYPEID.STOCK:
+#             raise NotImplementedError(
+#                 "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
+#                 "supported by get_price_data_bulk")
+#         vwdId = product.vwdId
+#         prices_req.append(webapi.get_price_data(
+#             session,
+#             vwdId,
+#             resolution=resolution,
+#             period=period,
+#             timezone=timezone,
+#             culture=culture,
+#             data_type=data_type))
 
 
 async def search_product(

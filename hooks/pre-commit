@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+echo "Linting..."
+flake8 . --select=E9,F63,F7,F82 --show-source --statistics --exclude venv/
+echo "Linting...OK"
+
+set +e
+# Informational only until the project is fully compliant with mypy
+echo "Running mypy from $(pwd)"
+mypy degiroasync
+set -e
+
+echo "Running the tests..."
+DEGIROASYNC_INTEGRATION=0 pytest --color yes
+echo "Running the tests...OK"
