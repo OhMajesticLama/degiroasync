@@ -1,3 +1,6 @@
+"""
+Contains core data structures and helpers for degiroasync.
+"""
 from .core import *
 from .helpers import join_url
 from .helpers import lru_cache_timed

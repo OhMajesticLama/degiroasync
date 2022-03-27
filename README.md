@@ -61,7 +61,7 @@ automation of Degiro trading platform.
 
 
 ## A word on stability
-*degiroasync should be considered alpha quality.*
+*degiroasync should be considered ALPHA quality.*
 
 Until this project's version reaches 1.0, the API should be considered unstable
 and may break even with minor versions increments.
@@ -93,7 +93,7 @@ product is running and passing adequate tests before running it in production.
 ## Install
 
 ### User installation
-```
+```bash
 # This is an ALPHA version. See disclaimers above.
 # Create a virtualenv or equivalent, depending on your tool of choice
 python3 -m virtualenv venv
@@ -103,7 +103,7 @@ pip3 install degiroasync
 ```
 
 ### Developer installation
-```
+```bash
 # Clone this repository
 git clone https://github.com/OhMajesticLama/degiroasync
 
@@ -157,7 +157,11 @@ DEGIROASYNC_INTEGRATION=1 pytest --color yes
 
 ### Tests coverage
 For example, leverage `coverage` module:
-`nose2 -t . -C --coverage-report html` 
+```bash
+coverage run --include='./degiroasync/*' -m pytest 
+# To exclude webapi module
+#coverage run --include='./degiroasync/*' --omit='./degiroasync/webapi/*' -m pytest
+```
 
 
 ## Other Python Degiro Libraries

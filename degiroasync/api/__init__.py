@@ -1,3 +1,60 @@
+"""
+High-level API for DEGIRO platform.
+===================================
+
+This module provides an interface that is higher level than the `webapi` module
+(or the direct HTTP API).
+It provides various data structures with guaranteed fields, and functions
+to build or act on those data structures.
+
+Users should only import directly from `degiroasync.api`, its submodules
+should be considered implementation details.
+
+Data Structures
++++++++++++++++
+
+Details on data structures are available for each data structure.
+
+Core structures to be aware off when dealing with `degiroasync` are:
+    - *Session*
+      It is necessary with almost every call in this module. Session contains
+      session identifier, as well as basic mapping information between
+      identifiers and objects.
+    - *Product*
+      A product per DEGIRO API. This can be a Shares, ETF or any other product
+      available on the platform.
+    - *Order*
+      An order per DEGIRO API. As in the web trader, an order can be active
+      or not, and different order types exist (BUY, SELL, LIMITED ...).
+    - *Transaction*
+      A transaction per DEGIRO API. This reflects cash impacts on the account.
+      There can be zero to many transactions per Order. As of 2022.03, DEGIRO
+      API does not seem to provide relationship between transactions and
+      orders.
+
+Other data structures are available, but more situational. They can be found
+in the module members documentation.
+
+Functions
++++++++++
+
+Several functions reflecting the API calls are implemented in this module,
+An overview of some of the essential ones is listed below.
+Details can be found with each function documentation.
+    - *login*
+      Builds a `Session` instance, this supports login with or without 2FA.
+    - *get_portfolio* and *get_portfolio_total*
+      Provide data on products currently held on the account.
+    - *search_product*
+      Find and instantiate DEGIRO products from various search options (text,
+      ISIN, symbol, exchange ...).
+    - *get_price_data*
+      Get price data on a Product.
+    - *get_orders* and *check_order*
+      Get orders on the account, start placing an order. Note: `webapi` module
+      must currently be used to confirm an order.
+
+"""
 from .orders import check_order
 from .orders import get_orders
 from .orders import get_transactions

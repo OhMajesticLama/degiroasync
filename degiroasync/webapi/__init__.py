@@ -1,4 +1,7 @@
 """
+A Python API close to Webtrader HTTP API
+========================================
+
 Async API for Degiro. This module is close to Degiro Web API structure:
 responses are provided (almost) as-is with minimum abstraction
 and verification.
