@@ -50,6 +50,7 @@ if __name__ == '__main__':
                 'flake8 >= 4.0.1',
                 'twine >= 3.8.0',
                 'sphinx >= 4.4.0',
+                'sphinx_rtd_theme >= 1.0.0',
                 'ipython',
                 'ipdb'
                 ]

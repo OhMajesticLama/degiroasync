@@ -105,18 +105,21 @@ class ProductFactory:
 
         Returns an iterable of Product instances
 
-        >>>> import asyncio
-        >>>> products_attrs = (
-        ....             {'id': 1, 'product_type_id': PRODUCT.TYPEID.STOCK},
-        ....             {'id': 2, 'product_type_id': PRODUCT.TYPEID.STOCK},
-        ....             {'id': 3, 'product_type_id': PRODUCT.TYPEID.STOCK},
-        ....     )
-        >>>> products_gen = ProductFactory.init_batch(session, products_attrs)
-        >>>> # At this stage, we have an awaitable for each product.
-        >>>> # All products information may not be available at the same time
-        >>>> # if init_batch was provided more products than the `size`
-        >>>> # parameter.
-        >>>> products = [p async for p in products_gen]
+        .. code-block:: python
+
+            import asyncio
+            products_attrs = (
+                        {'id': 1, 'product_type_id': PRODUCT.TYPEID.STOCK},
+                        {'id': 2, 'product_type_id': PRODUCT.TYPEID.STOCK},
+                        {'id': 3, 'product_type_id': PRODUCT.TYPEID.STOCK},
+                )
+            products_gen = ProductFactory.init_batch(session, products_attrs)
+            # At this stage, we have an awaitable for each product.
+            # All products information may not be available at the same time
+            # if init_batch was provided more products than the `size`
+            # parameter.
+            products = [p async for p in products_gen]
+
         """
         attributes_batch = []
         batches_awt = []

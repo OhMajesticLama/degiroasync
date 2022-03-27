@@ -46,8 +46,10 @@ class ExchangeDictionary:
     """
     Usage:
 
-    >>>> exchangedict = await ExchangeDictionary(session)
-    >>>> exchangedict.exchange_by(hiqAbbr='EPA')
+    .. code-block:: python
+
+        exchangedict = await ExchangeDictionary(session)
+        exchangedict.exchange_by(hiqAbbr='EPA')
 
     """
 
@@ -192,9 +194,11 @@ async def login(
 
     Strictly equivalent to:
 
-    >>>> session = await degiroasync.webapi.login(credentials)
-    >>>> await webapi.get_config(session)
-    >>>> await webapi.get_client_info(session)
+    .. code-block:: python
+
+        session = await degiroasync.webapi.login(credentials)
+        await webapi.get_config(session)
+        await webapi.get_client_info(session)
 
     If no `session` is provided, create one.
     """

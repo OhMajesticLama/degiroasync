@@ -16,6 +16,7 @@ Data Structures
 Details on data structures are available for each data structure.
 
 Core structures to be aware off when dealing with `degiroasync` are:
+
     - *Session*
       It is necessary with almost every call in this module. Session contains
       session identifier, as well as basic mapping information between
@@ -40,7 +41,8 @@ Functions
 
 Several functions reflecting the API calls are implemented in this module,
 An overview of some of the essential ones is listed below.
-Details can be found with each function documentation.
+Details can be found with each function documentation:
+
     - *login*
       Builds a `Session` instance, this supports login with or without 2FA.
     - *get_portfolio* and *get_portfolio_total*

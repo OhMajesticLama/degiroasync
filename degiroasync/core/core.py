@@ -237,9 +237,11 @@ class URLs:
         This url will need to be completed by caller with `confirmation_id`
         For example:
 
-        >>>> confirmation_id = '98741234kjaskdjfz098234'
-        >>>> confirm_order_url_base = URLs.get_confirm_order_url(session)
-        >>>> join_url(confirm_order_url_base, confirmation_id)
+        .. code-block:: python
+
+            confirmation_id = '98741234kjaskdjfz098234'
+            confirm_order_url_base = URLs.get_confirm_order_url(session)
+            join_url(confirm_order_url_base, confirmation_id)
 
         """
         check_session_config(session)

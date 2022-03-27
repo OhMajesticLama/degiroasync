@@ -83,29 +83,32 @@ async def check_order(
 
     This can also be used to get an order fees before confirming the order.
 
-    >>>> ... # Get your products through search_product
-    >>>> check_order(
-    ...     product=product,
-    ...     buy_sell=ORDER.ACTION.SELL,
-    ...     time_type=ORDER.TIME,
-    ...     order_type=ORDER.TYPE,
-    ...     size=1,
-    ...     price=100
-    ... )
-    ...
+    .. code-block:: python
 
+        # Get your products through search_product
+        check_order(
+            product=product,
+            buy_sell=ORDER.ACTION.SELL,
+            time_type=ORDER.TIME,
+            order_type=ORDER.TYPE,
+            size=1,
+            price=100
+        )
 
     WARNING: This call is rate limited at the end-point level, tests would show
     the call to be rate limited at 1 per second. Users should throttle their
     calls to this function.
 
     Example return:
-    {
-        'confirmation_id': '0f404158-3628-414b-87fc-91e2ab2ba1ee',
-        'free_space_new': 62283.1,
-        'transaction_fee': 0.5,
-        'show_ex_ante_report_link': True
-    }
+
+    .. code-block:: python
+
+        {
+            'confirmation_id': '0f404158-3628-414b-87fc-91e2ab2ba1ee',
+            'free_space_new': 62283.1,
+            'transaction_fee': 0.5,
+            'show_ex_ante_report_link': True
+        }
 
     In the case of a SELL order, the parameter 'transaction_opposite_fee'
     has also been observed. It does not seem to serve a differente purpose
