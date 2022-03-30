@@ -89,6 +89,15 @@ class IntEnum(int, _EnumBase):
 
 
 class LOGIN(IntEnum):
+    """
+    Login-related constants.
+
+    At this date, only one has been noticed and documented.
+
+    TOTP_NEEDED:
+        This flag is set when one-time-password is required to log in the
+        account.
+    """
     TOTP_NEEDED = 6
 
 
@@ -139,10 +148,28 @@ class ORDER:
         AMOUNT = 4
 
     class TIME(IntEnum):
+        """
+        DAY:
+            This is the "Day" option in the web trader.
+            Order placed for one day only: it expires at the end of the day it
+            was created.
+
+        PERMANENT:
+            This is the "GTC" option in the web trader.
+            This order sticks until it has been executed. Be careful that
+            occasionally Degiro cancels Permanent orders due to various events.
+        """
         DAY = 1
         PERMANENT = 3
 
     class STATUS(StrEnum):
+        """
+        CONFIRMED:
+            The order was accepted by the platform.
+
+        REJECTED:
+            The order was *not* accepted by the platform.
+        """
         CONFIRMED = 'CONFIRMED'
         REJECTED = 'REJECTED'
 
@@ -152,6 +179,15 @@ class TRANSACTION:
         pass
 
     class COUNTERPARTY(StrEnum):
+        """
+        Counterparty in web trader transactions details.
+
+        So far, 3 counterparts were documented, see below.
+        It is not completely clear when one counterparty is used rather than
+        the other. Check DEGIRO tool documentation for more details should
+        this be needed.
+
+        """
         MARKET = 'MK'
         DEGIRO = 'DG'
         GROUP = 'GR'
@@ -159,6 +195,39 @@ class TRANSACTION:
 
 class PRODUCT:
     class TYPEID(IntEnum):
+        """
+        STOCK:
+            Stocks, or shares products.
+
+        BONDS:
+            Bonds products.
+
+        FUTURES:
+            Futures products.
+
+        OPTIONS:
+            Options products
+
+        FUNDS:
+            Investment funds products.
+
+        LEVERAGE_PRODUCTS:
+            Leverage products.
+
+        ETFS:
+            ETFs products.
+
+        CFDS:
+            CFDs products.
+
+        WARRANTS:
+            Warrants products.
+
+        CURRENCY:
+            Currencies. This is used by endpoint for account balances for
+            instance.
+
+        """
         STOCK = 1
         BONDS = 2
         FUTURES = 7
@@ -178,6 +247,15 @@ class PRODUCT:
 
 
 class SORT(StrEnum):
+    """
+    Used by some endpoints to provide sorted results.
+
+    ASC:
+        Results will be sorted in ascending order.
+
+    DESC:
+        Results will be sorted in descending order.
+    """
     ASC = "asc"
     DESC = "desc"
 

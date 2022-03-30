@@ -30,10 +30,11 @@ author = 'OhMajesticLama'
 extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.coverage',
-        'sphinx.ext.napoleon',
+        'sphinx.ext.napoleon',  # numpy doc style support
         'sphinx.ext.githubpages',
         'sphinx.ext.doctest',
         'sphinx.ext.autosummary',
+        'myst_parser',  # markdown include
 ]
 
 napoleon_numpy_docstrings = True

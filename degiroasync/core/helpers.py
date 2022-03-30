@@ -367,6 +367,7 @@ def set_params(
                   'value': 0}
             ]
     ```
+
     """
     for k, v in dict_from_attr_list(
             attributes_list, ignore_error=ignore_error).items():

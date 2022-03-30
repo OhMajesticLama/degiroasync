@@ -1,42 +1,48 @@
 degiroasync's documentation
 ===========================
 
+Table of Contents
++++++++++++++++++
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   api
+   core
+   webapi
+
+- :ref:`genindex`
+
+
+README
+++++++
+
+.. include:: ../../README.md
+    :parser: myst_parser.sphinx_
 
 degiroasync
 +++++++++++
+
 .. autosummary::
     degiroasync.api
     degiroasync.webapi
     degiroasync.core
 
 
-Submodules
-++++++++++
+..
+    Submodules
+    ++++++++++
+    
+    degiroasync.api
+    ---------------
+    .. automodule:: degiroasync.api
+    
+    degiroasync.webapi
+    ------------------
+    .. automodule:: degiroasync.webapi
+    
+    degiroasync.core
+    ------------------
+    .. automodule:: degiroasync.core
 
-degiroasync.api
----------------
-.. automodule:: degiroasync.api
-    :members:
-
-degiroasync.webapi
-------------------
-.. automodule:: degiroasync.webapi
-
-degiroasync.core
-------------------
-.. automodule:: degiroasync.core
-
-Table of Contents
-+++++++++++++++++
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -1,7 +1,7 @@
 # DegiroAsync
 
 Current version is _ALPHA_ level of quality:
-- essential features are still missing, see supported features section.
+- some features are still missing, see supported features section.
 - external interface is still subject to change, even between minor version.
 - while there are integration tests, coverage of integration and unit tests is
   not yet where it needs to be.

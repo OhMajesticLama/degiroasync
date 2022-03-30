@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.14.1",
+        version="0.14.2",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
@@ -43,16 +43,22 @@ if __name__ == '__main__':
             ],
         extras_require={
             'dev': [
+                # Tests
                 'pytest >= 7.0.1',
-                'mypy >= 0.931',
                 'coverage >= 6.3',
-                'build >= 0.7.0',
+                # Code quality
                 'flake8 >= 4.0.1',
+                'mypy >= 0.931',
+                # For shipping
+                'build >= 0.7.0',
                 'twine >= 3.8.0',
+                # Documentation
                 'sphinx >= 4.4.0',
                 'sphinx_rtd_theme >= 1.0.0',
+                'myst-parser >= 0.17.0',  # markdown imports
+                # Other dev tools
                 'ipython',
-                'ipdb'
+                'ipdb',
                 ]
             },
         classifiers=[

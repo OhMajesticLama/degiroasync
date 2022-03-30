@@ -48,7 +48,9 @@ class Credentials:
 
 @JSONclass(annotations=True, annotations_type=True)
 class Config:
-    # SessionCore config, as returned by Degiro
+    """
+    SessionCore config, as returned by endpoint.
+    """
     client_id: int
     companies_service_url: Union[str, None]
     dictionary_url: str
