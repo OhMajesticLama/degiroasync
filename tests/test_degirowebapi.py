@@ -371,21 +371,18 @@ if RUN_INTEGRATION_TESTS:
 
             self.assertIn('data', resp_json)
             data = resp_json['data']
-            for order in data:
-                self.assertIn('orderId', order)
-                self.assertIn('productId', order)
-                self.assertIn('size', order)
-                self.assertIn('price', order)
-                self.assertIn('buysell', order)
-                self.assertIn(order['buysell'], ('B', 'S'))
-                self.assertIn('orderTypeId', order)
-                self.assertIn('orderTimeTypeId', order)
-                self.assertIn('type', order)
-                self.assertIn('status', order)
-                self.assertIn('last', order)
-                self.assertIn('isActive', order)
-                self.assertIn('currentTradedSize', order)
-                self.assertIn('totalTradedSize', order)
+            for trans in data:
+                self.assertIn('id', trans)
+                self.assertIn('productId', trans)
+                self.assertIn('quantity', trans)
+                self.assertIn('price', trans)
+                self.assertIn('fxRate', trans)
+                self.assertIn('nettFxRate', trans)
+                self.assertIn('transfered', trans)
+                self.assertIn('counterParty', trans)
+                self.assertIn('buysell', trans)
+                self.assertIn(trans['buysell'], ('B', 'S'))
+                self.assertIn('transactionTypeId', trans)
 
         async def test_get_transactions_date_check(self):
             session = await self._login()
