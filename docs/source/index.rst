@@ -5,14 +5,16 @@ Table of Contents
 +++++++++++++++++
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Contents:
+    :maxdepth: 1
+    :caption: Contents:
 
-   api
-   core
-   webapi
+    quickstart
+    api
+    core
+    webapi
 
-- :ref:`genindex`
+Documentation details for public API members can be found in the
+:ref:`genindex`
 
 
 README
@@ -30,19 +32,4 @@ degiroasync
     degiroasync.core
 
 
-..
-    Submodules
-    ++++++++++
-    
-    degiroasync.api
-    ---------------
-    .. automodule:: degiroasync.api
-    
-    degiroasync.webapi
-    ------------------
-    .. automodule:: degiroasync.webapi
-    
-    degiroasync.core
-    ------------------
-    .. automodule:: degiroasync.core
 
