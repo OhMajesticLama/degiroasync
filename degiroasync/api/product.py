@@ -316,6 +316,11 @@ class TotalPortfolio:
 class Position:
     """
     A position on a product, returned by get_portfolio.
+
+    Be careful when dealing with products in different currencies:
+    `value` attribute is in the account local currency, while `price`
+    in the currency of the product. `average_fx_rate` and other fx are
+    necessary to do the conversion between `price * size` and `value`
     """
     product: ProductBase
     size: Union[int, float]
@@ -402,10 +407,29 @@ class PriceSeries:
 class PriceSeriesTime:
     """
     Converted Wrapper for PriceSeriestime for get_price_data.
+
+    times
+        Starting time of the series.
+
+    price
+        Price floats of the series
+
+    date
+        Dates in ISO 8601 format. A data point (`date`, `price`) shares the
+        same index in the `price` and `date` list attributes.
+
+    resolution
+        `PRICE.RESOLUTION` of the data, if known. It may differ from requested
+        resolution.
+
+    expires
+        As returned per end point. Can be used as indication when to query
+        for new data.
     """
     times: str
     price: List[float]
     date: List[str]
+    resolution: Union[PRICE.RESOLUTION, str]
     expires: str
 
 
@@ -417,17 +441,32 @@ async def get_price_data(
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
-) -> PriceSeriesTime:
+        ) -> PriceSeriesTime:
     """
-
     Get price data for `product`.
 
-    product:
+    product
         Product to look for the data.
+
+    resolution
+        How close do we request data points to be.
+
+    period
+        How long of data do we want
+
+    data_type
+        Specify if we want raw price, or 'ohlc' (open, high, low, close)
+        information. The latter might be useful for long periods where high
+        resolution is not available.
+
+    Returns
+    -------
+        PriceSeriesTime
+            Contains price data and time information.
 
     """
     # Ensure product got results of product_info
-    if product.base.product_type_id != PRODUCT.TYPEID.STOCK:
+    if product.info.product_type_id != PRODUCT.TYPEID.STOCK:
         raise NotImplementedError(
             "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
             "supported by get_price_data")
@@ -454,16 +493,24 @@ async def get_price_data(
     converted_time_series = convert_time_series(resp_json['series'][ind])
     converted_time_series['date'] = converted_time_series['data']['date']
     converted_time_series['price'] = converted_time_series['data']['price']
+    try:
+        resolution_out = PRICE.RESOLUTION(converted_time_series['resolution'])
+        converted_time_series['resolution'] = resolution_out
+    except ValueError:
+        LOGGER.debug(
+                "converted_time_series['resolution'] is unknown: %s. "
+                "Leave as str",
+                converted_time_series['resolution']
+                )
     del converted_time_series['data']
     return PriceSeriesTime(converted_time_series)
 
 
 def convert_time_series(
         data_series: Dict[str, Union[str, List[Union[float, int]]]]
-) -> Dict[str,
-          Union[
-              str,
-              Dict[str, Union[float, str]]]]:
+    ) -> Dict[str,
+              Union[str, Dict[str, Union[float, str]]]
+              ]:
     """
     Helper to convert data series.
 
@@ -586,7 +633,8 @@ async def search_product(
         by_symbol: Optional[str] = None,
         by_exchange: Union[str, Exchange, None] = None,
         product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
-        max_iter: Union[int, None] = 1000) -> List[ProductBase]:
+        max_iter: Union[int, None] = 1000
+        ) -> List[ProductBase]:
     """
     Access `product_search` endpoint.
 

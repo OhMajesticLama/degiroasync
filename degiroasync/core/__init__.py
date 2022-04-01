@@ -20,6 +20,7 @@ from .helpers import set_params
 from .constants import ORDER
 from .constants import PRODUCT
 from .constants import TRANSACTION
+from .constants import PRICE
 from .constants import POSITION
 from .constants import LOGGER_NAME
 from .core import check_session_client
@@ -41,6 +42,7 @@ __all__ = [obj.__name__ for obj in (
     ORDER,
     TRANSACTION,
     POSITION,
+    PRICE,
     Credentials,
     Config,
     check_session_client,

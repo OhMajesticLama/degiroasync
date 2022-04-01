@@ -17,12 +17,6 @@ Documentation details for public API members can be found in the
 :ref:`genindex`
 
 
-README
-++++++
-
-.. include:: ../../README.md
-    :parser: myst_parser.sphinx_
-
 degiroasync
 +++++++++++
 
@@ -30,6 +24,14 @@ degiroasync
     degiroasync.api
     degiroasync.webapi
     degiroasync.core
+
+
+README
+++++++
+
+.. include:: ../../README.md
+    :parser: myst_parser.sphinx_
+
 
 
 
