@@ -84,6 +84,21 @@
 <p>Documentation details for public API members can be found in the
 <a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p>
 </section>
+<section id="a-word-on-stability">
+<h2>A word on stability<a class="headerlink" href="#a-word-on-stability" title="Permalink to this headline"></a></h2>
+<p><em>degiroasync should be considered ALPHA quality.</em></p>
+<p>Until this project’s version reaches 1.0, the API should be considered unstable
+and may break even with minor versions increments.</p>
+<p>Additionally, keep in mind that Degiro does <em>not</em> provide an official API
+for its platform, that means there is no commitment their API should
+be stable: it can change at any time and break this library. Potentially
+incurring losses depending on how you use that library.</p>
+</section>
+<section id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline"></a></h2>
+<p>Also available in the Table of Contents section, check-out the
+<a class="reference internal" href="quickstart.html#cookbook-quickstart"><span class="std std-ref">Quickstart with degiroasync</span></a>.</p>
+</section>
 <section id="degiroasync">
 <h2>degiroasync<a class="headerlink" href="#degiroasync" title="Permalink to this headline"></a></h2>
 <table class="autosummary longtable docutils align-default">
@@ -104,46 +119,22 @@
 </tbody>
 </table>
 </section>
-<section id="readme">
-<h2>README<a class="headerlink" href="#readme" title="Permalink to this headline"></a></h2>
-<section id="degiroasync">
-<h3>DegiroAsync<a class="headerlink" href="#degiroasync" title="Permalink to this headline"></a></h3>
-<section id="documentation">
-<h4>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline"></a></h4>
-<p>Check out the online documentation <a class="reference external" href="https://ohmajesticlama.github.io/degiroasync/index.html">here</a>.</p>
-</section>
-<section id="introduction">
-<h4>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h4>
-<p>Current version is <em>ALPHA</em> level of quality:</p>
-<ul class="simple">
-<li><p>some features are still missing, see supported features section.</p></li>
-<li><p>external interface is still subject to change, even between minor version.</p></li>
-<li><p>while there are integration tests, coverage of integration and unit tests is
-not yet where it needs to be.</p></li>
-</ul>
-<p>This project aims to provide an <em>unofficial</em> API for Degiro platform that works
-asynchronously.</p>
-<p>There are currently several Degiro Python Libraries that were
-active in 2021, check the <em>Other Python Degiro Libraries</em> section for a
-non-exhaustive list and assess which one best fits your needs.</p>
-</section>
 <section id="supported-features">
-<h4>Supported Features<a class="headerlink" href="#supported-features" title="Permalink to this headline"></a></h4>
-<p>As its name suggests, <code class="docutils literal notranslate"><span class="pre">degiroasync</span></code> provides an asynchronous Python API to
+<h2>Supported Features<a class="headerlink" href="#supported-features" title="Permalink to this headline"></a></h2>
+<p>As its name suggests, <cite>degiroasync</cite> provides an asynchronous Python API to
 Degiro trading interface.</p>
-<p>This module provides 2 APIs:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">degiroasync.api</span></code>: API that abstracts Degiro HTTP API to be closer to
-a consumer needs. This is the recommended choice to start.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">degiroasync.webapi</span></code>: API close to actual Degiro HTTP API.
+<p>This module provides 2 APIs:
+- <cite>degiroasync.api</cite>: API that abstracts Degiro HTTP API to be closer to
+a consumer needs. This is the recommended choice to start.
+- <cite>degiroasync.webapi</cite>: API close to actual Degiro HTTP API.
 This provides maximum flexibility and data availability, at the cost of
-less checks and more legwork to be used for higher-level logic.</p></li>
-</ul>
-<p><code class="docutils literal notranslate"><span class="pre">degiroasync.api</span></code> is built on top of <code class="docutils literal notranslate"><span class="pre">degiroasync.webapi</span></code>: it should be easy
-to fall back to <code class="docutils literal notranslate"><span class="pre">webapi</span></code> should the need arise. For example, there is currently
-no call for <code class="docutils literal notranslate"><span class="pre">confirm_order</span></code> in <code class="docutils literal notranslate"><span class="pre">degiroasync.api</span></code> as the <code class="docutils literal notranslate"><span class="pre">webapi</span></code> one is fairly
+less checks and more legwork to be used for higher-level logic.</p>
+<p><cite>degiroasync.api</cite> is built on top of <cite>degiroasync.webapi</cite>: it should be easy
+to fall back to <cite>webapi</cite> should the need arise. For example, there is currently
+no call for <cite>confirm_order</cite> in <cite>degiroasync.api</cite> as the <cite>webapi</cite> one is fairly
 straightforward.</p>
-<table class="colwidths-auto docutils align-default">
+<table class="colwidths-auto docutils align-default" id="id1">
+<caption><span class="caption-text">Features coverage between degiraosync.api and degiroasync.webapi</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>Feature</p></th>
 <th class="head"><p>degiroasync.api</p></th>
@@ -152,192 +143,71 @@ straightforward.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>login</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>login w/ 2FA</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-even"><td><p>get_config</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>get_client_info</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-even"><td><p>get_portfolio</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>get_portfolio_total</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-even"><td><p>get_products_info</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>get_price_data</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-even"><td><p>search_product</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>get_exchange</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-even"><td><p>get_news_by_company</p></td>
-<td><p></p></td>
-<td><p>:white_check_mark:</p></td>
+<td></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>get_company_profile</p></td>
-<td><p></p></td>
-<td><p>:white_check_mark:</p></td>
+<td></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-even"><td><p>check_order</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>confirm_order</p></td>
-<td><p></p></td>
-<td><p>:white_check_mark:</p></td>
+<td></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-even"><td><p>get_orders</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 <tr class="row-odd"><td><p>get_orders_history</p></td>
-<td><p>:white_check_mark:</p></td>
-<td><p>:white_check_mark:</p></td>
+<td><p>🗸</p></td>
+<td><p>🗸</p></td>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="precautions">
-<h4>Precautions<a class="headerlink" href="#precautions" title="Permalink to this headline"></a></h4>
-<p>This software is <em>not</em> an official Degiro product, nor is it backed by a company.
-It is made available to the users community, as a community effort to enable
-automation of Degiro trading platform.</p>
-</section>
-<section id="a-word-on-stability">
-<h4>A word on stability<a class="headerlink" href="#a-word-on-stability" title="Permalink to this headline"></a></h4>
-<p><em>degiroasync should be considered ALPHA quality.</em></p>
-<p>Until this project’s version reaches 1.0, the API should be considered unstable
-and may break even with minor versions increments.</p>
-<p>Additionally, keep in mind that Degiro does <em>not</em> provide an official API
-for its platform, that means there is no commitment their API should
-be stable: it can change at any time and break this library. Potentially
-incurring losses depending on how you use that library.</p>
-<section id="reminder-from-the-license">
-<h5>Reminder from the License<a class="headerlink" href="#reminder-from-the-license" title="Permalink to this headline"></a></h5>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-</pre></div>
-</div>
-<p>The license under which this software is made available can be found in
-the LICENSE file in this repository.</p>
-<p>It is the responsability of the user of this library to ensure its
-product is running and passing adequate tests before running it in production.</p>
-</section>
-</section>
-<section id="install">
-<h4>Install<a class="headerlink" href="#install" title="Permalink to this headline"></a></h4>
-<section id="user-installation">
-<h5>User installation<a class="headerlink" href="#user-installation" title="Permalink to this headline"></a></h5>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is an ALPHA version. See disclaimers above.</span>
-<span class="c1"># Create a virtualenv or equivalent, depending on your tool of choice</span>
-python3 -m virtualenv venv
-. venv/bin/activate
-<span class="c1"># Install from PyPI</span>
-pip3 install degiroasync
-</pre></div>
-</div>
-</section>
-<section id="developer-installation">
-<h5>Developer installation<a class="headerlink" href="#developer-installation" title="Permalink to this headline"></a></h5>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone this repository</span>
-git clone https://github.com/OhMajesticLama/degiroasync
-
-<span class="c1"># Create a virtualenv or equivalent, depending on your tool of choice</span>
-python3 -m virtualenv venv
-. venv/bin/activate
-
-<span class="c1"># Install with dev dependencies</span>
-pip3 install -e .<span class="o">[</span>dev<span class="o">]</span>
-
-<span class="c1"># To setup the project&#39;s git hooks:</span>
-git config --local core.hooksPath hooks
-</pre></div>
-</div>
-</section>
-</section>
-<section id="run-tests">
-<h4>Run Tests<a class="headerlink" href="#run-tests" title="Permalink to this headline"></a></h4>
-<p>Even if you don’t intend to develop for degiroasync,
-it is recommended to run tests, before using the library and regularly,
-to catch a broken environment or a change in Degiro API as early
-as possible and reduce the risk of a failure in your production environment.</p>
-<p>Running integration tests will require environment set-up. As Degiro does not
-provide a test environment, those tests will be run directly on an actual
-account.</p>
-<p>This comes with limitations and concerns:</p>
-<ul class="simple">
-<li><p>Placing and cancelling <em>order</em> integration test will not be implemented to
-avoid ending up placing unwanted orders in the event automation fails to
-remove them.</p></li>
-<li><p>You must be particularly careful to minimize risk to leak your credentials.
-e.g. write a helper script that will ask to input your password to run
-integration tests and run the tests to avoid leaking your credentials in
-global environment.
-Access to your script folder must be restricted, as well as write rights to
-any file that is imported - that includes this module and all its dependencies.
-We recommend installing it in a Virtual Environment or a container and restrict
-access to it.</p></li>
-</ul>
-<p>The following environment variables must be set:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>DEGIROASYNC_INTEGRATION  <span class="c1"># must be set to 1 for integration tests to run</span>
-DEGIRO_USERNAME  <span class="c1"># Your Degiro username</span>
-DEGIRO_PASSWORD  <span class="c1"># Your Degiro password</span>
-DEGIRO_TOTP_SECRET  <span class="c1"># Only if the account requires 2FA for login</span>
-</pre></div>
-</div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Unittests only</span>
-<span class="nv">DEGIROASYNC_INTEGRATION</span><span class="o">=</span><span class="m">0</span> pytest --color yes
-<span class="c1"># Integration tests &amp; Unittests</span>
-<span class="nv">DEGIROASYNC_INTEGRATION</span><span class="o">=</span><span class="m">1</span> pytest --color yes
-</pre></div>
-</div>
-<section id="tests-coverage">
-<h5>Tests coverage<a class="headerlink" href="#tests-coverage" title="Permalink to this headline"></a></h5>
-<p>For example, leverage <code class="docutils literal notranslate"><span class="pre">coverage</span></code> module:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>coverage run --include<span class="o">=</span><span class="s1">&#39;./degiroasync/*&#39;</span> -m pytest
-<span class="c1"># To exclude webapi module</span>
-<span class="c1">#coverage run --include=&#39;./degiroasync/*&#39; --omit=&#39;./degiroasync/webapi/*&#39; -m pytest</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="other-python-degiro-libraries">
-<h4>Other Python Degiro Libraries<a class="headerlink" href="#other-python-degiro-libraries" title="Permalink to this headline"></a></h4>
-<p>Check-out those other Python Degiro libraries - non-exhaustive list - to assess
-which best fits your needs:</p>
-<ul class="simple">
-<li><p>https://github.com/Chavithra/degiro-connector</p></li>
-<li><p>https://github.com/lolokraus/DegiroAPI</p></li>
-<li><p>https://github.com/bramton/degiro</p></li>
-</ul>
-</section>
-</section>
 </section>
 </section>
 

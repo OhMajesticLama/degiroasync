@@ -1,3 +1,5 @@
+.. _cookbook_quickstart:
+
 Quickstart with degiroasync
 ===========================
 
