@@ -21,44 +21,6 @@ active in 2021, check the _Other Python Degiro Libraries_ section for a
 non-exhaustive list and assess which one best fits your needs.
 
 
-## Supported Features
-
-As its name suggests, `degiroasync` provides an asynchronous Python API to
-Degiro trading interface.
-
-This module provides 2 APIs:
-- `degiroasync.api`: API that abstracts Degiro HTTP API to be closer to
-  a consumer needs. This is the recommended choice to start.
-- `degiroasync.webapi`: API close to actual Degiro HTTP API.
-  This provides maximum flexibility and data availability, at the cost of
-  less checks and more legwork to be used for higher-level logic.
-
-`degiroasync.api` is built on top of `degiroasync.webapi`: it should be easy
-to fall back to `webapi` should the need arise. For example, there is currently
-no call for `confirm_order` in `degiroasync.api` as the `webapi` one is fairly
-straightforward.
-
-
-| Feature             | degiroasync.api    | degiroasync.webapi |
-|---------------------|--------------------|--------------------|
-| login               | :white_check_mark: | :white_check_mark: |
-| login w/ 2FA        | :white_check_mark: | :white_check_mark: |
-| get_config          | :white_check_mark: | :white_check_mark: |
-| get_client_info     | :white_check_mark: | :white_check_mark: |
-| get_portfolio       | :white_check_mark: | :white_check_mark: |
-| get_portfolio_total | :white_check_mark: | :white_check_mark: |
-| get_products_info   | :white_check_mark: | :white_check_mark: |
-| get_price_data      | :white_check_mark: | :white_check_mark: |
-| search_product      | :white_check_mark: | :white_check_mark: |
-| get_exchange        | :white_check_mark: | :white_check_mark: |
-| get_news_by_company |                    | :white_check_mark: |
-| get_company_profile |                    | :white_check_mark: |
-| check_order         | :white_check_mark: | :white_check_mark: |
-| confirm_order       |                    | :white_check_mark: |
-| get_orders          | :white_check_mark: | :white_check_mark: |
-| get_orders_history  | :white_check_mark: | :white_check_mark: |
-
-
 ## Precautions
 
 This software is *not* an official Degiro product, nor is it backed by a company.

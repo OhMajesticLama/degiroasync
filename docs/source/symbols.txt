@@ -1,0 +1,4 @@
+
+.. |checkmarklight|  unicode:: U+1F5F8 .. Light check mark
+.. |checkmark|  unicode:: U+2713 .. Check mark
+.. |checkmarkheavy|  unicode:: U+2714 .. Heavy check mark

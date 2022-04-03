@@ -7,18 +7,7 @@ import os
 import setuptools
 
 
-def forbid_publish():
-    argv = sys.argv
-    blacklist = ['register', 'upload']
-
-    for command in blacklist:
-        if command in argv:
-            print(f'Command "{command}" has been blacklisted, exiting...')
-            sys.exit(2)
-
-
 if __name__ == '__main__':
-    forbid_publish()  # Not ready for publish
 
     description = "A Python asynchronous library for Degiro trading service."
     readme_path = os.path.join(os.path.dirname(__file__), 'README.md')
@@ -33,6 +22,10 @@ if __name__ == '__main__':
         long_description=long_description,
         long_description_content_type='text/markdown',
         url="https://github.com/OhMajesticLama/degiroasync",
+        project_urls={
+            'Documentation':
+                'https://ohmajesticlama.github.io/degiroasync/index.html'
+            },
         packages=setuptools.find_packages(),
         install_requires=[
             'httpx >= 0.21.3',
