@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>degiroasync.webapi’s documentation &mdash; degiroasync  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="degiroasync.core" href="core.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> degiroasync
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart with degiroasync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">degiroasync.api documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">degiroasync.core</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">degiroasync.webapi’s documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-python-api-close-to-webtrader-http-api">A Python API close to Webtrader HTTP API</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">degiroasync</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>degiroasync.webapi’s documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/webapi.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="degiroasync-webapi-s-documentation">
+<h1>degiroasync.webapi’s documentation<a class="headerlink" href="#degiroasync-webapi-s-documentation" title="Permalink to this headline"></a></h1>
+<span class="target" id="module-degiroasync.webapi"><span id="webapi"></span></span><section id="a-python-api-close-to-webtrader-http-api">
+<h2>A Python API close to Webtrader HTTP API<a class="headerlink" href="#a-python-api-close-to-webtrader-http-api" title="Permalink to this headline"></a></h2>
+<p>Async API for Degiro. This module is close to Degiro Web API structure:
+responses are provided (almost) as-is with minimum abstraction
+and verification.</p>
+<p>For a higher level api, see <cite>api</cite> module.</p>
+<p>Users should only import directly from <cite>degiroasync.webapi</cite>, its submodules
+should be considered implementation details.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.check_order">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">check_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buy_sell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.ORDER.TIME" title="degiroasync.core.constants.ORDER.TIME"><span class="pre">degiroasync.core.constants.ORDER.TIME</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.ORDER.TYPE" title="degiroasync.core.constants.ORDER.TYPE"><span class="pre">degiroasync.core.constants.ORDER.TYPE</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.check_order" title="Permalink to this definition"></a></dt>
+<dd><p>Start the placing order process. This is used to retrieve order
+cost for instance and is mandatory to actually place an order with
+<cite>confirm_order</cite>.</p>
+<dl class="simple">
+<dt>buy_sell:</dt><dd><p>One of (‘BUY’, ‘SELL’).</p>
+</dd>
+<dt>price:</dt><dd><p>Price in currency of the product.</p>
+</dd>
+<dt>product_id:</dt><dd><p>Product on which to place the order.</p>
+</dd>
+<dt>order_type:</dt><dd><p>Specify if we want a STOP_LIMITED, MARKET_ORDER, STOP_LOSS,
+STOP_LIMITED.</p>
+</dd>
+<dt>time_type:</dt><dd><p>Specify if we want a DAY or PERMANENT order.</p>
+</dd>
+</dl>
+<p>Check <cite>degiroasync.core.ORDER</cite> for details.</p>
+<p>Example data with request:
+<a href="#id1"><span class="problematic" id="id2">``</span></a>`
+{</p>
+<blockquote>
+<div><p>“buySell”: “BUY”,
+“orderType”: 0,
+“price”: 10,
+“productId”: “96008”,
+“size”: 1,
+“timeType”: 1</p>
+</div></blockquote>
+<p>Example JSON response:
+<a href="#id3"><span class="problematic" id="id4">``</span></a>`
+{</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“data”: {</dt><dd><p>“confirmationId”: “c64332f0-a800-4f04-bc29-12a2b7efa20b”,
+“freeSpaceNew”: 2282.0,
+“showExAnteReportLink”: true,
+“transactionFee”: 0.5</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.confirm_order">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">confirm_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confirmation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buy_sell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.ORDER.TIME" title="degiroasync.core.constants.ORDER.TIME"><span class="pre">degiroasync.core.constants.ORDER.TIME</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.ORDER.TYPE" title="degiroasync.core.constants.ORDER.TYPE"><span class="pre">degiroasync.core.constants.ORDER.TYPE</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.webapi.confirm_order" title="Permalink to this definition"></a></dt>
+<dd><p>Close the placing order process. This is used after <cite>check_order</cite>
+to confirm placing an order. It must be called with the same paramaters
+and the confirmation_id obtained with <cite>check_order</cite>.</p>
+<dl class="simple">
+<dt>buy_sell:</dt><dd><p>One of (‘BUY’, ‘SELL’).</p>
+</dd>
+<dt>price:</dt><dd><p>Price in currency of the product.</p>
+</dd>
+<dt>product_id:</dt><dd><p>Product on which to place the order.</p>
+</dd>
+<dt>order_type:</dt><dd><p>Specify if we want a STOP_LIMITED, MARKET_ORDER, STOP_LOSS,
+STOP_LIMITED.</p>
+</dd>
+<dt>time_type:</dt><dd><p>Specify if we want a DAY or PERMANENT order.</p>
+</dd>
+</dl>
+<p>Check <cite>degiroasync.core.ORDER</cite> for details.</p>
+<p>Example data with request:
+<a href="#id5"><span class="problematic" id="id6">``</span></a>`
+{</p>
+<blockquote>
+<div><p>“buySell”: “BUY”,
+“orderType”: 0,
+“price”: 10,
+“productId”: “96008”,
+“size”: 1,
+“timeType”: 1</p>
+</div></blockquote>
+<p>Example JSON response:
+<a href="#id7"><span class="problematic" id="id8">``</span></a>`
+# TODO: Next time we place an order
+{‘data’: {‘confirmationId’: ‘a8e49a7e-4d79-4f21-961b-988dc0806d09’, ‘freeSpaceNew’: 55395, ‘transactionFee’: 0.5, ‘showExAnteReportLink’: True}}</p>
+<p><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_client_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_client_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></span><a class="headerlink" href="#degiroasync.webapi.get_client_info" title="Permalink to this definition"></a></dt>
+<dd><p>Get client information.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_company_profile">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_company_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_company_profile" title="Permalink to this definition"></a></dt>
+<dd><p>Get company profile.</p>
+<p>Example return</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_config">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></span><a class="headerlink" href="#degiroasync.webapi.get_config" title="Permalink to this definition"></a></dt>
+<dd><p>Populate session with configuration</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_news_by_company">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_news_by_company</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">languages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['en']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_news_by_company" title="Permalink to this definition"></a></dt>
+<dd><p>Get news for a company.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_orders">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_orders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_orders" title="Permalink to this definition"></a></dt>
+<dd><p>Get current and historical orders.</p>
+<p>Example response:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_orders_history">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_orders_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_orders_history" title="Permalink to this definition"></a></dt>
+<dd><p>Get historical orders for session.</p>
+<dl class="simple">
+<dt>from_date:</dt><dd><p>Date in format DD/MM/YYYY. Raise ValueError if incorrect format.</p>
+</dd>
+<dt>to_date:</dt><dd><p>Date in format DD/MM/YYYY. Raise ValueError if incorrect format.</p>
+</dd>
+</dl>
+<p>Example return in json():
+<a href="#id13"><span class="problematic" id="id14">``</span></a>`
+{</p>
+<blockquote>
+<div><dl>
+<dt>‘data’: {</dt><dd><dl>
+<dt>[</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>‘created’: ‘2021-11-05T11:56:33+01:00’,
+‘orderId’: ‘asdfjkhrewqrkljh’,
+‘productId’: 12341234,
+‘size’: 100,
+‘price’: 390,
+‘buysell’: ‘B’,
+‘orderTypeId’: 1,
+‘stopPrice’: 0,
+‘currentTradedSize’: 0,
+‘totalTradedSize’: 0,
+‘type’: ‘CREATE’,
+‘status’: ‘CONFIRMED’,
+‘last’: ‘2021-11-6T12:33:23+01:00’,
+‘isActive’: True</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>]</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_portfolio">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_portfolio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_portfolio" title="Permalink to this definition"></a></dt>
+<dd><p>Get portfolio web call.</p>
+<p>Example return:</p>
+<blockquote>
+<div><dl>
+<dt>{‘portfolio’: {‘isAdded’: True,</dt><dd><p>‘lastUpdated’: 1088,
+‘name’: ‘portfolio’,
+‘value’: [</p>
+<blockquote>
+<div><dl>
+<dt>{‘id’: ‘8614787’,</dt><dd><p>‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [</p>
+<blockquote>
+<div><dl class="simple">
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘id’,
+‘value’: ‘8614787’},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘positionType’,
+‘value’: ‘PRODUCT’},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘size’,
+‘value’: 100},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘price’,
+‘value’: 73.0},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘value’,
+‘value’: 7300.0},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘accruedInterest’},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘plBase’,
+‘value’: {‘EUR’: -6716.901595272}},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: -7300.0}},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘breakEvenPrice’,
+‘value’: 68.15},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘averageFxRate’,
+‘value’: 1},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘realizedProductPl’,
+‘value’: 98.098404728},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘realizedFxPl’,
+‘value’: 0},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘todayRealizedProductPl’,
+‘value’: 0.0},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}
+]</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+<dt>},</dt><dd><p>…</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+<dt>},</dt><dd><dl>
+<dt>{‘id’: ‘EUR’,</dt><dd><p>‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [</p>
+<blockquote>
+<div><p>{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘EUR’},
+{‘isAdded’: True,
+‘name’: ‘positionType’,
+‘value’: ‘CASH’},
+{‘isAdded’: True,
+‘name’: ‘size’,
+‘value’: -53676.25},
+{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: -53676.25},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: 53676.2467863145}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 53676.2467863145}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>},
+{‘id’: ‘USD’,</p>
+<blockquote>
+<div><p>‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘USD’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘positionType’,
+‘value’: ‘CASH’},</p>
+</dd>
+<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘size’,
+‘value’: 0.0},</p>
+</dd>
+</dl>
+<p>{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: -4.216892111}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 0.0}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]},
+{‘id’: ‘PLN’,
+‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘PLN’},
+{‘isAdded’: True,
+‘name’: ‘positionType’,
+‘value’: ‘CASH’},
+{‘isAdded’: True,
+‘name’: ‘size’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: 1.8128205}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 0.0}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]},
+{‘id’: ‘GBP’,
+‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘GBP’},
+{‘isAdded’: True,
+‘name’: ‘positionType’,
+‘value’: ‘CASH’},
+{‘isAdded’: True,
+‘name’: ‘size’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: 0.0}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 0.0}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]},
+{‘id’: ‘FLATEX_EUR’,
+‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘FLATEX_EUR’},
+{‘isAdded’: True,
+‘name’: ‘positionType’,
+‘value’: ‘CASH’},
+{‘isAdded’: True,
+‘name’: ‘size’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: 0.0}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 0.0}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]},
+{‘id’: ‘FLATEX_USD’,
+‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘FLATEX_USD’},
+{‘isAdded’: True,
+‘name’: ‘positionType’,
+‘value’: ‘CASH’},
+{‘isAdded’: True,
+‘name’: ‘size’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: 0}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 0}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]},
+{‘id’: ‘FLATEX_PLN’,
+‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘FLATEX_PLN’},
+{‘isAdded’: True,
+‘name’: ‘positionType’,
+‘value’: ‘CASH’},
+{‘isAdded’: True,
+‘name’: ‘size’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: 0}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 0}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]},
+{‘id’: ‘FLATEX_GBP’,
+‘isAdded’: True,
+‘name’: ‘positionrow’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘id’,
+‘value’: ‘FLATEX_GBP’},
+{‘isAdded’: True,
+‘name’: ‘positionType’,
+‘value’: ‘CASH’},
+{‘isAdded’: True,
+‘name’: ‘size’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘price’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘value’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘accruedInterest’},
+{‘isAdded’: True,
+‘name’: ‘plBase’,
+‘value’: {‘EUR’: 0}},
+{‘isAdded’: True,
+‘name’: ‘todayPlBase’,
+‘value’: {‘EUR’: 0}},
+{‘isAdded’: True,
+‘name’: ‘portfolioValueCorrection’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘breakEvenPrice’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘averageFxRate’,
+‘value’: 1},
+{‘isAdded’: True,
+‘name’: ‘realizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘realizedFxPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedProductPl’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayRealizedFxPl’,
+‘value’: 0}]}]},
+‘totalPortfolio’: {‘isAdded’: True,
+‘lastUpdated’: 22,
+‘name’: ‘totalPortfolio’,
+‘value’: [{‘isAdded’: True,
+‘name’: ‘degiroCash’,
+‘value’: -53676.25},
+{‘isAdded’: True,
+‘name’: ‘flatexCash’,
+‘value’: 0.0},
+{‘isAdded’: True,
+‘name’: ‘totalCash’,
+‘value’: -53676.25},
+{‘isAdded’: True,
+‘name’: ‘totalDepositWithdrawal’,
+‘value’: 63950.27},
+{‘isAdded’: True,
+‘name’: ‘todayDepositWithdrawal’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘cashFundCompensationCurrency’,
+‘value’: ‘EUR’},
+{‘isAdded’: True,
+‘name’: ‘cashFundCompensation’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘cashFundCompensationWithdrawn’,
+‘value’: 28.79},
+{‘isAdded’: True,
+‘name’: ‘cashFundCompensationPending’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘todayNonProductFees’,
+‘value’: 0},
+{‘isAdded’: True,
+‘name’: ‘totalNonProductFees’,
+‘value’: -657.242202735},
+{‘isAdded’: True,
+‘name’: ‘freeSpaceNew’,
+‘value’: {‘EUR’: 35136.647442}},
+{‘isAdded’: True,
+‘name’: ‘reportMargin’,
+‘value’: 35136.647442},
+{‘isAdded’: True,
+‘name’: ‘reportCreationTime’,
+‘value’: ‘12:48:31’},
+{‘isAdded’: True,
+‘name’: ‘reportPortfValue’,
+‘value’: 149223.516559},
+{‘isAdded’: True,
+‘name’: ‘reportCashBal’,
+‘value’: -53676.2465},
+{‘isAdded’: True,
+‘name’: ‘reportNetliq’,
+‘value’: 95547.270059},
+{‘isAdded’: True,
+‘name’: ‘reportOverallMargin’,
+‘value’: 60410.622617},
+{‘isAdded’: True,
+‘name’: ‘reportTotalLongVal’,
+‘value’: 104456.461592},
+{‘isAdded’: True,
+‘name’: ‘reportDeficit’,
+‘value’: 50780.215092},
+{‘isAdded’: True,
+‘name’: ‘marginCallStatus’,
+‘value’: ‘NO_MARGIN_CALL’},
+{‘isAdded’: True, ‘name’: ‘marginCallDeadline’}]}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_price_data">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_price_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vwdId</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vwdIdentifierType</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.core.constants.PRICE.RESOLUTION</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RESOLUTION.PT1M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.core.constants.PRICE.PERIOD</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PERIOD.P1DAY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Europe/Paris'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">culture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fr-FR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.core.constants.PRICE.TYPE</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">TYPE.PRICE</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_price_data" title="Permalink to this definition"></a></dt>
+<dd><p>Get price data for a company.</p>
+<p>data_type = ‘ohlc’ provides access to ‘Open’, ‘High’, ‘Low’, ‘Close’ in
+that order for each period, instead of price data.</p>
+<p>vwdIdentifierType can be ‘issueid’ or ‘vwdkey’</p>
+<p>Example returned JSON:
+{</p>
+<blockquote>
+<div><p>“requestid”: “1”,
+“start”: “2022-01-20T00:00:00”,
+“end”: “2022-01-20T14:12:24”,
+“resolution”: “PT1M”,
+“series”: [</p>
+<blockquote>
+<div><dl>
+<dt>{</dt><dd><p>“expires”: “2022-01-20T10:12:56+01:00”,
+“data”: {</p>
+<blockquote>
+<div><p>“issueId”: 360114899,
+“companyId”: 1001,
+“name”: “AIRBUS”,
+“identifier”: “issueid:360114899”,
+“isin”: “NL0000235190”,
+“alfa”: “AIR15598”,
+“market”: “XPAR”,
+“currency”: “EUR”,
+“type”: “AAN”,
+“quality”: “REALTIME”,
+“lastPrice”: 113.1,
+“lastTime”: “2022-01-21T14:12:24”,
+“absDiff”: -2.62,
+“relDiff”: -0.02264,
+“highPrice”: 114.46,
+“highTime”: “2022-01-21T10:31:14”,
+“lowPrice”: 112.78,
+“lowTime”: “2022-01-21T13:56:36”,
+“openPrice”: 114.0,
+“openTime”: “2022-01-21T09:00:19”,
+“closePrice”: 114.0,
+“closeTime”: “2022-01-21T09:00:19”,
+“cumulativeVolume”: 857092.0,
+“previousClosePrice”: 115.72,
+“previousCloseTime”: “2022-01-20T17:35:03”,
+“tradingStartTime”: “09:00:00”,
+“tradingEndTime”: “17:40:00”,
+“tradingAddedTime”: “00:10:00”,
+“lowPriceP1Y”: 81.84,
+“highPriceP1Y”: 121.1,
+“windowStart”: “2022-01-20T00:00:00”,
+“windowEnd”: “2022-01-20T10:11:22”,
+“windowFirst”: “2022-01-20T09:00:00”,
+“windowLast”: “2022-01-20T10:11:00”,
+“windowHighTime”: “2022-01-20T10:11:00”,
+“windowHighPrice”: 114.46,
+“windowLowTime”: “2022-01-20T10:16:00”,
+“windowLowPrice”: 112.78,
+“windowOpenTime”: “2022-01-20T09:00:19”,
+“windowOpenPrice”: 114.0,
+“windowPreviousCloseTime”: “2022-01-19T17:35:03”,
+“windowPreviousClosePrice”: 115.72,
+“windowTrend”: -0.02264</p>
+</div></blockquote>
+<p>},
+“id”: “issueid:360114899”,
+“type”: “object”
+“times”: “2022-01-20T00:00:00”,
+“expires”: “2022-01-20T10:12:56+01:00”,
+“data”: [</p>
+<blockquote>
+<div><p>[
+540,
+114.0
+],
+[
+541,
+114.08
+],
+[
+542,
+113.62
+],
+[
+543,
+113.8
+],
+…
+[
+552,
+113.7
+]],</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>“id”:”price:issueid:360114899”,
+“type”:”time”}]</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_product_dictionary">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_product_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_product_dictionary" title="Permalink to this definition"></a></dt>
+<dd><p>Get product dictionary information from server.</p>
+<p>This is needed to provide human-redeable product data for products:</p>
+<ul class="simple">
+<li><p>Bonds, CFD Exchange places.</p></li>
+<li><p>ETF fees types.</p></li>
+<li><p>Countries.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_products_info">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_products_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">products_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_products_info" title="Permalink to this definition"></a></dt>
+<dd><p>Get Product info Web API call.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.get_transactions">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_transactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_transactions" title="Permalink to this definition"></a></dt>
+<dd><p>Get transactions for session.</p>
+<dl class="simple">
+<dt>from_date:</dt><dd><p>Date in format DD/MM/YYYY. Raise ValueError if incorrect format.</p>
+</dd>
+<dt>to_date:</dt><dd><p>Date in format DD/MM/YYYY. Raise ValueError if incorrect format.</p>
+</dd>
+</dl>
+<p>Example return in json():
+<a href="#id15"><span class="problematic" id="id16">``</span></a>`
+{</p>
+<blockquote>
+<div><dl>
+<dt>‘data’: {</dt><dd><dl>
+<dt>[</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>‘id’: 123123,
+‘productId’: 12341234,
+‘date’: ‘2021-11-05T11:56:33+01:00’,
+‘buysell’: ‘B’,
+‘price’: 39,
+‘quantity’: 100,
+‘total’: -3900,
+‘orderTypeId’: 1,
+‘counterParty’: 1,
+‘transfered’: False,
+‘fxRate’: 0,
+‘totalInBaseCurrency’: -3900,
+‘feeInBaseCurrency’: -12,
+‘totalPlusFeeInBaseCurrency’: -3912,
+‘transactionTypeId’: -3912,
+‘tradingVenue’: -3912,</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>]</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.login">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">credentials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.Credentials" title="degiroasync.core.core.Credentials"><span class="pre">degiroasync.core.core.Credentials</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></span><a class="headerlink" href="#degiroasync.webapi.login" title="Permalink to this definition"></a></dt>
+<dd><p>Authentify with Degiro API.
+<cite>session</cite> will be updated with required data for further connections.
+If no <cite>session</cite> is provided, create one.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.webapi.search_product">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">search_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_txt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">degiroasync.core.constants.PRODUCT.TYPEID</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.search_product" title="Permalink to this definition"></a></dt>
+<dd><p>Access <cite>product_search</cite> endpoint.</p>
+<p>Example JSON response:
+{</p>
+<blockquote>
+<div><p>“offset”: 0,
+“products”: [</p>
+<blockquote>
+<div><dl>
+<dt>{</dt><dd><p>“active”: true,
+“buyOrderTypes”: [</p>
+<blockquote>
+<div><p>“LIMIT”,
+“MARKET”,
+“STOPLOSS”,
+“STOPLIMIT”</p>
+</div></blockquote>
+<p>],
+“category”: “B”,
+“closePrice”: 113.3,
+“closePriceDate”: “2022-02-02”,
+“contractSize”: 1.0,
+“currency”: “EUR”,
+“exchangeId”: “710”,
+“feedQuality”: “R”,
+“feedQualitySecondary”: “CX”,
+“id”: “96008”,
+“isin”: “NL0000235190”,
+“name”: “AIRBUS”,
+“onlyEodPrices”: false,
+“orderBookDepth”: 0,
+“orderBookDepthSecondary”: 0,
+“orderTimeTypes”: [</p>
+<blockquote>
+<div><p>“DAY”,
+“GTC”</p>
+</div></blockquote>
+<p>],
+“productBitTypes”: [],
+“productType”: “STOCK”,
+“productTypeId”: 1,
+“qualitySwitchFree”: false,
+“qualitySwitchFreeSecondary”: false,
+“qualitySwitchable”: false,
+“qualitySwitchableSecondary”: false,
+“sellOrderTypes”: [</p>
+<blockquote>
+<div><p>“LIMIT”,
+“MARKET”,
+“STOPLOSS”,
+“STOPLIMIT”</p>
+</div></blockquote>
+<p>],
+“strikePrice”: -0.0001,
+“symbol”: “AIR”,
+“tradable”: true,
+“vwdId”: “360114899”,
+“vwdIdSecondary”: “955000256”,
+“vwdIdentifierType”: “issueid”,
+“vwdIdentifierTypeSecondary”: “issueid”,
+“vwdModuleId”: 1,
+“vwdModuleIdSecondary”: 2</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>}</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="core.html" class="btn btn-neutral float-left" title="degiroasync.core" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, OhMajesticLama.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>degiroasync.api documentation &mdash; degiroasync  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="degiroasync.core" href="core.html" />
+    <link rel="prev" title="Quickstart with degiroasync" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> degiroasync
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart with degiroasync</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">degiroasync.api documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#high-level-api-for-degiro-platform">High-level API for DEGIRO platform.</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-structures">Data Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">degiroasync.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapi.html">degiroasync.webapi’s documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">degiroasync</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>degiroasync.api documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="degiroasync-api-documentation">
+<h1>degiroasync.api documentation<a class="headerlink" href="#degiroasync-api-documentation" title="Permalink to this headline"></a></h1>
+<span class="target" id="module-degiroasync.api"><span id="api"></span></span><section id="high-level-api-for-degiro-platform">
+<h2>High-level API for DEGIRO platform.<a class="headerlink" href="#high-level-api-for-degiro-platform" title="Permalink to this headline"></a></h2>
+<p>This module provides an interface that is higher level than the <cite>webapi</cite> module
+(or the direct HTTP API).
+It provides various data structures with guaranteed fields, and functions
+to build or act on those data structures.</p>
+<p>Users should only import directly from <cite>degiroasync.api</cite>, its submodules
+should be considered implementation details.</p>
+<section id="data-structures">
+<h3>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this headline"></a></h3>
+<p>Details on data structures are available for each data structure.</p>
+<p>Core structures to be aware off when dealing with <cite>degiroasync</cite> are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Session</em>
+It is necessary with almost every call in this module. Session contains
+session identifier, as well as basic mapping information between
+identifiers and objects.</p></li>
+<li><p><em>Product</em>
+A product per DEGIRO API. This can be a Shares, ETF or any other product
+available on the platform.</p></li>
+<li><p><em>Order</em>
+An order per DEGIRO API. As in the web trader, an order can be active
+or not, and different order types exist (BUY, SELL, LIMITED …).</p></li>
+<li><p><em>Transaction</em>
+A transaction per DEGIRO API. This reflects cash impacts on the account.
+There can be zero to many transactions per Order. As of 2022.03, DEGIRO
+API does not seem to provide relationship between transactions and
+orders.</p></li>
+</ul>
+</div></blockquote>
+<p>Other data structures are available, but more situational. They can be found
+in the module members documentation.</p>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline"></a></h3>
+<p>Several functions reflecting the API calls are implemented in this module,
+An overview of some of the essential ones is listed below.
+Details can be found with each function documentation:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>login</em>
+Builds a <cite>Session</cite> instance, this supports login with or without 2FA.</p></li>
+<li><p><em>get_portfolio</em> and <em>get_portfolio_total</em>
+Provide data on products currently held on the account.</p></li>
+<li><p><em>search_product</em>
+Find and instantiate DEGIRO products from various search options (text,
+ISIN, symbol, exchange …).</p></li>
+<li><p><em>get_price_data</em>
+Get price data on a Product.</p></li>
+<li><p><em>get_orders</em> and <em>check_order</em>
+Get orders on the account, start placing an order. Note: <cite>webapi</cite> module
+must currently be used to confirm an order.</p></li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Country">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Country</span></span><a class="headerlink" href="#degiroasync.api.Country" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Credentials">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Credentials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totp_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_time_password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.Credentials" title="Permalink to this definition"></a></dt>
+<dd><p>Holds credentials for Web API.</p>
+<p>If 2FA is enabled on the account, either totp_secret or one_time_password
+must be provided for the login to be successful.</p>
+<p><cite>totp_secret</cite> can be obtained in a 2FA editor/app (e.g. andOTP) in the
+‘Secret’ field.</p>
+<p>If use of <cite>one_time_password</cite> is chosen instead, be mindful that login
+must be called promptly as one_time_password expires frequently.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Exchange">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Exchange</span></span><a class="headerlink" href="#degiroasync.api.Exchange" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.ExchangeDictionary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">ExchangeDictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ExchangeDictionary" title="Permalink to this definition"></a></dt>
+<dd><p>Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">exchangedict</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ExchangeDictionary</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+<span class="n">exchangedict</span><span class="o">.</span><span class="n">exchange_by</span><span class="p">(</span><span class="n">hiqAbbr</span><span class="o">=</span><span class="s1">&#39;EPA&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="degiroasync.api.ExchangeDictionary.exchange_by">
+<span class="sig-name descname"><span class="pre">exchange_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hiq_abbr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mic_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper</span></span></span><a class="headerlink" href="#degiroasync.api.ExchangeDictionary.exchange_by" title="Permalink to this definition"></a></dt>
+<dd><p>Get Exchange by <em>either</em> name, hiqAbbr (e.g. EPA),
+micCode (e.g. XPAR).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.ORDER">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">ORDER</span></span><a class="headerlink" href="#degiroasync.api.ORDER" title="Permalink to this definition"></a></dt>
+<dd><p>Constants for orders in web API.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.ORDER.ACTION">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACTION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.ACTION" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>BUY:</dt><dd><p>Use when placing a _BUY_ order on a product.</p>
+</dd>
+<dt>SELL:</dt><dd><p>Use when placing a _SELL_ order on a product.</p>
+</dd>
+</dl>
+<p>Check <cite>ORDER.TYPE</cite> for types of orders.</p>
+<p>For use with <cite>checkOrder</cite> HTTP endpoint - or <cite>check_order</cite> degiroasync
+API calls.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.ORDER.STATUS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">STATUS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.STATUS" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>CONFIRMED:</dt><dd><p>The order was accepted by the platform.</p>
+</dd>
+<dt>REJECTED:</dt><dd><p>The order was <em>not</em> accepted by the platform.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.ORDER.TIME">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TIME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.TIME" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>DAY:</dt><dd><p>This is the “Day” option in the web trader.
+Order placed for one day only: it expires at the end of the day it
+was created.</p>
+</dd>
+<dt>PERMANENT:</dt><dd><p>This is the “GTC” option in the web trader.
+This order sticks until it has been executed. Be careful that
+occasionally Degiro cancels Permanent orders due to various events.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.ORDER.TYPE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TYPE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.TYPE" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>LIMITED:</dt><dd><p>This is the “Limit” field value of “Order type” in the web trader.</p>
+</dd>
+<dt>MARKET:</dt><dd><p>This is the “Market” field value of “Order type” in the web trader.</p>
+</dd>
+<dt>STOP_LOSS:</dt><dd><p>This is the “Stop Loss” field value of “Order type” in the web
+trader.</p>
+</dd>
+<dt>STOP_LIMITED:</dt><dd><p>This is the “Stop Limited” field value of “Order type” in the web
+trader.</p>
+</dd>
+<dt>AMOUNT:</dt><dd><p>This is the “Amount” field value of “Order type” in the web trader.
+It’s used for investment funds.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Order">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Order</span></span><a class="headerlink" href="#degiroasync.api.Order" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.PriceSeriesTime">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">PriceSeriesTime</span></span><a class="headerlink" href="#degiroasync.api.PriceSeriesTime" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Region">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Region</span></span><a class="headerlink" href="#degiroasync.api.Region" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Session">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_core</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exchange_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary" title="degiroasync.api.session.ExchangeDictionary"><span class="pre">degiroasync.api.session.ExchangeDictionary</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.Session" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.TotalPortfolio">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">TotalPortfolio</span></span><a class="headerlink" href="#degiroasync.api.TotalPortfolio" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Transaction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Transaction</span></span><a class="headerlink" href="#degiroasync.api.Transaction" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.check_order">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">check_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.api.product.ProductBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buy_sell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.ORDER.ACTION" title="degiroasync.core.constants.ORDER.ACTION"><span class="pre">degiroasync.core.constants.ORDER.ACTION</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.ORDER.TIME" title="degiroasync.core.constants.ORDER.TIME"><span class="pre">degiroasync.core.constants.ORDER.TIME</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.ORDER.TYPE" title="degiroasync.core.constants.ORDER.TYPE"><span class="pre">degiroasync.core.constants.ORDER.TYPE</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.api.check_order" title="Permalink to this definition"></a></dt>
+<dd><p>This must be called to obtain a confirmation_id prior to confirming an
+order.</p>
+<p>This can also be used to get an order fees before confirming the order.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get your products through search_product</span>
+<span class="n">check_order</span><span class="p">(</span>
+    <span class="n">product</span><span class="o">=</span><span class="n">product</span><span class="p">,</span>
+    <span class="n">buy_sell</span><span class="o">=</span><span class="n">ORDER</span><span class="o">.</span><span class="n">ACTION</span><span class="o">.</span><span class="n">SELL</span><span class="p">,</span>
+    <span class="n">time_type</span><span class="o">=</span><span class="n">ORDER</span><span class="o">.</span><span class="n">TIME</span><span class="p">,</span>
+    <span class="n">order_type</span><span class="o">=</span><span class="n">ORDER</span><span class="o">.</span><span class="n">TYPE</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">price</span><span class="o">=</span><span class="mi">100</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>WARNING: This call is rate limited at the end-point level, tests would show
+the call to be rate limited at 1 per second. Users should throttle their
+calls to this function.</p>
+<p>Example return:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;confirmation_id&#39;</span><span class="p">:</span> <span class="s1">&#39;0f404158-3628-414b-87fc-91e2ab2ba1ee&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;free_space_new&#39;</span><span class="p">:</span> <span class="mf">62283.1</span><span class="p">,</span>
+    <span class="s1">&#39;transaction_fee&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="s1">&#39;show_ex_ante_report_link&#39;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In the case of a SELL order, the parameter ‘transaction_opposite_fee’
+has also been observed. It does not seem to serve a differente purpose
+than transaction_fee.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.get_exchange_dictionary">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_exchange_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.api.Session" title="degiroasync.api.session.Session"><span class="pre">degiroasync.api.session.Session</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary" title="degiroasync.api.session.ExchangeDictionary"><span class="pre">degiroasync.api.session.ExchangeDictionary</span></a></span></span><a class="headerlink" href="#degiroasync.api.get_exchange_dictionary" title="Permalink to this definition"></a></dt>
+<dd><p>Populate session with exchange_dictionary.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.get_orders">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_orders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple[typing.List[jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper]]</span></span></span><a class="headerlink" href="#degiroasync.api.get_orders" title="Permalink to this definition"></a></dt>
+<dd><p>Get current orders and history.</p>
+<dl class="simple">
+<dt>to_date:</dt><dd><p>Request orders history up to <cite>to_date</cite>. Defaults to today.</p>
+</dd>
+<dt>from_date:</dt><dd><p>Request orders history from <cite>from_date</cite>. Defaults to today - 7 days.</p>
+</dd>
+</dl>
+<p>Return current_orders, historical_orders.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.get_portfolio">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_portfolio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence[jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper]</span></span></span><a class="headerlink" href="#degiroasync.api.get_portfolio" title="Permalink to this definition"></a></dt>
+<dd><p>Returns Products in portfolio. Refer to  <cite>Products</cite> classes for minimum
+available attributes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.get_portfolio_total">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_portfolio_total</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper</span></span></span><a class="headerlink" href="#degiroasync.api.get_portfolio_total" title="Permalink to this definition"></a></dt>
+<dd><p>Returns (TotalPortfolio, Products). Refer to <cite>TotalPortfolio</cite> and
+<cite>Products</cite> classes for attributes available.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.get_price_data">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_price_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.api.product.Stock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.core.constants.PRICE.RESOLUTION</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RESOLUTION.PT1M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.core.constants.PRICE.PERIOD</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PERIOD.P1DAY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Europe/Paris'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">culture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fr-FR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">degiroasync.core.constants.PRICE.TYPE</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">TYPE.PRICE</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper</span></span></span><a class="headerlink" href="#degiroasync.api.get_price_data" title="Permalink to this definition"></a></dt>
+<dd><p>Get price data for <cite>product</cite>.</p>
+<dl class="simple">
+<dt>product</dt><dd><p>Product to look for the data.</p>
+</dd>
+<dt>resolution</dt><dd><p>How close do we request data points to be.</p>
+</dd>
+<dt>period</dt><dd><p>How long of data do we want</p>
+</dd>
+<dt>data_type</dt><dd><p>Specify if we want raw price, or ‘ohlc’ (open, high, low, close)
+information. The latter might be useful for long periods where high
+resolution is not available.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Contains price data and time information.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#degiroasync.api.PriceSeriesTime" title="degiroasync.api.PriceSeriesTime">PriceSeriesTime</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.get_transactions">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_transactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List[jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper]</span></span></span><a class="headerlink" href="#degiroasync.api.get_transactions" title="Permalink to this definition"></a></dt>
+<dd><p>Get transactions for <cite>session</cite>.</p>
+<dl class="simple">
+<dt>from_date:</dt><dd><p>Request transactions from <cite>from_date</cite>. Defaults to <cite>to_date - 7 days</cite>.</p>
+</dd>
+<dt>to_date:</dt><dd><p>Request transactions to <cite>to_date</cite>. Defaults to today.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.login">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">credentials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.Credentials" title="degiroasync.core.core.Credentials"><span class="pre">degiroasync.core.core.Credentials</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#degiroasync.api.Session" title="degiroasync.api.session.Session"><span class="pre">degiroasync.api.session.Session</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#degiroasync.api.Session" title="degiroasync.api.session.Session"><span class="pre">degiroasync.api.session.Session</span></a></span></span><a class="headerlink" href="#degiroasync.api.login" title="Permalink to this definition"></a></dt>
+<dd><p>Authentify with Degiro API and populate basic information that’ll be needed
+for further calls.</p>
+<p><cite>session</cite> will be updated with required data for further connections.</p>
+<p>Strictly equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">degiroasync</span><span class="o">.</span><span class="n">webapi</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">credentials</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">webapi</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">webapi</span><span class="o">.</span><span class="n">get_client_info</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If no <cite>session</cite> is provided, create one.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="degiroasync.api.search_product">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">search_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session:</span> <span class="pre">degiroasync.api.session.Session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_text:</span> <span class="pre">typing.Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_isin:</span> <span class="pre">typing.Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_symbol:</span> <span class="pre">typing.Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_exchange:</span> <span class="pre">typing.Optional[typing.Union[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type_id:</span> <span class="pre">typing.Optional[degiroasync.core.constants.PRODUCT.TYPEID]</span> <span class="pre">=</span> <span class="pre">TYPEID.STOCK</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter:</span> <span class="pre">typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">degiroasync.api.product.ProductBase</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.api.search_product" title="Permalink to this definition"></a></dt>
+<dd><p>Access <cite>product_search</cite> endpoint.</p>
+<p>Exactly one of <cite>by_text</cite>, <cite>by_isin</cite>, <cite>by_symbol</cite> be set.
+This is done because endpoint API doesn’t return expected results
+with both text and ISIN search.</p>
+<dl class="simple">
+<dt>product_type_id:</dt><dd><p>Restricts search to one type of products.</p>
+</dd>
+<dt>by_exchange:</dt><dd><p>Restricts results to products in a exchange. Can be either an Exchange
+instance or an <cite>hiq_abbr</cite> str (e.g. EPA for Paris, AEX for Amsterdam)</p>
+</dd>
+<dt>max_iter:</dt><dd><p>Pull <cite>max_iter</cite> pages of results. If <cite>None</cite>, don’t stop until end is
+reached. Default value: 1000.</p>
+</dd>
+</dl>
+<p>Return a list of ProductBase objects returned by Degiro for <cite>search_txt</cite>
+attribute.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart with degiroasync" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="core.html" class="btn btn-neutral float-right" title="degiroasync.core" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, OhMajesticLama.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

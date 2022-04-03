@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickstart with degiroasync &mdash; degiroasync  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="degiroasync.api documentation" href="api.html" />
+    <link rel="prev" title="degiroasync’s documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> degiroasync
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart with degiroasync</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#log-in-the-platform">Log in the platform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-my-portfolio">Get my Portfolio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-a-product">Find a product</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-price-data">Get price data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">degiroasync.api documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">degiroasync.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapi.html">degiroasync.webapi’s documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">degiroasync</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Quickstart with degiroasync</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quickstart-with-degiroasync">
+<h1><a class="toc-backref" href="#id1">Quickstart with degiroasync</a><a class="headerlink" href="#quickstart-with-degiroasync" title="Permalink to this headline"></a></h1>
+<p>If you’re here, you’re probably looking for a way to directly interact
+with DEGIRO’s endpoints, with Python, in an asynchronous way.</p>
+<p>We’ll focus on higher level abstractions as they were built to limit
+headaches about rebuilding and linking useful objects from the endpoint
+returned information.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#quickstart-with-degiroasync" id="id1">Quickstart with degiroasync</a></p>
+<ul>
+<li><p><a class="reference internal" href="#log-in-the-platform" id="id2">Log in the platform</a></p></li>
+<li><p><a class="reference internal" href="#get-my-portfolio" id="id3">Get my Portfolio</a></p></li>
+<li><p><a class="reference internal" href="#find-a-product" id="id4">Find a product</a></p></li>
+<li><p><a class="reference internal" href="#get-price-data" id="id5">Get price data</a></p></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="log-in-the-platform">
+<span id="cookbook-login"></span><h2><a class="toc-backref" href="#id2">Log in the platform</a><a class="headerlink" href="#log-in-the-platform" title="Permalink to this headline"></a></h2>
+<p><cite>degiroasync</cite> provides helpers to log in the endpoints. They will build a
+<cite>Session</cite> instance for you, that will need to be passed argument to most of
+the functions of this API.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># First we need to get your credentials. In this example we&#39;ll prompt the</span>
+<span class="c1"># user for it.</span>
+<span class="c1">#</span>
+<span class="c1"># Be extremely mindful how you store and provide them to your code should</span>
+<span class="c1"># you want to automate login: plaintext passwords and lax permissions</span>
+<span class="c1"># will bite you back, hard. Your program and its dependencies</span>
+<span class="c1"># files permissions (e.g. write access) should also be limited as much as</span>
+<span class="c1"># possible.</span>
+<span class="kn">import</span> <span class="nn">getpass</span>  <span class="c1"># So your password doesn&#39;t show on screen while you type it</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">degiroasync</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="kn">from</span> <span class="nn">degiroasync.core</span> <span class="kn">import</span> <span class="n">Credentials</span>
+
+<span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;username: &#39;</span><span class="p">)</span>
+<span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">()</span>
+
+<span class="c1"># Let&#39;s ask for a one_time_password, in case the account is MFA-enabled</span>
+<span class="n">one_time_password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span>
+    <span class="s1">&#39;One Time Password (leave blank if not applicable): &#39;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="c1"># If user left one_time_password_blank, we want to disable MFA login: set</span>
+<span class="c1"># it to None.</span>
+<span class="n">one_time_password</span> <span class="o">=</span> <span class="n">one_time_password</span> <span class="ow">or</span> <span class="kc">None</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">my_login</span><span class="p">(</span>
+        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">one_time_password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span><span class="p">:</span>
+
+    <span class="c1"># api.login and Credentials also support totp_secret parameter</span>
+    <span class="c1"># should you want to let degiroasync generate the one time password</span>
+    <span class="c1"># from your secret. Check the Credentials class documentation for</span>
+    <span class="c1"># details.</span>
+    <span class="c1"># Doing so would make automation at your script level easier (no</span>
+    <span class="c1"># need for manual inputs at start-up nor a separate service that</span>
+    <span class="c1"># provides one time passwords) but lower security.</span>
+    <span class="n">credentials</span><span class="p">:</span> <span class="n">Credentials</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">(</span>
+        <span class="n">username</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">,</span>
+        <span class="n">one_time_password</span><span class="o">=</span><span class="n">one_time_password</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Let&#39;s log in. Don&#39;t forget await.</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">credentials</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We&#39;re logged in!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">session</span>
+
+<span class="c1"># Call your login function from your async code or directly</span>
+<span class="c1"># in an asyncio (or your favorite async framework) eventloop:</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
+    <span class="n">my_login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span>
+             <span class="n">password</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-my-portfolio">
+<h2><a class="toc-backref" href="#id3">Get my Portfolio</a><a class="headerlink" href="#get-my-portfolio" title="Permalink to this headline"></a></h2>
+<p>Here we assume you know how to log-in the endpoints and you have a valid Session
+instance available. If you don’t, check <a class="reference internal" href="#cookbook-login"><span class="std std-ref">Log in the platform</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assumption: you&#39;re logged in and have a session, if that&#39;s not the</span>
+<span class="c1"># case, check the login section of this quick start.</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">degiroasync</span> <span class="kn">import</span> <span class="n">api</span>
+
+<span class="n">session</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">my_portfolio</span><span class="p">(</span><span class="n">session</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span><span class="p">):</span>
+    <span class="n">positions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">Position</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">get_portfolio</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+
+    <span class="c1"># A position object contains a product attribute with product</span>
+    <span class="c1"># information and various attributes on the position returned</span>
+    <span class="c1"># by the endpoint.</span>
+    <span class="c1"># Most notably, it includes:</span>
+    <span class="c1">#   - size: quantity of the product that are held.</span>
+    <span class="c1">#   - price: price of the product, in the currency of the product</span>
+    <span class="c1">#   - average_fx_rate: fx rate if not in account currency - else 0.</span>
+    <span class="c1">#   - value: price * size.</span>
+    <span class="n">total_portfolio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Symbol </span><span class="si">{}</span><span class="s2"> Exchange </span><span class="si">{}</span><span class="s2">: Value </span><span class="si">{}</span><span class="s2"> (price </span><span class="si">{}</span><span class="s2"> * size </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">exchange</span><span class="p">,</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">price</span><span class="p">,</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+        <span class="p">))</span>
+        <span class="n">total_portfolio</span> <span class="o">+=</span> <span class="n">pos</span><span class="o">.</span><span class="n">value</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total portfolio: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">total_portfolio</span><span class="p">)</span>
+
+
+<span class="c1"># Call your login function from your async code or directly</span>
+<span class="c1"># in an asyncio (or your favorite async framework) eventloop:</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
+    <span class="n">my_get_portfolio</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="find-a-product">
+<h2><a class="toc-backref" href="#id4">Find a product</a><a class="headerlink" href="#find-a-product" title="Permalink to this headline"></a></h2>
+<p>There are two main ways to get a Product:</p>
+<ul class="simple">
+<li><p>The <cite>get_portfolio</cite> from the example above.</p></li>
+<li><p>The <cite>search_product</cite> call that we’ll show here.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">from</span> <span class="nn">degiroasync</span> <span class="kn">import</span> <span class="n">api</span>
+
+<span class="c1"># Assumption: you&#39;re logged in and have a session, if that&#39;s not the</span>
+<span class="c1"># case, check the login section of this quick start.</span>
+<span class="n">session</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">my_search_product</span><span class="p">(</span><span class="n">session</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span><span class="p">):</span>
+    <span class="c1"># For example, we are looking for a symbol on an exchange place,</span>
+    <span class="c1"># Airbus (AIR) on Paris stock exchange (EPA).</span>
+    <span class="c1"># search_product supports other search criteria, check out its</span>
+    <span class="c1"># documentation for more details.</span>
+    <span class="n">products</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">Product</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">search_product</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">,</span>
+        <span class="n">by_symbol</span><span class="o">=</span><span class="s2">&quot;AIR&quot;</span><span class="p">,</span>
+        <span class="n">by_exchange</span><span class="o">=</span><span class="s2">&quot;EPA&quot;</span><span class="p">,</span>
+        <span class="n">product_type_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> products were founds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">)))</span>
+    <span class="c1"># Notice how we have more than 1 product?</span>
+    <span class="c1"># Setting product_type_id will return all found products: this will</span>
+    <span class="c1"># include stocks but also any obligation, futures or anything else</span>
+    <span class="c1"># the endpoint is aware of.</span>
+    <span class="c1"># By default, search_product will restrict its search to shares.</span>
+    <span class="n">products</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">Product</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">search_product</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">,</span>
+        <span class="n">by_symbol</span><span class="o">=</span><span class="s2">&quot;AIR&quot;</span><span class="p">,</span>
+        <span class="n">by_exchange</span><span class="o">=</span><span class="s2">&quot;EPA&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> products were founds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">)))</span>
+    <span class="c1"># Now we should have just the one.</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Product: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">products</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">products</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+    <span class="c1"># Call your login function from your async code or directly</span>
+    <span class="c1"># in an asyncio (or your favorite async framework) eventloop:</span>
+    <span class="kn">import</span> <span class="nn">asyncio</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
+        <span class="n">my_search_product</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-price-data">
+<h2><a class="toc-backref" href="#id5">Get price data</a><a class="headerlink" href="#get-price-data" title="Permalink to this headline"></a></h2>
+<p>Now that we know how to get Product instances, we may want to get price data
+related to those products.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">from</span> <span class="nn">degiroasync</span> <span class="kn">import</span> <span class="n">api</span>
+<span class="kn">from</span> <span class="nn">degiroasync</span> <span class="kn">import</span> <span class="n">api</span>
+
+<span class="c1"># Assumption: you&#39;re logged in and have a session, if that&#39;s not the</span>
+<span class="c1"># case, check the login section of this quick start.</span>
+<span class="n">session</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">my_price_analysis</span><span class="p">(</span><span class="n">session</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Session</span><span class="p">):</span>
+    <span class="c1"># For example, we are looking for a symbol on an exchange place,</span>
+    <span class="c1"># Airbus (AIR) on Paris stock exchange (EPA).</span>
+    <span class="c1"># search_product supports other search criteria, check out its</span>
+    <span class="c1"># documentation for more details.</span>
+    <span class="n">products</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">Product</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">search_product</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">,</span>
+        <span class="n">by_symbol</span><span class="o">=</span><span class="s2">&quot;AIR&quot;</span><span class="p">,</span>
+        <span class="n">by_exchange</span><span class="o">=</span><span class="s2">&quot;EPA&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> products were founds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">)))</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;We shouldn&#39;t have more than one here.&quot;</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">products</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Let&#39;s get today price data</span>
+    <span class="c1"># The endpoint expects request to be framed in terms of resolution</span>
+    <span class="c1"># and period - how old data do we request, rather than a timeframe.</span>
+    <span class="c1"># Also note that there is no guarantee data will be available and</span>
+    <span class="c1"># returned at the resolution requested for the requested period.</span>
+    <span class="c1"># For example requesting PT1M (1 minute) resolution for P50YEAR</span>
+    <span class="c1"># (50 years) resolution will not return the requested result but</span>
+    <span class="c1"># whatever best quality is available.</span>
+    <span class="c1"># Only trust the date and price fields of the PriceSeriesTime</span>
+    <span class="n">priceseries</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">get_price_data</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">,</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">product</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="o">=</span><span class="n">PRICE</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="o">.</span><span class="n">PT1M</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="n">PRICE</span><span class="o">.</span><span class="n">PERIOD</span><span class="o">.</span><span class="n">P1DAY</span>
+    <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Returned resolution: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">priceseries</span><span class="o">.</span><span class="n">resolution</span><span class="p">))</span>
+    <span class="c1"># priceseries.date is in ISO format &#39;2022-01-20T09:00:00&#39;</span>
+
+    <span class="c1"># Now we could feed the pricesseries.date and priceseries.price in</span>
+    <span class="c1"># a pandas dataframe. In this example we&#39;ll just do an average.</span>
+    <span class="n">average</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">priceseries</span><span class="o">.</span><span class="n">price</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">priceseries</span><span class="o">.</span><span class="n">price</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Since </span><span class="si">{}</span><span class="s1">, price average for </span><span class="si">{}</span><span class="s1"> has been: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">priceseries</span><span class="o">.</span><span class="n">times</span><span class="p">,</span>
+            <span class="n">product</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span>
+            <span class="n">average</span><span class="p">,</span>
+    <span class="p">))</span>
+
+
+    <span class="c1"># Call your login function from your async code or directly</span>
+    <span class="c1"># in an asyncio (or your favorite async framework) eventloop:</span>
+    <span class="kn">import</span> <span class="nn">asyncio</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
+        <span class="n">my_search_product</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="degiroasync’s documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="degiroasync.api documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, OhMajesticLama.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
