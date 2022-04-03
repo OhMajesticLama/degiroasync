@@ -13,7 +13,7 @@ class TestLRUCacheTimed(unittest.IsolatedAsyncioTestCase):
     async def test_cached_time_async(self):
         delay = 0.1  # in s
 
-        @degiroasync.core.lru_cache_timed(seconds=delay*1.2)
+        @degiroasync.core.lru_cache_timed(seconds=delay*2)
         async def dummy():
             await asyncio.sleep(delay)
             return 2
