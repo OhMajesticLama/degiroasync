@@ -11,19 +11,19 @@ This project aims to provide an *unofficial* API for Degiro platform that works
 asynchronously.
 
 There are currently several Degiro Python Libraries that were
-active in 2021, check the _Other Python Degiro Libraries_ section for a 
+active in 2021, check the _Other Python Degiro Libraries_ section for a
 non-exhaustive list and assess which one best fits your needs.
 
 
 ## Supported Features
 
-As its name suggests, `degiroasync` provides an asynchronous Python API to 
+As its name suggests, `degiroasync` provides an asynchronous Python API to
 Degiro trading interface.
 
 This module provides 2 APIs:
 - `degiroasync.api`: API that abstracts Degiro HTTP API to be closer to
   a consumer needs. This is the recommended choice to start.
-- `degiroasync.webapi`: API close to actual Degiro HTTP API. 
+- `degiroasync.webapi`: API close to actual Degiro HTTP API.
   This provides maximum flexibility and data availability, at the cost of
   less checks and more legwork to be used for higher-level logic.
 
@@ -86,7 +86,7 @@ SOFTWARE.
 The license under which this software is made available can be found in
 the LICENSE file in this repository.
 
-It is the responsability of the user of this library to ensure its 
+It is the responsability of the user of this library to ensure its
 product is running and passing adequate tests before running it in production.
 
 
@@ -126,7 +126,7 @@ as possible and reduce the risk of a failure in your production environment.
 
 
 Running integration tests will require environment set-up. As Degiro does not
-provide a test environment, those tests will be run directly on an actual 
+provide a test environment, those tests will be run directly on an actual
 account.
 
 This comes with limitations and concerns:
@@ -134,8 +134,8 @@ This comes with limitations and concerns:
   avoid ending up placing unwanted orders in the event automation fails to
   remove them.
 - You must be particularly careful to minimize risk to leak your credentials.
-  e.g. write a helper script that will ask to input your password to run 
-  integration tests and run the tests to avoid leaking your credentials in 
+  e.g. write a helper script that will ask to input your password to run
+  integration tests and run the tests to avoid leaking your credentials in
   global environment.
   Access to your script folder must be restricted, as well as write rights to
   any file that is imported - that includes this module and all its dependencies.
@@ -143,7 +143,7 @@ This comes with limitations and concerns:
   access to it.
 
 The following environment variables must be set:
-```
+```bash
 DEGIROASYNC_INTEGRATION  # must be set to 1 for integration tests to run
 DEGIRO_USERNAME  # Your Degiro username
 DEGIRO_PASSWORD  # Your Degiro password
@@ -151,7 +151,7 @@ DEGIRO_TOTP_SECRET  # Only if the account requires 2FA for login
 
 ```
 
-```
+```bash
 # Unittests only
 DEGIROASYNC_INTEGRATION=0 pytest --color yes
 # Integration tests & Unittests
@@ -161,7 +161,7 @@ DEGIROASYNC_INTEGRATION=1 pytest --color yes
 ### Tests coverage
 For example, leverage `coverage` module:
 ```bash
-coverage run --include='./degiroasync/*' -m pytest 
+coverage run --include='./degiroasync/*' -m pytest
 # To exclude webapi module
 #coverage run --include='./degiroasync/*' --omit='./degiroasync/webapi/*' -m pytest
 ```
@@ -173,4 +173,4 @@ Check-out those other Python Degiro libraries - non-exhaustive list - to assess
 which best fits your needs:
 - https://github.com/Chavithra/degiro-connector
 - https://github.com/lolokraus/DegiroAPI
-- https://github.com/bramton/degiro 
+- https://github.com/bramton/degiro
