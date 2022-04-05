@@ -616,14 +616,14 @@ async def search_product(
     This is done because endpoint API doesn't return expected results
     with both text and ISIN search.
 
-    product_type_id:
+    product_type_id
         Restricts search to one type of products.
 
-    by_exchange:
+    by_exchange
         Restricts results to products in a exchange. Can be either an Exchange
         instance or an `hiq_abbr` str (e.g. EPA for Paris, AEX for Amsterdam)
 
-    max_iter:
+    max_iter
         Pull `max_iter` pages of results. If `None`, don't stop until end is
         reached. Default value: 1000.
 

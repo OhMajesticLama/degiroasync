@@ -1,4 +1,4 @@
-degiroasync.api documentation
+degiroasync.api's documentation
 =============================
 .. _api:
 

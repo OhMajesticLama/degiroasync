@@ -53,11 +53,14 @@ As its name suggests, `degiroasync` provides an asynchronous Python API to
 Degiro trading interface.
 
 This module provides 2 APIs:
+
 - `degiroasync.api`: API that abstracts Degiro HTTP API to be closer to
-a consumer needs. This is the recommended choice to start.
+  a consumer needs. This is the recommended choice to start.
+
 - `degiroasync.webapi`: API close to actual Degiro HTTP API.
-This provides maximum flexibility and data availability, at the cost of
-less checks and more legwork to be used for higher-level logic.
+  This provides maximum flexibility and data availability, at the cost of
+  less checks and more legwork to be used for higher-level logic.
+
 
 `degiroasync.api` is built on top of `degiroasync.webapi`: it should be easy
 to fall back to `webapi` should the need arise. For example, there is currently
