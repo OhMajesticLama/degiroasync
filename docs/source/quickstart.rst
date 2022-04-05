@@ -183,12 +183,12 @@ There are two main ways to get a Product:
         return products[0]
 
 
-        # Call your login function from your async code or directly
-        # in an asyncio (or your favorite async framework) eventloop:
-        import asyncio
-        asyncio.get_event_loop().run_until_complete(
-            my_search_product(session)
-        )
+    # Call your login function from your async code or directly
+    # in an asyncio (or your favorite async framework) eventloop:
+    import asyncio
+    asyncio.get_event_loop().run_until_complete(
+        my_search_product(session)
+    )
 
 
 Get price data
@@ -252,9 +252,9 @@ related to those products.
         ))
 
 
-        # Call your login function from your async code or directly
-        # in an asyncio (or your favorite async framework) eventloop:
-        import asyncio
-        asyncio.get_event_loop().run_until_complete(
-            my_search_product(session)
-        )
+    # Call your login function from your async code or directly
+    # in an asyncio (or your favorite async framework) eventloop:
+    import asyncio
+    asyncio.get_event_loop().run_until_complete(
+        my_search_product(session)
+    )
