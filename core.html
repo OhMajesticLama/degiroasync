@@ -7,6 +7,7 @@
   <title>degiroasync.core’s documentation &mdash; degiroasync  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -110,7 +111,7 @@ must be called promptly as one_time_password expires frequently.</p>
 <dt class="sig sig-object py" id="degiroasync.core.ORDER.ACTION">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACTION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.ORDER.ACTION" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>BUY:</dt><dd><p>Use when placing a _BUY_ order on a product.</p>
+<dt>BUY</dt><dd><p>Use when placing a _BUY_ order on a product.</p>
 </dd>
 <dt>SELL:</dt><dd><p>Use when placing a _SELL_ order on a product.</p>
 </dd>
@@ -124,9 +125,9 @@ API calls.</p>
 <dt class="sig sig-object py" id="degiroasync.core.ORDER.STATUS">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">STATUS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.ORDER.STATUS" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>CONFIRMED:</dt><dd><p>The order was accepted by the platform.</p>
+<dt>CONFIRMED</dt><dd><p>The order was accepted by the platform.</p>
 </dd>
-<dt>REJECTED:</dt><dd><p>The order was <em>not</em> accepted by the platform.</p>
+<dt>REJECTED</dt><dd><p>The order was <em>not</em> accepted by the platform.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -135,11 +136,11 @@ API calls.</p>
 <dt class="sig sig-object py" id="degiroasync.core.ORDER.TIME">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TIME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.ORDER.TIME" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>DAY:</dt><dd><p>This is the “Day” option in the web trader.
+<dt>DAY</dt><dd><p>This is the “Day” option in the web trader.
 Order placed for one day only: it expires at the end of the day it
 was created.</p>
 </dd>
-<dt>PERMANENT:</dt><dd><p>This is the “GTC” option in the web trader.
+<dt>PERMANENT</dt><dd><p>This is the “GTC” option in the web trader.
 This order sticks until it has been executed. Be careful that
 occasionally Degiro cancels Permanent orders due to various events.</p>
 </dd>
@@ -150,17 +151,17 @@ occasionally Degiro cancels Permanent orders due to various events.</p>
 <dt class="sig sig-object py" id="degiroasync.core.ORDER.TYPE">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TYPE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.ORDER.TYPE" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>LIMITED:</dt><dd><p>This is the “Limit” field value of “Order type” in the web trader.</p>
+<dt>LIMITED</dt><dd><p>This is the “Limit” field value of “Order type” in the web trader.</p>
 </dd>
-<dt>MARKET:</dt><dd><p>This is the “Market” field value of “Order type” in the web trader.</p>
+<dt>MARKET</dt><dd><p>This is the “Market” field value of “Order type” in the web trader.</p>
 </dd>
-<dt>STOP_LOSS:</dt><dd><p>This is the “Stop Loss” field value of “Order type” in the web
+<dt>STOP_LOSS</dt><dd><p>This is the “Stop Loss” field value of “Order type” in the web
 trader.</p>
 </dd>
-<dt>STOP_LIMITED:</dt><dd><p>This is the “Stop Limited” field value of “Order type” in the web
+<dt>STOP_LIMITED</dt><dd><p>This is the “Stop Limited” field value of “Order type” in the web
 trader.</p>
 </dd>
-<dt>AMOUNT:</dt><dd><p>This is the “Amount” field value of “Order type” in the web trader.
+<dt>AMOUNT</dt><dd><p>This is the “Amount” field value of “Order type” in the web trader.
 It’s used for investment funds.</p>
 </dd>
 </dl>

@@ -202,7 +202,6 @@ related to those products.
     from typing import Iterable
 
     from degiroasync import api
-    from degiroasync import api
 
     # Assumption: you're logged in and have a session, if that's not the
     # case, check the login section of this quick start.

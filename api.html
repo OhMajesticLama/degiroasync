@@ -7,6 +7,7 @@
   <title>degiroasync.api documentation &mdash; degiroasync  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -173,72 +174,6 @@ micCode (e.g. XPAR).</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="degiroasync.api.ORDER">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">ORDER</span></span><a class="headerlink" href="#degiroasync.api.ORDER" title="Permalink to this definition"></a></dt>
-<dd><p>Constants for orders in web API.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="degiroasync.api.ORDER.ACTION">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ACTION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.ACTION" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>BUY:</dt><dd><p>Use when placing a _BUY_ order on a product.</p>
-</dd>
-<dt>SELL:</dt><dd><p>Use when placing a _SELL_ order on a product.</p>
-</dd>
-</dl>
-<p>Check <cite>ORDER.TYPE</cite> for types of orders.</p>
-<p>For use with <cite>checkOrder</cite> HTTP endpoint - or <cite>check_order</cite> degiroasync
-API calls.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="degiroasync.api.ORDER.STATUS">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">STATUS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.STATUS" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>CONFIRMED:</dt><dd><p>The order was accepted by the platform.</p>
-</dd>
-<dt>REJECTED:</dt><dd><p>The order was <em>not</em> accepted by the platform.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="degiroasync.api.ORDER.TIME">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TIME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.TIME" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>DAY:</dt><dd><p>This is the “Day” option in the web trader.
-Order placed for one day only: it expires at the end of the day it
-was created.</p>
-</dd>
-<dt>PERMANENT:</dt><dd><p>This is the “GTC” option in the web trader.
-This order sticks until it has been executed. Be careful that
-occasionally Degiro cancels Permanent orders due to various events.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="degiroasync.api.ORDER.TYPE">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TYPE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ORDER.TYPE" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>LIMITED:</dt><dd><p>This is the “Limit” field value of “Order type” in the web trader.</p>
-</dd>
-<dt>MARKET:</dt><dd><p>This is the “Market” field value of “Order type” in the web trader.</p>
-</dd>
-<dt>STOP_LOSS:</dt><dd><p>This is the “Stop Loss” field value of “Order type” in the web
-trader.</p>
-</dd>
-<dt>STOP_LIMITED:</dt><dd><p>This is the “Stop Limited” field value of “Order type” in the web
-trader.</p>
-</dd>
-<dt>AMOUNT:</dt><dd><p>This is the “Amount” field value of “Order type” in the web trader.
-It’s used for investment funds.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="degiroasync.api.Order">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Order</span></span><a class="headerlink" href="#degiroasync.api.Order" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -313,9 +248,9 @@ than transaction_fee.</p>
 <em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_orders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple[typing.List[jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper]]</span></span></span><a class="headerlink" href="#degiroasync.api.get_orders" title="Permalink to this definition"></a></dt>
 <dd><p>Get current orders and history.</p>
 <dl class="simple">
-<dt>to_date:</dt><dd><p>Request orders history up to <cite>to_date</cite>. Defaults to today.</p>
+<dt>to_date</dt><dd><p>Request orders history up to <cite>to_date</cite>. Defaults to today.</p>
 </dd>
-<dt>from_date:</dt><dd><p>Request orders history from <cite>from_date</cite>. Defaults to today - 7 days.</p>
+<dt>from_date</dt><dd><p>Request orders history from <cite>from_date</cite>. Defaults to today - 7 days.</p>
 </dd>
 </dl>
 <p>Return current_orders, historical_orders.</p>
@@ -366,9 +301,9 @@ resolution is not available.</p>
 <em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_transactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List[jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper]</span></span></span><a class="headerlink" href="#degiroasync.api.get_transactions" title="Permalink to this definition"></a></dt>
 <dd><p>Get transactions for <cite>session</cite>.</p>
 <dl class="simple">
-<dt>from_date:</dt><dd><p>Request transactions from <cite>from_date</cite>. Defaults to <cite>to_date - 7 days</cite>.</p>
+<dt>from_date</dt><dd><p>Request transactions from <cite>from_date</cite>. Defaults to <cite>to_date - 7 days</cite>.</p>
 </dd>
-<dt>to_date:</dt><dd><p>Request transactions to <cite>to_date</cite>. Defaults to today.</p>
+<dt>to_date</dt><dd><p>Request transactions to <cite>to_date</cite>. Defaults to today.</p>
 </dd>
 </dl>
 </dd></dl>
