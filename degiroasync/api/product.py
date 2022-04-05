@@ -76,7 +76,7 @@ class ProductBase:
         Batching your requests will improve performance and lower
         load on endpoint.
 
-        force_init:
+        force_init
             If this is set to True, allow init of product. Use only if you know
             what you're doing.
         """
@@ -98,7 +98,7 @@ class ProductFactory:
         This is useful to do batch requests to populate additional attributes
         for Products.
 
-        attributes_iter:
+        attributes_iter
             At the minimum must provides 'id' and 'product_type_id'.
             All attributes provided will be set to the Product.base
             oject.
@@ -189,9 +189,18 @@ class ProductFactory:
             cls,
             session: Session,
             products_base_iter: Iterable[Dict[str, Any]],
-            products_info: Dict[str, Any]):
+            products_info: Dict[str, Any]
+            ) -> Iterable[ProductBase]:
         """
         Instantiate products from attributes and product_info.
+
+        products_base_iter
+            This dictionary keys and values will be assigned to the `base`
+            attribute of the instantiated product.
+
+        products_info
+            This dictionary keys and values will be assigned to the `info`
+            attribute of the instantiated product.
         """
         LOGGER.debug("__products_from_attrs| products_info %s",
                      products_info)
@@ -588,41 +597,6 @@ def convert_time_series(
         measure_date = start_date + datetime.timedelta(minutes=time_delta)
         data_new['date'].append(measure_date.isoformat())
     return data_out
-
-
-# async def get_price_data_batch(
-#         session: SessionCore,
-#         products: Union[Iterable[ProductBase], ProductBase],
-#         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
-#         period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
-#         timezone: str = 'Europe/Paris',
-#         culture: str = 'fr-FR',
-#         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
-# ):
-#     """
-#     Get price data for products. Be mindful that not all product types will
-
-#     >>>>
-#     """
-#     raise NotImplementedError()  # Add helper around _get_price_data
-#     if isinstance(products, ProductBase):
-#         products = [products]
-
-#     for product in products:
-#         # Ensure product got results of product_info
-#         if product.productTypeId != PRODUCT.TYPEID.STOCK:
-#             raise NotImplementedError(
-#                 "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
-#                 "supported by get_price_data_bulk")
-#         vwdId = product.vwdId
-#         prices_req.append(webapi.get_price_data(
-#             session,
-#             vwdId,
-#             resolution=resolution,
-#             period=period,
-#             timezone=timezone,
-#             culture=culture,
-#             data_type=data_type))
 
 
 async def search_product(

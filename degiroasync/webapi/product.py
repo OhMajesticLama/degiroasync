@@ -577,8 +577,6 @@ async def get_company_profile(
         isin: str) -> Dict[str, Any]:
     """
     Get company profile.
-
-    Example return
     """
     # should this url be taken from config as well?
 

@@ -4,7 +4,7 @@ import datetime
 
 import httpx
 
-from .webapi import get_trading_update
+from .product import get_trading_update
 from ..core import SessionCore
 from ..core import URLs
 from ..core import constants
@@ -13,7 +13,7 @@ from ..core.constants import TIMEOUT
 from ..core import join_url
 from ..core import check_session_client
 from ..core import check_session_config
-from .webapi import check_response
+from ..core.helpers import check_response
 
 
 LOGGER = logging.getLogger(constants.LOGGER_NAME)

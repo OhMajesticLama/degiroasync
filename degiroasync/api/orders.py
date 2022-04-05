@@ -136,9 +136,9 @@ async def get_orders(
     """
     Get current orders and history.
 
-    to_date:
+    to_date
         Request orders history up to `to_date`. Defaults to today.
-    from_date:
+    from_date
         Request orders history from `from_date`. Defaults to today - 7 days.
 
     Return current_orders, historical_orders.
@@ -189,10 +189,10 @@ async def get_transactions(
     """
     Get transactions for `session`.
 
-    from_date:
+    from_date
         Request transactions from `from_date`. Defaults to `to_date - 7 days`.
 
-    to_date:
+    to_date
         Request transactions to `to_date`. Defaults to today.
     """
     to_date = to_date or datetime.datetime.now()

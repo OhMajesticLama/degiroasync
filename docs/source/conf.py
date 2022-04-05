@@ -39,6 +39,11 @@ extensions = [
 
 napoleon_numpy_docstrings = True
 
+autodoc_default_options = {
+    'members': True,
+    'members-order': 'bysource',
+        }
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

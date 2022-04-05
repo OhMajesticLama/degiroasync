@@ -94,7 +94,7 @@ class LOGIN(IntEnum):
 
     At this date, only one has been noticed and documented.
 
-    TOTP_NEEDED:
+    TOTP_NEEDED
         This flag is set when one-time-password is required to log in the
         account.
     """
@@ -107,7 +107,7 @@ class ORDER:
     """
     class ACTION(StrEnum):
         """
-        BUY:
+        BUY
             Use when placing a _BUY_ order on a product.
 
         SELL:
@@ -123,21 +123,21 @@ class ORDER:
 
     class TYPE(IntEnum):
         """
-        LIMITED:
+        LIMITED
             This is the "Limit" field value of "Order type" in the web trader.
 
-        MARKET:
+        MARKET
             This is the "Market" field value of "Order type" in the web trader.
 
-        STOP_LOSS:
+        STOP_LOSS
             This is the "Stop Loss" field value of "Order type" in the web
             trader.
 
-        STOP_LIMITED:
+        STOP_LIMITED
             This is the "Stop Limited" field value of "Order type" in the web
             trader.
 
-        AMOUNT:
+        AMOUNT
             This is the "Amount" field value of "Order type" in the web trader.
             It's used for investment funds.
         """
@@ -149,12 +149,12 @@ class ORDER:
 
     class TIME(IntEnum):
         """
-        DAY:
+        DAY
             This is the "Day" option in the web trader.
             Order placed for one day only: it expires at the end of the day it
             was created.
 
-        PERMANENT:
+        PERMANENT
             This is the "GTC" option in the web trader.
             This order sticks until it has been executed. Be careful that
             occasionally Degiro cancels Permanent orders due to various events.
@@ -164,10 +164,10 @@ class ORDER:
 
     class STATUS(StrEnum):
         """
-        CONFIRMED:
+        CONFIRMED
             The order was accepted by the platform.
 
-        REJECTED:
+        REJECTED
             The order was *not* accepted by the platform.
         """
         CONFIRMED = 'CONFIRMED'
@@ -196,34 +196,34 @@ class TRANSACTION:
 class PRODUCT:
     class TYPEID(IntEnum):
         """
-        STOCK:
+        STOCK
             Stocks, or shares products.
 
-        BONDS:
+        BONDS
             Bonds products.
 
-        FUTURES:
+        FUTURES
             Futures products.
 
-        OPTIONS:
+        OPTIONS
             Options products
 
-        FUNDS:
+        FUNDS
             Investment funds products.
 
-        LEVERAGE_PRODUCTS:
+        LEVERAGE_PRODUCTS
             Leverage products.
 
-        ETFS:
+        ETFS
             ETFs products.
 
-        CFDS:
+        CFDS
             CFDs products.
 
-        WARRANTS:
+        WARRANTS
             Warrants products.
 
-        CURRENCY:
+        CURRENCY
             Currencies. This is used by endpoint for account balances for
             instance.
 
@@ -250,10 +250,10 @@ class SORT(StrEnum):
     """
     Used by some endpoints to provide sorted results.
 
-    ASC:
+    ASC
         Results will be sorted in ascending order.
 
-    DESC:
+    DESC
         Results will be sorted in descending order.
     """
     ASC = "asc"
@@ -288,3 +288,5 @@ class POSITION:
 
 # HTTP Requests global timeout, in seconds
 TIMEOUT: float = 20
+
+
