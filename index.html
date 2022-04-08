@@ -124,12 +124,14 @@ incurring losses depending on how you use that library.</p>
 <h2>Supported Features<a class="headerlink" href="#supported-features" title="Permalink to this headline"></a></h2>
 <p>As its name suggests, <cite>degiroasync</cite> provides an asynchronous Python API to
 Degiro trading interface.</p>
-<p>This module provides 2 APIs:
-- <cite>degiroasync.api</cite>: API that abstracts Degiro HTTP API to be closer to
-a consumer needs. This is the recommended choice to start.
-- <cite>degiroasync.webapi</cite>: API close to actual Degiro HTTP API.
+<p>This module provides 2 APIs:</p>
+<ul class="simple">
+<li><p><cite>degiroasync.api</cite>: API that abstracts Degiro HTTP API to be closer to
+a consumer needs. This is the recommended choice to start.</p></li>
+<li><p><cite>degiroasync.webapi</cite>: API close to actual Degiro HTTP API.
 This provides maximum flexibility and data availability, at the cost of
-less checks and more legwork to be used for higher-level logic.</p>
+less checks and more legwork to be used for higher-level logic.</p></li>
+</ul>
 <p><cite>degiroasync.api</cite> is built on top of <cite>degiroasync.webapi</cite>: it should be easy
 to fall back to <cite>webapi</cite> should the need arise. For example, there is currently
 no call for <cite>confirm_order</cite> in <cite>degiroasync.api</cite> as the <cite>webapi</cite> one is fairly
