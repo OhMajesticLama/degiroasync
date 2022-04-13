@@ -85,41 +85,46 @@ from ..core.constants import ORDER
 from ..core.constants import POSITION
 
 
-__all__ = [obj.__name__ for obj in (
-    # Session
-    login,
-    Credentials,
-    Session,
-    get_exchange_dictionary,
-    ExchangeDictionary,
-    Exchange, Region, Country,
+__all__ = [
+        # Choice between strings or import errors at this level.
+        # An object missing __name__ will fail at module import, typos
+        # in object names are flagged by editor's tools and easier to catch
+        # than typos in a string.
+        obj.__name__ for obj in (  # type: ignore
+            # Session
+            login,
+            Credentials,
+            Session,
+            get_exchange_dictionary,
+            ExchangeDictionary,
+            Exchange, Region, Country,
 
-    # Product
-    search_product,
-    get_portfolio,
-    get_price_data,
+            # Product
+            search_product,
+            get_portfolio,
+            get_price_data,
 
-    # PriceData,
-    PriceSeriesTime,
-    Stock,
-    Currency,
-    ProductBase,
-    ProductGeneric,
+            # PriceData,
+            PriceSeriesTime,
+            Stock,
+            Currency,
+            ProductBase,
+            ProductGeneric,
 
-    get_portfolio,
-    get_portfolio_total,
-    TotalPortfolio,
+            get_portfolio,
+            get_portfolio_total,
+            TotalPortfolio,
 
-    # Order
-    check_order,
-    get_orders,
-    get_transactions,
-    Order,
-    Transaction,
+            # Order
+            check_order,
+            get_orders,
+            get_transactions,
+            Order,
+            Transaction,
 
-    # Constants
-    #PRODUCT,
-    #ORDER,
-    #PRICE,
-    #POSITION
+            # Constants
+            #PRODUCT,
+            #ORDER,
+            #PRICE,
+            #POSITION
 )]

@@ -1,11 +1,13 @@
 import enum
 
 try:
-    from enum import StrEnum
+    # 2022.04 available starting Python 3.11. We're within a try/except
+    # with an alternative, ignore type.
+    from enum import StrEnum  # type: ignore
 except ImportError:
     # Exists only starting Python 3.11
     # Reimplement what we need from it here.
-    class StrEnum(str, enum.Enum):
+    class StrEnum(str, enum.Enum):  # type: ignore
         def __str__(self):
             return str.__str__(self)
 

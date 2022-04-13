@@ -8,6 +8,7 @@ import asyncio
 import time
 
 
+import asyncstdlib
 import asyncstdlib.functools as afunctools
 import httpx
 
@@ -34,8 +35,8 @@ class CoroCache:
 
         """
         self.coro = coro
-        self.res = None
-        self.wait = True
+        self.res: Optional[Any] = None
+        self.wait: bool = True
 
     def __await__(self) -> Any:
         if self.wait:
