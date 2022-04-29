@@ -41,7 +41,7 @@ async def login(
     }
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         LOGGER.debug("login| url %s", url)
-        response = await client.post(url, data=json.dumps(payload))
+        response = await client.post(url, content=json.dumps(payload))
         LOGGER.debug("login| response %s", response.__dict__)
 
         response_load = response.json()
@@ -63,7 +63,7 @@ async def login(
             LOGGER.debug("run totp login at %s", url)
             response = await client.post(
                 url,
-                data=json.dumps(payload),
+                content=json.dumps(payload),
                 cookies=response.cookies)
             LOGGER.debug(response.__dict__)
             LOGGER.debug(response.json())
