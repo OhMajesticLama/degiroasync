@@ -90,7 +90,7 @@ class ProductFactory:
     @classmethod
     async def init_batch(
             cls,
-            session: Session,
+            session: SessionCore,
             attributes_iter: Iterable[Dict[str, Any]],
             size=50
     ) -> AsyncGenerator[ProductBase, None]:
@@ -129,7 +129,8 @@ class ProductFactory:
         for ind, attributes in enumerate(attributes_iter, 1):
             # Check that minimum keys are in attributes
             attributes = camelcase_dict_to_snake(attributes)
-            ProductBase.Base(attributes)
+            # 2022.04 Poor JSONclass compatibility with mypy
+            ProductBase.Base(attributes)  # type: ignore
             attributes_batch.append(attributes)
             if ind % size == 0:
                 LOGGER.debug("init_batch| attributes_batch %s",
@@ -159,7 +160,7 @@ class ProductFactory:
     @classmethod
     async def _create_batch(
             cls,
-            session: Session,
+            session: SessionCore,
             attributes_batch: Iterable[Dict[str, Any]]
     ) -> Iterable[ProductBase]:
         """
@@ -243,9 +244,11 @@ class ProductFactory:
                         "api.ProductFactory.init_product| type_id %s class %s",
                         product_type_id, inst_cls)
                 product_info = camelcase_dict_to_snake(product_info)
-                info = inst_cls.Info(product_info)
+                # 2022.04 JSONclass poor compatibility with mypy
+                info = inst_cls.Info(product_info)  # type: ignore
                 instance = inst_cls(force_init=True)
-                instance.base = inst_cls.Base(product_base)
+                # 2022.04 JSONclass poor compatibility with mypy
+                instance.base = inst_cls.Base(product_base)  # type: ignore
                 instance.info = info
                 products_dict[product_id] = instance
             yield instance
@@ -261,6 +264,8 @@ class Currency(ProductBase):
         tradable: bool
         product_type_id: PRODUCT.TYPEID
 
+    info: Info
+
 
 class Stock(ProductBase):
     class Info(ProductBase.Info):
@@ -268,8 +273,8 @@ class Stock(ProductBase):
         isin: str
         symbol: str
         name: str
-        vwd_id: Optional[AnyStr] = None  # not set if non-tradable
-        vwd_identifier_type: Optional[AnyStr] = None  # not set if non-tradable
+        vwd_id: Optional[str] = None  # not set if non-tradable
+        vwd_identifier_type: Optional[str] = None  # not set if non-tradable
         product_type: str
         product_type_id: PRODUCT.TYPEID
         tradable: bool
@@ -279,6 +284,8 @@ class Stock(ProductBase):
     class VWDIDTYPES(StrEnum):
         ISSUEID = 'issueId'
         VWDKEY = 'vwdkey'
+
+    info: Info
 
 
 class ProductGeneric(ProductBase):
@@ -291,6 +298,8 @@ class ProductGeneric(ProductBase):
         symbol: str
         name: str
         tradable: bool
+
+    info: Info
 
 
 @JSONclass(annotations=True, annotations_type=True)
@@ -385,7 +394,8 @@ async def get_portfolio(
             LOGGER.info("POSITION TYPE %s unknown. Leave as is.",
                         portf['position_type'])
         del portf['id']
-    return [Position(portf) for portf in portf_dict_json]
+    # 2022.04 JSONclass has poor compatibility with mypy
+    return [Position(portf) for portf in portf_dict_json]  # type: ignore
 
 
 async def get_portfolio_total(
@@ -445,14 +455,15 @@ class PriceSeriesTime:
     expires: str
 
 
+# 2022.04: mypy limited support for StrEnum, ignore until proper support.
 async def get_price_data(
         session: SessionCore,
         product: Stock,
-        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1M,
-        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
+        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1M,  # type: ignore
+        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,  # type: ignore
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
-        data_type: PRICE.TYPE = PRICE.TYPE.PRICE
+        data_type: PRICE.TYPE = PRICE.TYPE.PRICE  # type: ignore
         ) -> PriceSeriesTime:
     """
     Get price data for `product`.
@@ -564,7 +575,7 @@ def convert_time_series(
 
     """
     time_t, resolution_t = data_series['times'].split('/')
-    data_out = data_series.copy()
+    data_out: Dict[str, Any] = data_series.copy()
 
     for key in ('times', 'expires', 'data'):
         if key not in data_series:
@@ -580,7 +591,10 @@ def convert_time_series(
                                         )
                                   )
 
-    data_new = {'price': [], 'date': []}
+    data_new: Dict[str, Union[Sequence[str], Sequence[float]]] = {
+        'price': [],
+        'date': [],
+        }
     data_out['data'] = data_new
     data_out['type'] = 'time'
     data_out['resolution'] = resolution_t
@@ -594,9 +608,9 @@ def convert_time_series(
 
     start_date = datetime.datetime.fromisoformat(time_t)
     for kv in data_series['data']:
-        data_new['price'].append(kv[1])
+        data_new['price'].append(float(kv[1]))
         time_ind = kv[0]
-        time_delta = time_ind * time_multiplier
+        time_delta = float(time_ind) * time_multiplier
         measure_date = start_date + datetime.timedelta(minutes=time_delta)
         data_new['date'].append(measure_date.isoformat())
     return data_out
@@ -686,7 +700,10 @@ async def search_product(
         return True
 
     iter_n = 0
-    while iter_n < max_iter or max_iter is None:
+    run_forever = max_iter is None
+    if max_iter is None:
+        max_iter = -1
+    while iter_n < max_iter or run_forever:
         iter_n += 1
         resp_json = await webapi.search_product(
             session,
@@ -723,7 +740,7 @@ async def search_product(
 
 
 __all__ = [
-    obj.__name__ for obj in (
+    obj.__name__ for obj in (  # type: ignore
         # Login & setup
         Credentials,
         Session,

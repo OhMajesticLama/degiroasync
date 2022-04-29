@@ -378,4 +378,3 @@ def check_keys(data: dict, keys: Iterable[str]):
 # Logs helpers
 FORMAT_DEFAULT = '%(asctime)s-%(name)s-%(levelname)s- %(message)s'
 STREAMHANDLER_DEFAULT = logging.StreamHandler(stream=sys.stdout)
-
