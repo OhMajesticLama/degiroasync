@@ -1,8 +1,9 @@
-from typing import Iterable, Any, List, Dict, Tuple, Union, ForwardRef, AnyStr
+from typing import Iterable, Any, List, Dict, Union, AnyStr
 from typing import Optional, AsyncGenerator, Sequence
 import logging
 import pprint
 import itertools
+import asyncio
 import datetime
 try:
     from enum import StrEnum
@@ -51,7 +52,7 @@ class ProductBase:
     @JSONclass(annotations=True, annotations_type=True)
     class Base:
         # Attributes provided to init_batch will be populated on base
-        # attributte.
+        # attribute.
         id: str
 
     @JSONclass(annotations=True, annotations_type=True)
@@ -59,6 +60,7 @@ class ProductBase:
         """
         Must be overwritten and/or subclassed by subclasses of Product.
         """
+        id: str
         name: str
         symbol: str
         currency: str
@@ -134,11 +136,12 @@ class ProductFactory:
                              attributes_batch)
                 products_batch = cls._create_batch(session,
                                                    attributes_batch.copy())
-                batches_awt.append(products_batch)
+                batches_awt.append(asyncio.create_task(products_batch))
                 attributes_batch.clear()
 
         if len(attributes_batch):
-            batches_awt.append(cls._create_batch(session, attributes_batch))
+            batches_awt.append(asyncio.create_task(
+                    cls._create_batch(session, attributes_batch)))
         LOGGER.debug('init_batch| batches_awt %s', batches_awt)
         ind = 0
         try:
@@ -638,8 +641,19 @@ async def search_product(
     # e.g. we can't search for "AIRBUS NL0000235190" and get all the AIRBUS
     # named products with ISIN NL0000235190.
     if by_text is None:
-        by_text = ' '.join(filter(lambda k: k is not None,
-                                  (by_text, by_isin, by_symbol)))
+        # We've checked above that we only have one not-None search parameter.
+        if by_symbol is not None:
+            by_text = by_symbol
+        elif by_isin is not None:
+            by_text = by_isin
+        else:
+            raise AssertionError(
+                    "by_text is None and no search parameters was set or "
+                    "found. Have you set a search parameters to "
+                    "get_price_data?"
+                    "\n If yes, this shouldn't be happening, please open a bug"
+                    " report."
+                    )
 
     exchange_id = None
     if by_exchange is not None:

@@ -6,13 +6,6 @@ Check out the online documentation [here](https://ohmajesticlama.github.io/degir
 
 ## Introduction
 
-Current version is _ALPHA_ level of quality:
-- some features are still missing, see supported features section.
-- external interface is still subject to change, even between minor version.
-- while there are integration tests, coverage of integration and unit tests is
-  not yet where it needs to be.
-
-
 This project aims to provide an *unofficial* API for Degiro platform that works
 asynchronously.
 

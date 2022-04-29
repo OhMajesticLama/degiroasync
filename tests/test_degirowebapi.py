@@ -151,6 +151,9 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('items' in resp_json['data'], resp_json)
 
         async def test_get_price_data(self):
+            """
+            Simply check that we don't have an error and data is not empty.
+            """
             session = await self._login()
 
             vwdId = '360114899'

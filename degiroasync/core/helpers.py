@@ -8,7 +8,6 @@ import asyncio
 import time
 
 
-import asyncstdlib
 import asyncstdlib.functools as afunctools
 import httpx
 
@@ -115,22 +114,6 @@ def lru_cache_timed(
                                             typed=typed,
                                             seconds=seconds)
 
-# def run_in_new_thread(
-#        coroutine: Coroutine,
-#        ) -> concurrent.futures.Future:
-#    """
-#    Use to stop async creep: when you need to run a coroutine and return in
-#    a synchronous call.
-#    """
-#    loop = asyncio.new_event_loop()
-#    #loop = asyncio.get_event_loop()
-#    with concurrent.futures.ThreadPoolExecutor(1) as executor:
-#        future = executor.submit(
-#                loop.run_until_complete,
-#                coroutine)
-#
-#    return future
-
 
 def camelcase_to_snake(text: str) -> str:
     """
@@ -155,7 +138,7 @@ def camelcase_to_snake(text: str) -> str:
 
 def camelcase_dict_to_snake(
         dict_in: Dict[str, Any],
-        *,
+        /,
         recursive: bool = True) -> Dict[str, Any]:
     """
     Convert keys of dictionary with `str` keys from camelCase to snake_case.
@@ -213,16 +196,6 @@ def check_response(response: httpx.Response):
         raise ResponseError(
             f"Error on call: url {response.url}"
             f" | code {response.status_code} | content {response.content}")
-
-
-# def check_keys(data: dict, keys: Iterable[str]):
-#    """
-#    Helper to check keys are in data.
-#    """
-#    for attr in keys:
-#        if attr not in data:
-#            raise AssertionError(f'{attr} not found in config.'
-#                    ' Please try again later and open a bug ticket if the problem persits.')
 
 
 def dict_from_attr_list(
@@ -406,19 +379,3 @@ def check_keys(data: dict, keys: Iterable[str]):
 FORMAT_DEFAULT = '%(asctime)s-%(name)s-%(levelname)s- %(message)s'
 STREAMHANDLER_DEFAULT = logging.StreamHandler(stream=sys.stdout)
 
-
-# def set_logs(
-#        logger: logging.Logger,
-#        logging_level: int,
-#        log_format: str = FORMAT_DEFAULT,
-#        handler: logging.Handler = STREAMHANDLER_DEFAULT
-#        ):
-#    "Configure logging for this module."
-#    # Configure logging
-#    logger.setLevel(logging_level)
-#    #handler = logging.StreamHandler(stream=sys.stdout)
-#    handler.setLevel(logging_level)
-#    # DEBUG: Will need to find where another handler is being added when running tests. nose2 catches loggers by default.
-#    #logger.addHandler(handler)
-#    formatter = logging.Formatter(log_format)
-#    handler.setFormatter(formatter)

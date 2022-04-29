@@ -288,7 +288,8 @@ class POSITION:
     class TYPE(StrEnum):
         PRODUCT = 'PRODUCT'
 
-# HTTP Requests global timeout, in seconds
+
+# HTTP Requests global timeout, in seconds. DEGIRO endpoints are sometimes
+# a bit slow to answer, maybe due to throttling: this is necessary
+# to limit number of call failure.
 TIMEOUT: float = 20
-
-

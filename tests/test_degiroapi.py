@@ -539,13 +539,18 @@ if RUN_INTEGRATION_TESTS:
 
             # We entered PT1D resolution, check that we have one data point
             # per day at most
-            start = datetime.datetime.now() - datetime.timedelta(days=31)
+            start = datetime.datetime.now() - datetime.timedelta(days=32)
             prior_day = datetime.datetime(start.year, start.month, start.day)
             for date_str in date_series:
                 date = datetime.datetime.fromisoformat(date_str)
                 day = datetime.datetime(date.year, date.month, date.day)
                 delta_days = (day - prior_day).days
-                self.assertGreaterEqual(delta_days, 1)
+                self.assertGreaterEqual(
+                        delta_days, 1,
+                        "day {}, prior_day {}".format(
+                            day.isoformat(),
+                            prior_day.isoformat()
+                            ))
 
                 prior_day = day
 

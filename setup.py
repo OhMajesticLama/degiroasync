@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.15.1",
+        version="0.15.2",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
@@ -58,7 +58,7 @@ if __name__ == '__main__':
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
             "Operating System :: OS Independent",
-            "Development Status :: 3 - Alpha",
+            "Development Status :: 4 - Beta",
             "Topic :: Software Development :: Libraries :: Python Modules",
             "Intended Audience :: Developers",
         ],
