@@ -20,7 +20,6 @@ Documentation details for public API members can be found in the
 
 A word on stability
 +++++++++++++++++++
-*degiroasync should be considered ALPHA quality.*
 
 Until this project's version reaches 1.0, the API should be considered unstable
 and may break even with minor versions increments.
