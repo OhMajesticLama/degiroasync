@@ -170,7 +170,8 @@ async def get_orders(
         }[order['buysell']]
         order['status'] = {
             'CONFIRMED': ORDER.STATUS.CONFIRMED,
-            'REJECTED': ORDER.STATUS.REJECTED
+            'REJECTED': ORDER.STATUS.REJECTED,
+            'PENDING': ORDER.STATUS.PENDING
                 }[order['status']]
     # 2022.03 mypy does not handle __new__ well, ignore for now.
     return (

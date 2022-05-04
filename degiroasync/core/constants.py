@@ -171,9 +171,13 @@ class ORDER:
 
         REJECTED
             The order was *not* accepted by the platform.
+
+        PENDING
+            The order is 'PENDING' on the web trader.
         """
         CONFIRMED = 'CONFIRMED'
         REJECTED = 'REJECTED'
+        PENDING = 'PENDING'
 
 
 class TRANSACTION:

@@ -22,7 +22,6 @@ automation of Degiro trading platform.
 
 
 ## A word on stability
-*degiroasync should be considered ALPHA quality.*
 
 Until this project's version reaches 1.0, the API should be considered unstable
 and may break even with minor versions increments.
@@ -55,12 +54,11 @@ product is running and passing adequate tests before running it in production.
 
 ### User installation
 ```bash
-# This is an ALPHA version. See disclaimers above.
 # Create a virtualenv or equivalent, depending on your tool of choice
 python3 -m virtualenv venv
 . venv/bin/activate
 # Install from PyPI
-pip3 install degiroasync
+python3 -m pip install degiroasync
 ```
 
 ### Developer installation
@@ -73,7 +71,7 @@ python3 -m virtualenv venv
 . venv/bin/activate
 
 # Install with dev dependencies
-pip3 install -e .[dev]
+python3 -m pip install -e .[dev]
 
 # To setup the project's git hooks:
 git config --local core.hooksPath hooks
