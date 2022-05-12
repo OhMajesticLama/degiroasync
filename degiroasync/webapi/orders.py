@@ -14,6 +14,7 @@ from ..core import join_url
 from ..core import check_session_client
 from ..core import check_session_config
 from ..core.helpers import check_response
+from ..core.helpers import dict_from_attr_list
 
 
 LOGGER = logging.getLogger(constants.LOGGER_NAME)
@@ -248,16 +249,50 @@ async def get_orders(session: SessionCore) -> Dict[str, Any]:
 
     Example response:
 
+    {'orders': [
+        {
+        'id': '52401b7d-00ed-4aed-979d-a2476e331b26',
+        'date': '2022-05-12T15:08:33',
+        'productId': 255931,
+        'product': 'Veolia Environnement',
+        'contractType': 1,
+        'contractSize': 1.0,
+        'currency': 'EUR',
+        'buysell': 'B',
+        'size': 100.0,
+        'quantity': 100.0,
+        'price': 24.7,
+        'stopPrice': 0.0,
+        'totalOrderValue': 2470.0,
+        'orderTypeId': 0,
+        'orderTimeTypeId': 1,
+        'orderType': 'LIMIT',
+        'orderTimeType': 'DAY',
+        'isModifiable': True,
+        'isDeletable': True
+        }]
+    }
 
     """
     # TODO: assess if historicalOrders is relevant here
     # or if it should be removed and we should only rely on get_orders_history
-    return await get_trading_update(
+    orders = await get_trading_update(
         session,
         params={
             'orders': 0,
-            'historicalOrders': 0}
+            }
+            #'historicalOrders': 0}
     )
+    LOGGER.debug("webapi.get_orders| orders %s", orders)
+    orders = {
+            'orders': [
+                dict_from_attr_list(order['value'])
+                for order in orders['orders']['value']
+                if order['name'] == 'order'
+                ]
+            }
+    LOGGER.debug("webapi.get_orders| orders rebuilt %s", orders)
+    return orders
 
 
 ORDER_DATE_FORMAT = '%d/%m/%Y'

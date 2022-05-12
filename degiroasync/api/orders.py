@@ -14,6 +14,7 @@ from ..core import ORDER
 from ..core import TRANSACTION
 from ..core import LOGGER_NAME
 from ..core import camelcase_dict_to_snake
+from ..core.helpers import dict_from_attr_list
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -21,7 +22,6 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 @JSONclass(annotations=True, annotations_type=True)
 class Order:
-    created: str
     order_id: Optional[str] = None  # Can be None if STATUS == REJECTED
     product_id: str
     size: Union[float, int]
@@ -29,13 +29,20 @@ class Order:
     buysell: ORDER.ACTION
     order_type_id: int
     order_time_type_id: int
-    current_traded_size: int
-    total_traded_size: int
-    type: str  # 'CREATED' or ...?
-    is_active: bool
-    status: str  # 'REJECTED' or ...?
+
     # product: Union[ProductBase, None] = None  # do we want to reinstantiate
     # products here or let user?
+    #: Creation date of the order, not always available for "Outstanding".
+    created: Optional[str] = None
+
+    current_traded_size: int = 0
+    total_traded_size: int = 0
+    # 'CREATE' or ... ?
+    type: Optional[str] = None
+    is_active: bool
+
+    #: Not always available for "Outstanding" orders
+    status: Optional[ORDER.STATUS] = None
 
 # {'id': 182722888, 'productId': 65153, 'date': '2020-02-07T09:00:10+01:00', 'buysell': 'B', 'price': 36.07, 'quantity': 20, 'total': -721.4, 'orderTypeId': 0, 'counterParty': 'MK', 'transfered': False, 'fxRate': 0, 'totalInBaseCurrency': -721.4, 'feeInBaseCurrency': -0.29, 'totalPlusFeeInBaseCurrency': -721.69, 'transactionTypeId': 0, 'tradingVenue': 'XPAR'})
 
@@ -157,7 +164,19 @@ async def get_orders(
             to_date=to_date.strftime(webapi.ORDER_DATE_FORMAT))
     )
 
-    orders_dict = orders_current_resp['orders']['value']
+    LOGGER.debug(
+            "get_orders orders_current_resp| %s",
+            orders_current_resp)
+    orders_dict = orders_current_resp['orders']
+    del orders_current_resp
+    for order in orders_dict:
+        if 'isActive' not in order and 'created' not in order:
+            # If no information and not created, consider order not active.
+            # It was chosen to mark isActive = False explicitly instead of
+            # having an Optional is_active attribute as a None might easily
+            # be misinterpreted as False by clients.
+            order['isActive'] = False
+
     orders_history_dict = orders_history_resp['data']
     LOGGER.debug("get_orders orders_dict| %s", orders_dict)
     LOGGER.debug("get_orders orders_history_dict| %s", orders_history_dict)
@@ -168,11 +187,12 @@ async def get_orders(
             'B': ORDER.ACTION.BUY,
             'S': ORDER.ACTION.SELL
         }[order['buysell']]
-        order['status'] = {
-            'CONFIRMED': ORDER.STATUS.CONFIRMED,
-            'REJECTED': ORDER.STATUS.REJECTED,
-            'PENDING': ORDER.STATUS.PENDING
-                }[order['status']]
+        if 'status' in order:
+            order['status'] = {
+                'CONFIRMED': ORDER.STATUS.CONFIRMED,
+                'REJECTED': ORDER.STATUS.REJECTED,
+                'PENDING': ORDER.STATUS.PENDING
+                    }[order['status']]
     # 2022.03 mypy does not handle __new__ well, ignore for now.
     return (
         [Order(camelcase_dict_to_snake(o))  # type: ignore

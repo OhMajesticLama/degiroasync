@@ -246,7 +246,7 @@ if RUN_INTEGRATION_TESTS:
             resp_json = await degiroasync.webapi.get_orders(session)
             LOGGER.debug("test_get_orders| %s", pprint.pformat(resp_json))
             self.assertIn('orders', resp_json)
-            self.assertIn('value', resp_json['orders'])
+            self.assertIsInstance(resp_json['orders'], list)
 
         async def test_check_order(self):
             session = await self._login()
@@ -382,7 +382,6 @@ if RUN_INTEGRATION_TESTS:
                 self.assertIn('fxRate', trans)
                 self.assertIn('nettFxRate', trans)
                 self.assertIn('transfered', trans)
-                self.assertIn('counterParty', trans)
                 self.assertIn('buysell', trans)
                 self.assertIn(trans['buysell'], ('B', 'S'))
                 self.assertIn('transactionTypeId', trans)

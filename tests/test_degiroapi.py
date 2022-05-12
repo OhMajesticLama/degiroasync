@@ -62,10 +62,8 @@ del _env_var
 class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.get_orders_mock = MagicMock()
-        #self.get_orders_mock.json = MagicMock(return_value={
         self._orders_dummy = {
-                'orders': {
-                    'value': [
+                'orders': [
                         {
                             'created': '2022-02-23 09:00:00 CET',
                             'orderId': 'weiurpoiwejaklsj',
@@ -82,10 +80,8 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
                             'status': 'CONFIRMED',
                         }
                     ]
-                }
             }
         self.get_orders_history_mock = MagicMock()
-        #self.get_orders_history_mock.json = MagicMock(return_value={
         self._orders_history_dummy = {
                 'data': [
                         {
@@ -602,11 +598,13 @@ if RUN_INTEGRATION_TESTS:
             self.assertGreaterEqual(len(products), 1)
             for product in products:
                 # We should only have airbus products here
-                self.assertTrue('general electric' in product.info.name.lower())
+                self.assertTrue(
+                        'general electric' in product.info.name.lower())
 
         async def test_search_product_text(self):
             session = await self._login()
-            products = await degiroasync.api.search_product(session,
+            products = await degiroasync.api.search_product(
+                    session,
                     by_text='airbus')
             self.assertGreaterEqual(len(products), 1)
             for product in products:
