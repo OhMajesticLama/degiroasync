@@ -200,6 +200,31 @@ STOP_LIMITED.</p>
 <em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_orders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_orders" title="Permalink to this definition"></a></dt>
 <dd><p>Get current and historical orders.</p>
 <p>Example response:</p>
+<dl class="simple">
+<dt>{‘orders’: [</dt><dd><p>{
+‘id’: ‘52401b7d-00ed-4aed-979d-a2476e331b26’,
+‘date’: ‘2022-05-12T15:08:33’,
+‘productId’: 255931,
+‘product’: ‘Veolia Environnement’,
+‘contractType’: 1,
+‘contractSize’: 1.0,
+‘currency’: ‘EUR’,
+‘buysell’: ‘B’,
+‘size’: 100.0,
+‘quantity’: 100.0,
+‘price’: 24.7,
+‘stopPrice’: 0.0,
+‘totalOrderValue’: 2470.0,
+‘orderTypeId’: 0,
+‘orderTimeTypeId’: 1,
+‘orderType’: ‘LIMIT’,
+‘orderTimeType’: ‘DAY’,
+‘isModifiable’: True,
+‘isDeletable’: True
+}]</p>
+</dd>
+</dl>
+<p>}</p>
 </dd></dl>
 
 <dl class="py function">
