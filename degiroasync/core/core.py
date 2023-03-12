@@ -12,7 +12,7 @@ except ImportError:
         def __str__(self):
             return str.__str__(self)
 
-from typing import Union, Optional
+from typing import Union, Optional, Any
 
 import httpx
 from jsonloader import JSONclass
@@ -44,6 +44,19 @@ class Credentials:
 
     totp_secret: Union[str, None] = None
     one_time_password: Union[str, None] = None
+
+    def __hash__(self) -> str:
+        return hash(
+            '|'.join(
+                ':'.join((str(k), str(v)))
+                for k, v in self.__dict__.items())
+                )
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Credentials):
+            raise AttributeError(
+                    "other is not `Credentials` instance.")
+        return hash(self) == hash(other)
 
 
 @JSONclass(annotations=True, annotations_type=True)

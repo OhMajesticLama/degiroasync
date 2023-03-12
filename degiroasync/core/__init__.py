@@ -30,7 +30,8 @@ from .core import Config
 from .core import SessionCore
 from .core import URLs
 from .core import PAClient
-from .constants import ResponseError
+from .exceptions import ResponseError
+from .exceptions import BadCredentialsError
 
 __all__ = [obj.__name__ for obj in (
     join_url,
@@ -48,6 +49,7 @@ __all__ = [obj.__name__ for obj in (
     check_session_client,
     check_session_config,
     ResponseError,
+    BadCredentialsError,
     SessionCore,
     PAClient,
     URLs,

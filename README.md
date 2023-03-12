@@ -120,10 +120,11 @@ DEGIROASYNC_INTEGRATION=1 pytest --color yes
 ### Tests coverage
 For example, leverage `coverage` module:
 ```bash
-coverage run --include='./degiroasync/*' -m pytest
-# To exclude webapi module
-#coverage run --include='./degiroasync/*' --omit='./degiroasync/webapi/*' -m pytest
+pytest --cov
 ```
+
+Please note that the coverage will or will not include integration tests if
+`DEGIROASYNC_INTEGRATION` environment variable is set to 1 or not set.
 
 
 ## Other Python Degiro Libraries

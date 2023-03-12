@@ -4,16 +4,24 @@ import os
 import pprint
 import asyncio
 import datetime
+from typing import Optional
+import unittest.mock
+from unittest.mock import MagicMock
 
+import httpx
 
 import degiroasync
 import degiroasync.webapi
 import degiroasync.core
 import degiroasync.core.helpers
 from degiroasync.core import Credentials
+from degiroasync.core import SessionCore
 from degiroasync.core.constants import PRODUCT
 from degiroasync.core.constants import PRICE
 from degiroasync.core.constants import ORDER
+from degiroasync.core.constants import LOGIN
+from degiroasync.core import ResponseError
+from degiroasync.core import BadCredentialsError
 from degiroasync.webapi import get_config
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
@@ -21,7 +29,6 @@ from degiroasync.webapi import get_news_by_company
 
 
 LOGGER = logging.getLogger(degiroasync.core.LOGGER_NAME)
-#degiroasync.core.helpers.set_logs(LOGGER, logging.DEBUG)
 
 RUN_INTEGRATION_TESTS = 0
 try:
@@ -29,6 +36,32 @@ try:
     RUN_INTEGRATION_TESTS = int(_env_var)
 except ValueError:
     LOGGER.info('degiroasync integration tests will *not* run.')
+
+
+class TestDegiroAsyncWebAPI(unittest.IsolatedAsyncioTestCase):
+    @unittest.mock.patch('httpx.AsyncClient.post')
+    async def test_login_bad_credentials(
+            self,
+            post_m
+            ):
+        """
+        Verify that BadCredentialsError is raised when endpoint returns a bad
+        credentials error.
+        """
+        post_m.return_value = MagicMock()
+        response = post_m.return_value
+        response.json = MagicMock(
+                return_value={
+                    'status': LOGIN.BAD_CREDENTIALS,
+                    'content': 'badCredentials'})
+        response.status_code = httpx.codes.BAD_REQUEST
+
+        credentials = Credentials(
+            username='dummyaccount123456',
+            password='dummydummy'
+                )
+        with self.assertRaises(BadCredentialsError):
+            await degiroasync.webapi.login(credentials)
 
 
 def _get_credentials():
@@ -46,16 +79,6 @@ def _get_credentials():
     return Credentials(username, password, totp_secret)
 
 
-#def mock_asyncclient(mock):
-#    pass
-#
-#
-#class TestDegiroWebAPIUnit(unittest.IsolatedAsyncioTestCase):
-#    @unittest.mock.patch('httpx.AsyncClient')
-#    async def test_confirm_order(self, asyncclient_mock):
-#        pass
-
-
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.webapi integration tests will run.')
 
@@ -66,17 +89,28 @@ if RUN_INTEGRATION_TESTS:
         """
         async def asyncSetUp(self):
             self._lock = asyncio.Lock()
+            self._login_attempted = False
+            self.session: Optional[SessionCore] = None
 
         async def _login(self):
+            if self.session is not None:
+                return self.session
             async with self._lock:
-                if not hasattr(self, 'session'):
+                if not self._login_attempted and not self.session:
+                    self._login_attempted = True
                     credentials = _get_credentials()
-                    self.session = await degiroasync.webapi.login(credentials)
+                    self.session = await degiroasync.webapi.login(
+                            credentials)
                     await degiroasync.webapi.get_config(self.session)
                     await degiroasync.webapi.get_client_info(self.session)
+                else:
+                    LOGGER.warning(
+                            "Log in already attempted without success, skip.")
+            if not self.session:
+                raise ResponseError("No session available.")
             return self.session
 
-    class TestDegiroWebAPIIntegration(
+    class TestDegiroAsyncWebAPIIntegration(
             _IntegrationWebLogin,
             unittest.IsolatedAsyncioTestCase):
 
@@ -85,15 +119,26 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('JSESSIONID' in session.cookies,
                             "No JSESSIONID found.")
 
+        async def test_login_bad_credentials(self):
+            credentials = Credentials(
+                username='dummyaccount123456',
+                password='dummydummy'
+                    )
+            with self.assertRaises(BadCredentialsError):
+                await degiroasync.webapi.login(credentials)
+
         async def test_config(self):
             session = await self._login()
             await get_config(session)
             LOGGER.debug('test_config| %s', session.config)
-            self.assertTrue(session.config.pa_url is not None,
+            self.assertTrue(
+                    session.config.pa_url is not None,
                     "paUrl not defined.")
-            self.assertTrue(session.config.product_search_url is not None,
+            self.assertTrue(
+                    session.config.product_search_url is not None,
                     "productSearchUrl not defined.")
-            self.assertTrue(session.config.trading_url is not None,
+            self.assertTrue(
+                    session.config.trading_url is not None,
                     "tradingUrl not defined.")
 
         async def test_porfolio(self):
@@ -109,7 +154,6 @@ if RUN_INTEGRATION_TESTS:
 
             resp_json = await degiroasync.webapi.get_portfolio_total(session)
             LOGGER.debug("test_portfolio_total| %s", resp_json)
-            #self.assertIn(response.status_code, (200, 201))
             self.assertTrue('totalPortfolio' in resp_json)
             self.assertTrue('value' in resp_json['totalPortfolio'])
 
@@ -123,7 +167,6 @@ if RUN_INTEGRATION_TESTS:
                                   for product in portfolio['value']))
             response = await get_products_info(session,
                                                [p for p in product_ids])
-            #self.assertEqual(response.status_code, 200)
             self.assertIsInstance(response, dict)
 
             response = await degiroasync.webapi.get_products_info(session,
@@ -219,7 +262,9 @@ if RUN_INTEGRATION_TESTS:
         async def test_product_dictionary(self):
             session = await self._login()
 
-            resp_json = await degiroasync.webapi.get_product_dictionary(session)
+            resp_json = await degiroasync.webapi.get_product_dictionary(
+                    session
+                    )
 
             self.assertIn('exchanges', resp_json)
             self.assertIn('countries', resp_json)

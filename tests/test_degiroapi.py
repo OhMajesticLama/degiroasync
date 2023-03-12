@@ -8,33 +8,26 @@ import unittest.mock
 import sys
 import datetime
 from unittest.mock import MagicMock
+from typing import Optional, Sequence
 
 
 import degiroasync
 import degiroasync.webapi
 import degiroasync.api
+import degiroasync.webapi
 import degiroasync.core
 import degiroasync.core.helpers
-from degiroasync.core import join_url
-from degiroasync.core import SessionCore
-from degiroasync.core.helpers import set_params
-from degiroasync.core.helpers import camelcase_to_snake
-from degiroasync.core.helpers import camelcase_dict_to_snake
-from degiroasync.webapi import get_config
-from degiroasync.webapi import get_client_info
-from degiroasync.webapi import get_products_info
-from degiroasync.webapi import get_company_profile
-from degiroasync.webapi import get_news_by_company
+from degiroasync.core import Credentials
 from degiroasync.api.product import convert_time_series
-from degiroasync.api import ProductBase
 from degiroasync.api import ProductFactory
-from degiroasync.api import Stock
-from degiroasync.api import Currency
 from degiroasync.api import Order
 from degiroasync.api import ORDER
 from degiroasync.api import Exchange
+from degiroasync.api import Session
 from degiroasync.core.constants import PRODUCT
 from degiroasync.core.constants import PRICE
+from degiroasync.core import BadCredentialsError
+from degiroasync.core import ResponseError
 
 from .test_degirowebapi import _get_credentials
 
@@ -57,6 +50,47 @@ del _env_var
 #############
 # Unittests #
 #############
+
+class TestDegiroAsyncLogin(unittest.IsolatedAsyncioTestCase):
+    @unittest.mock.patch('degiroasync.webapi.get_client_info')
+    @unittest.mock.patch('degiroasync.webapi.get_config')
+    @unittest.mock.patch('degiroasync.webapi.login')
+    async def test_bad_credentials(
+            self,
+            login_m: MagicMock,
+            get_config_m: MagicMock,
+            *stubs: Sequence[MagicMock]
+            ):
+        """
+        Verify that BadCredentialsError is raised in case of bad credentials
+        and that default behavior does not try to log in again with previously
+        failed credentials.
+        """
+        login_m.side_effect = BadCredentialsError()
+        # This should never be called as we're supposed to raise an exception
+        # before. Raise exception in case we make it to get_config.
+        get_config_m.side_effect = RuntimeError("This should not happen.")
+
+        credentials = Credentials(
+            username='dummyaccount123456',
+            password='dummydummy'
+                )
+        with self.assertRaises(BadCredentialsError):
+            await degiroasync.api.login(credentials)
+        # There should be exactly one call made to webapi.login
+        login_m.assert_called_once()
+
+        # Attempt a second login with same credentials.
+        credentials = Credentials(
+            username='dummyaccount123456',
+            password='dummydummy'
+                )
+        # BadCredentialsError should still be raised.
+        with self.assertRaises(BadCredentialsError):
+            await degiroasync.api.login(credentials)
+
+        # There should be no new call to webapi.login.
+        login_m.assert_called_once()
 
 
 class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
@@ -101,6 +135,7 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
                         }
                     ]
             }
+
 
     @unittest.mock.patch('degiroasync.webapi.get_orders_history')
     @unittest.mock.patch('degiroasync.webapi.get_orders')
@@ -360,12 +395,17 @@ if RUN_INTEGRATION_TESTS:
         """
         async def asyncSetUp(self):
             self._lock = asyncio.Lock()
+            self.session: Optional[Session] = None
+            self._login_attempted = False
 
         async def _login(self):
             async with self._lock:
-                if not hasattr(self, 'session'):
+                if not self.session and not self._login_attempted:
+                    self._login_attempted = True
                     credentials = _get_credentials()
                     self.session = await degiroasync.api.login(credentials)
+            if not self.session:
+                raise ResponseError("No session available.")
             return self.session
 
     class TestDegiroasyncIntegrationLogin(

@@ -1,8 +1,9 @@
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict, Any, Optional
 import functools
 import logging
 import pprint
 import copy
+import time
 
 from jsonloader import JSONclass
 
@@ -12,6 +13,8 @@ from ..core import Config
 from ..core import PAClient
 from ..core import Credentials
 from ..core import camelcase_dict_to_snake
+from ..core import BadCredentialsError
+from ..core import lru_cache_timed
 from .. import webapi
 
 
@@ -63,7 +66,6 @@ class ExchangeDictionary:
         self = super().__new__(cls)
 
         product_dictionary = await webapi.get_product_dictionary(session)
-        #product_dictionary = resp.json()
         LOGGER.debug("api.ExchangeDictionary| %s",
                      pprint.pformat(product_dictionary))
         self._regions = {p['id']: Region(p)
@@ -183,16 +185,38 @@ async def get_exchange_dictionary(session: Session) -> ExchangeDictionary:
     return await ExchangeDictionary(session)
 
 
+#: Singleton to store hash of failed attempts credentials.
+_LOGIN_FAILURE_HASH: set[str] = set()
+
+#: Minimum time before new login attempt is allowed with bad credentials (s).
+#: Default = 3 hours
+_LOGIN_FAILURE_MINTIME = 60 * 60 * 3
+
+
+@lru_cache_timed(maxsize=32, seconds=_LOGIN_FAILURE_MINTIME)
+def _should_fail(credentials: Credentials) -> bool:
+    if credentials in _LOGIN_FAILURE_HASH:
+        # We can discard failure as it will be remembered by this function
+        # cache.
+        _LOGIN_FAILURE_HASH.discard(credentials)
+        return True
+    else:
+        return False
+
+
 async def login(
         credentials: Credentials,
-        session: Union[Session, None] = None) -> Session:
+        session: Union[Session, None] = None,
+        /,
+        safeguard_incorrect_credentials: bool = True
+        ) -> Session:
     """
     Authentify with Degiro API and populate basic information that'll be needed
     for further calls.
 
     `session` will be updated with required data for further connections.
 
-    Strictly equivalent to:
+    Roughly equivalent to:
 
     .. code-block:: python
 
@@ -201,8 +225,47 @@ async def login(
         await webapi.get_client_info(session)
 
     If no `session` is provided, create one.
+
+    Parameters
+    ----------
+
+    credentials:
+        Credentials with which we attempt login.
+
+    session:
+        If provided, populate with API config. If not a new Session will be
+        created.
+
+    safeguard_incorrect_credentials:
+        Defaults to True. If `True`, store credentials hash in case of failure
+        and do not allow new login attempts with same hash. This allows to
+        avoid blocking account in case of inaccurate credentials.
+
+    Raises
+    ------
+
+    BadCredentialsError:
+        If login with those credentials returned a bad credentials response.
+
+    ResponseError:
+        Other response errors.
+
     """
-    session_core = await webapi.login(credentials)
+    if safeguard_incorrect_credentials:
+        if credentials in _LOGIN_FAILURE_HASH:
+            LOGGER.error("Bad credentials, abort login.")
+            raise BadCredentialsError(
+                    "Abort. Login previously failed with these credentials."
+                    " Provide `safeguard_incorrect_credentials=False` "
+                    "if you want to override this behavior.")
+
+    try:
+        session_core = await webapi.login(credentials)
+    except BadCredentialsError:
+        LOGGER.error("Bad credentials, abort login.")
+        _LOGIN_FAILURE_HASH.add(credentials)
+        raise
+
     await webapi.get_config(session_core)
     await webapi.get_client_info(session_core)
     exchange_dictionary = await get_exchange_dictionary(session_core)

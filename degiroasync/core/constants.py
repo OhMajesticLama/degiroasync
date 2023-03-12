@@ -16,8 +16,6 @@ except ImportError:
 LOGGER_NAME = 'degiroasync'
 
 
-class ResponseError(Exception):
-    "Raised when bad response has been received from server."
 
 
 class _EnumBase(enum.Enum):
@@ -101,6 +99,7 @@ class LOGIN(IntEnum):
         account.
     """
     TOTP_NEEDED = 6
+    BAD_CREDENTIALS = 3
 
 
 class ORDER:

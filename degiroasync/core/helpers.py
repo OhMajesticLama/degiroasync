@@ -12,7 +12,9 @@ import asyncstdlib.functools as afunctools
 import httpx
 
 from .constants import LOGGER_NAME
-from .constants import ResponseError
+from .constants import LOGIN
+from .exceptions import ResponseError
+from .exceptions import BadCredentialsError
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -46,7 +48,7 @@ class CoroCache:
 
 def lru_cache_timed(
         func: Union[Callable, None] = None,
-        *,
+        /,
         maxsize: int = 128,
         typed: bool = False,
         seconds: Union[None, float] = None,
@@ -71,7 +73,7 @@ def lru_cache_timed(
     >>> time.time() - start < .1
     True
     """
-    first_start = []
+    first_start: List[float]= []
     if func is not None:
         if asyncio.iscoroutinefunction(func):
             @afunctools.lru_cache(maxsize=maxsize, typed=typed)
@@ -190,12 +192,27 @@ def join_url(*sections):
 
 def check_response(response: httpx.Response):
     """
-    Raise an httpx.HTTPError if return code != 200
+    Raises
+    ------
+
+    BadCredentialsError:
+        If return code == 400 and web API status returns bad credentials code.
+    ResponseError:
+        If return code != 200
     """
+    if response.status_code == httpx.codes.BAD_REQUEST:
+        resp_json = response.json()
+        if (
+                'status' in resp_json
+                and resp_json['status'] == LOGIN.BAD_CREDENTIALS
+                ):
+            raise BadCredentialsError(
+                    f"Bad Credentialsa. Reponse content: {str(response.content)}")
+
     if response.status_code not in (httpx.codes.OK, httpx.codes.CREATED):
         raise ResponseError(
             f"Error on call: url {response.url}"
-            f" | code {response.status_code} | content {response.content}")
+            f" | code {response.status_code} | content {str(response.content)}")
 
 
 def dict_from_attr_list(
