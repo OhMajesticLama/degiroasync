@@ -32,8 +32,11 @@ from .core import URLs
 from .core import PAClient
 from .exceptions import ResponseError
 from .exceptions import BadCredentialsError
+from .exceptions import ContextError
 
-__all__ = [obj.__name__ for obj in (
+
+# Fail at module import if an attribute is missing __name__: ignore mypy here.
+__all__ = [obj.__name__ for obj in (  # type: ignore
     join_url,
     lru_cache_timed,
     camelcase_to_snake,
@@ -50,6 +53,7 @@ __all__ = [obj.__name__ for obj in (
     check_session_config,
     ResponseError,
     BadCredentialsError,
+    ContextError,
     SessionCore,
     PAClient,
     URLs,

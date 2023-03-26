@@ -2,17 +2,20 @@ from __future__ import annotations
 import logging
 import dataclasses
 try:
-    from enum import StrEnum
+    # Ignore type here: will fail w/ Python version <3.11
+    from enum import StrEnum  # type: ignore
 except ImportError:
     import enum
     # Exists only starting Python 3.11
     # Reimplement what we need from it here.
 
-    class StrEnum(str, enum.Enum):
+    # Type warning 'already defined', this statement is executed if prior
+    # import failed: no risk of redefinition.
+    class StrEnum(str, enum.Enum):  # type: ignore
         def __str__(self):
             return str.__str__(self)
 
-from typing import Union, Optional, Any
+from typing import Union, Optional, Any, Dict
 
 import httpx
 from jsonloader import JSONclass
@@ -20,6 +23,7 @@ from jsonloader import JSONclass
 from .helpers import join_url
 from .constants import LOGGER_NAME
 from .constants import PRODUCT
+from .exceptions import ContextError
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 LOGGER.setLevel(logging.DEBUG)
@@ -45,7 +49,7 @@ class Credentials:
     totp_secret: Union[str, None] = None
     one_time_password: Union[str, None] = None
 
-    def __hash__(self) -> str:
+    def __hash__(self) -> int:
         return hash(
             '|'.join(
                 ':'.join((str(k), str(v)))
@@ -67,37 +71,37 @@ class Config:
     client_id: int
     companies_service_url: Union[str, None]
     dictionary_url: str
-    i18n_url: Union[str, None]
-    landing_path: Union[str, None]
-    latest_searched_products_url: Union[str, None]
+    i18n_url: Optional[str]
+    landing_path: Optional[str]
+    latest_searched_products_url: Optional[str]
     login_url: str
-    mobile_landing_path: Union[str, None]
+    mobile_landing_path: Optional[str]
     pa_url: str
-    payment_service_url: Union[str, None]
-    product_notes_url: Union[str, None]
+    payment_service_url: Optional[str]
+    product_notes_url: Optional[str]
     product_search_url: str
     product_types_url: str
-    refinitiv_agenda_url: Union[str, None]
-    refinitiv_clips_url: Union[str, None]
-    refinitiv_company_profile_url: Union[str, None]
-    refinitiv_company_ratios_url: Union[str, None]
-    refinitiv_esgs_url: Union[str, None]
-    refinitiv_estimates_url: Union[str, None]
-    refinitiv_financial_statements_url: Union[str, None]
-    refinitiv_insider_transactions_url: Union[str, None]
-    refinitiv_insiders_report_url: Union[str, None]
-    refinitiv_investor_url: Union[str, None]
-    refinitiv_news_url: Union[str, None]
-    refinitiv_shareholders_url: Union[str, None]
-    refinitiv_top_news_categories_url: Union[str, None]
-    reporting_url: Union[str, None]
-    session_id: Union[str, None]
-    task_manager_url: Union[str, None]
-    trading_url: Union[str, None]
-    translations_url: Union[str, None]
-    vwd_gossips_url: Union[str, None]
-    vwd_news_url: Union[str, None]
-    vwd_quotecast_service_url: Union[str, None]
+    refinitiv_agenda_url: Optional[str]
+    refinitiv_clips_url: Optional[str]
+    refinitiv_company_profile_url: Optional[str]
+    refinitiv_company_ratios_url: Optional[str]
+    refinitiv_esgs_url: Optional[str]
+    refinitiv_estimates_url: Optional[str]
+    refinitiv_financial_statements_url: Optional[str]
+    refinitiv_insider_transactions_url: Optional[str]
+    refinitiv_insiders_report_url: Optional[str]
+    refinitiv_investor_url: Optional[str]
+    refinitiv_news_url: Optional[str]
+    refinitiv_shareholders_url: Optional[str]
+    refinitiv_top_news_categories_url: Optional[str]
+    reporting_url: Optional[str]
+    session_id: Optional[str]
+    task_manager_url: Optional[str]
+    trading_url: Optional[str]
+    translations_url: Optional[str]
+    vwd_gossips_url: Optional[str]
+    vwd_news_url: Optional[str]
+    vwd_quotecast_service_url: Optional[str]
 
 
 @JSONclass(annotations=True, annotations_type=True)
@@ -188,30 +192,45 @@ class URLs:
     @staticmethod
     def get_news_by_company_url(session: SessionCore) -> str:
         "Build news_by_company url"
-        check_session_config(session)
-        return join_url(session.config.refinitiv_news_url, 'news-by-company')
+        config = check_session_config(session)
+        if config.refinitiv_news_url is None:
+            raise ContextError(
+                    "Session attribute 'refinitiv_news_url' is not set."
+                    )
+        return join_url(config.refinitiv_news_url, 'news-by-company')
 
     @staticmethod
     def get_client_info_url(session: SessionCore) -> str:
         """
         Build client info url.
         """
-        check_session_config(session)
-        return join_url(session.config.pa_url, 'client')
+        config = check_session_config(session)
+        if config.pa_url is None:
+            raise ContextError(
+                    "Session attribute 'pa_url' is not set."
+                    )
+        return join_url(config.pa_url, 'client')
 
     @staticmethod
     def get_portfolio_url(session: SessionCore) -> str:
         """
         Build portfolio url, also used for orders.
         """
-        check_session_config(session)
-        check_session_client(session)
+        config = check_session_config(session)
+        client = check_session_client(session)
+
+        if session._cookies is None:
+            raise ContextError("_cookies not set in session.")
 
         jsessionid = session._cookies[session.JSESSIONID]
 
+        if config.trading_url is None:
+            raise ContextError(
+                    "Session attribute 'trading_url' is not set."
+                    )
         url = join_url(
-            session.config.trading_url,
-            f'v5/update/{session.client.int_account}',
+            config.trading_url,
+            f'v5/update/{client.int_account}',
             f';jsessionid={jsessionid}')
         LOGGER.debug('get_portfolio_url| %s', url)
         return url
@@ -221,8 +240,12 @@ class URLs:
         """
         Get reporting URL. Used for orders history and transactions.
         """
-        check_session_config(session)
-        url = session.config.reporting_url
+        config = check_session_config(session)
+        url = config.reporting_url
+        if url is None:
+            raise ContextError(
+                    "Session attribute 'reporting_url' is not set."
+                    )
         LOGGER.debug('get_reporting_url| %s', url)
         return url
 
@@ -259,10 +282,10 @@ class URLs:
             join_url(confirm_order_url_base, confirmation_id)
 
         """
-        check_session_config(session)
+        config = check_session_config(session)
 
         return join_url(
-            session.config.trading_url,
+            config.trading_url,
             'v5/order'
         )
 
@@ -279,12 +302,12 @@ class URLs:
         """
         Get check order URL.
         """
-        check_session_config(session)
+        config = check_session_config(session)
 
-        jsessionid = session._cookies[session.JSESSIONID]
+        jsessionid = check_session_cookies(session)[session.JSESSIONID]
 
         url = join_url(
-            session.config.trading_url,
+            config.trading_url,
             f'v5/checkOrder;jsessionid={jsessionid}'
         )
         LOGGER.debug('get_check_order_url| %s', url)
@@ -310,8 +333,8 @@ class URLs:
     @staticmethod
     def get_product_search_url(
             session: SessionCore,
-            product_type_id: Union[PRODUCT.TYPEID, None] = None) -> str:
-        specialization = {
+            product_type_id: Optional[PRODUCT.TYPEID] = None) -> str:
+        specialization: Union[str, URLs.PRODUCT_SEARCH_TYPE] = {
             PRODUCT.TYPEID.STOCK:
                 URLs.PRODUCT_SEARCH_TYPE.STOCKS,
             PRODUCT.TYPEID.ETFS:
@@ -326,10 +349,16 @@ class URLs:
                 URLs.PRODUCT_SEARCH_TYPE.LEVERAGED_PRODUCTS,
             PRODUCT.TYPEID.WARRANTS:
                 URLs.PRODUCT_SEARCH_TYPE.WARRANTS,
-        }.get(product_type_id, URLs.PRODUCT_SEARCH_TYPE.GENERIC)
-        check_session_config(session)
+            # mypy doesn't handle well the error management in dict.get:
+            # here we rely on dict.get to provide default value if
+            # product_type_id is not found or None.
+        }.get(
+            product_type_id,  # type: ignore
+            URLs.PRODUCT_SEARCH_TYPE.GENERIC
+        )
+        config = check_session_config(session)
         url = join_url(
-            session.config.product_search_url,
+            config.product_search_url,
             'v5',
             specialization)
         LOGGER.debug('get_product_search_url: %s', url)
@@ -337,33 +366,44 @@ class URLs:
 
     @staticmethod
     def get_product_dictionary_url(session: SessionCore) -> str:
-        check_session_config(session)
-        url = session.config.dictionary_url
+        config = check_session_config(session)
+        url = config.dictionary_url
         LOGGER.debug('get_product_search_url: %s', url)
         return url
 
     @classmethod
     def get_account_info_url(cls, session: SessionCore) -> str:
-        check_session_client(session)
-        url = join_url(URLs.ACCOUNT_INFO, str(session.client.int_account))
+        client = check_session_client(session)
+        url = join_url(URLs.ACCOUNT_INFO, str(client.int_account))
         return cls._add_jsessionid(session, url)
 
     @classmethod
     def _add_jsessionid(cls, session: SessionCore, url: str) -> str:
         check_session_config(session)
+        cookies = check_session_cookies(session)
         return url + ';jsessionid={}'.format(
-            session._cookies[session.JSESSIONID])
+            cookies[session.JSESSIONID])
 
 
-def check_session_config(session: SessionCore):
+def check_session_config(session: SessionCore) -> Config:
     "Raise an exception if session.config is not set"
     if session.config is None:
         raise AssertionError(
             "session.config is not set. Call get_config first.")
+    return session.config
 
 
-def check_session_client(session: SessionCore):
+def check_session_client(session: SessionCore) -> PAClient:
     "Raise an exception if session.client is not set"
-    if session.config is None:
+    if session.client is None:
         raise AssertionError(
             "session.client is not set. Call get_client_info first.")
+    return session.client
+
+
+def check_session_cookies(session: SessionCore) -> httpx.Cookies:
+    "Helper to get cookies from a session."
+    if session._cookies is not None:
+        return session._cookies
+    else:
+        raise ContextError("Cookies not set in session. Abort.")

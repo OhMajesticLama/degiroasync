@@ -216,7 +216,7 @@ def check_response(response: httpx.Response):
 
 
 def dict_from_attr_list(
-        attributes_list: List[Dict[str, Any]],
+        attributes_list: Iterable[Dict[str, Any]],
         ignore_error=False) -> Dict[str, Any]:
     """
     Helper to build a dict from an attribute list as returned by the web API.

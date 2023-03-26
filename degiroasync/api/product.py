@@ -208,7 +208,7 @@ class ProductFactory:
         """
         LOGGER.debug("__products_from_attrs| products_info %s",
                      products_info)
-        products_dict = {}
+        products_dict: Dict[str, ProductBase] = {}
 
         # Instantiate products
         for product_base in products_base_iter:

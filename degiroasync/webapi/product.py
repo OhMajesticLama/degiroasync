@@ -6,6 +6,7 @@ import httpx
 from ..core import SessionCore, URLs
 from ..core import join_url
 from ..core import check_session_config
+from ..core import check_session_client
 from ..core.constants import LOGGER_NAME
 from ..core.constants import PRICE
 from ..core.constants import PRODUCT
@@ -542,20 +543,22 @@ async def get_products_info(
     """
     Get Product info Web API call.
     """
-    if session.config.product_search_url is None:
+    config = check_session_config(session)
+    client = check_session_client(session)
+    if config.product_search_url is None:
         raise AssertionError("productSearchUrl is None:"
                              " have you called get_config?")
 
     LOGGER.debug('get_products_info products_ids| %s', products_ids)
-    url = join_url(session.config.product_search_url,
+    url = join_url(config.product_search_url,
                    'v5/products/info')
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        response = await client.post(
+    async with httpx.AsyncClient(timeout=TIMEOUT) as httpxclient:
+        response = await httpxclient.post(
             url,
             cookies=session.cookies,
             params={
-                'intAccount': session.client.int_account,
-                'sessionId': session.config.session_id
+                'intAccount': client.int_account,
+                'sessionId': config.session_id
             },
             json=products_ids
         )
@@ -580,16 +583,19 @@ async def get_company_profile(
     """
     # should this url be taken from config as well?
 
+    client = check_session_client(session)
+    config = check_session_config(session)
+
     # Look for dgtbxdsservice in network logs for financial statements etc.
     # might have intraday data as well
     url = join_url(URLs.BASE, 'dgtbxdsservice/company-profile/v2', isin)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        response = await client.get(
+    async with httpx.AsyncClient(timeout=TIMEOUT) as httpxclient:
+        response = await httpxclient.get(
             url,
             cookies=session.cookies,
             params={
-                'intAccount': session.client.int_account,
-                'sessionId': session.config.session_id
+                'intAccount': client.int_account,
+                'sessionId': config.session_id
             })
     check_response(response)
     LOGGER.debug(response.json())
@@ -606,9 +612,11 @@ async def get_news_by_company(
     """
     Get news for a company.
     """
+    client = check_session_client(session)
+    config = check_session_config(session)
     url = URLs.get_news_by_company_url(session)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        response = await client.get(
+    async with httpx.AsyncClient(timeout=TIMEOUT) as httpxclient:
+        response = await httpxclient.get(
             url,
             cookies=session.cookies,
             params={
@@ -616,8 +624,8 @@ async def get_news_by_company(
                 'limit': limit,
                 'languages': languages,
                 'offset': offset,
-                'intAccount': session.client.int_account,
-                'sessionId': session.config.session_id
+                'intAccount': client.int_account,
+                'sessionId': config.session_id
             })
     check_response(response)
     resp_json = response.json()
