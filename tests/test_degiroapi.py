@@ -136,7 +136,6 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
                     ]
             }
 
-
     @unittest.mock.patch('degiroasync.webapi.get_orders_history')
     @unittest.mock.patch('degiroasync.webapi.get_orders')
     async def test_get_orders(self,
@@ -201,8 +200,6 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
     "Unittest for api.ExchangeDictionary"
     def setUp(self):
         resp_mock = unittest.mock.MagicMock()
-        #resp_mock.json = unittest.mock.MagicMock()
-        #resp_mock.return_value = {
         self._product_dictionary_dummy = {
                 "regions": [
                     {
@@ -332,6 +329,7 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(products[0].base.id, '123')
         self.assertEqual(products[0].info.name, 'foo')
         self.assertEqual(products[0].info.symbol, 'FOO')
+        self.assertIsInstance(repr(products[0]), str)  # don't raise exception
 
     @unittest.mock.patch('degiroasync.webapi.get_products_info')
     async def test_product_no_batch(self, wapi_prodinfo_m):
@@ -629,9 +627,9 @@ if RUN_INTEGRATION_TESTS:
                 #self.assertTrue('airbus' in product.info.name.lower(),
                 #               product.info)
 
-        async def test_search_product_symbol_gne(self):
+        async def test_search_product_symbol_air(self):
             session = await self._login()
-            symbol = 'GNE'  # GE symbol on EPA
+            symbol = 'AIR'  # GE symbol on EPA
             products = await degiroasync.api.search_product(session,
                                                             by_symbol=symbol,
                                                             by_exchange='EPA')
@@ -639,7 +637,7 @@ if RUN_INTEGRATION_TESTS:
             for product in products:
                 # We should only have airbus products here
                 self.assertTrue(
-                        'general electric' in product.info.name.lower())
+                        'airbus' in product.info.name.lower())
 
         async def test_search_product_text(self):
             session = await self._login()

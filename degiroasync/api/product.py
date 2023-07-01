@@ -85,6 +85,10 @@ class ProductBase:
         if not force_init:
             raise NotImplementedError("Please use ProductFactory.init_batch.")
 
+    def __repr__(self):
+        return (f'<degiroasync.api.product.{self.__class__.__name__} '
+                f'[self.info.name | self.info.symbol]>')
+
 
 class ProductFactory:
     @classmethod
