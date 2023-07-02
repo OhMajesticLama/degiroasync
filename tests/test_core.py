@@ -1,12 +1,16 @@
 import unittest
+import unittest.mock
+from unittest.mock import MagicMock, AsyncMock
 import asyncio
 import time
+
 
 import degiroasync.core
 from degiroasync.core import join_url
 from degiroasync.core import camelcase_to_snake
 from degiroasync.core import camelcase_dict_to_snake
 from degiroasync.core import set_params
+from degiroasync.core.helpers import ThrottlingClient
 
 
 class TestLRUCacheTimed(unittest.IsolatedAsyncioTestCase):
@@ -116,3 +120,27 @@ class TestDegiroAsyncJoinUrl(unittest.TestCase):
         d = {'fooBar': 2, 'camelCase': {'camelCase': 1}}
         out = camelcase_dict_to_snake(d, recursive=True)
         self.assertEqual(out, {'foo_bar': 2, 'camel_case': {'camel_case': 1}})
+
+
+class TestThrottlingClient(unittest.IsolatedAsyncioTestCase):
+    async def test_throttling(self):
+        max_requests = 2
+        period_seconds = 0.2
+        client = ThrottlingClient(
+                max_requests=max_requests,
+                period_seconds=period_seconds)
+        client._async_client = MagicMock()
+        client._client_open = MagicMock()
+        client._client_open.get = AsyncMock()
+
+        n_calls = 20
+        calls = []
+        start = time.time()
+        for _ in range(n_calls):
+            calls.append(client.get())
+        for c in calls:
+            await c
+        del calls
+        self.assertGreaterEqual(
+                time.time() - start,
+                (n_calls-max_requests) * period_seconds / max_requests)

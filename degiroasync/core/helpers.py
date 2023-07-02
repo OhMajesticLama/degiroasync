@@ -73,7 +73,7 @@ def lru_cache_timed(
     >>> time.time() - start < .1
     True
     """
-    first_start: List[float]= []
+    first_start: List[float] = []
     if func is not None:
         if asyncio.iscoroutinefunction(func):
             @afunctools.lru_cache(maxsize=maxsize, typed=typed)
@@ -207,12 +207,14 @@ def check_response(response: httpx.Response):
                 and resp_json['status'] == LOGIN.BAD_CREDENTIALS
                 ):
             raise BadCredentialsError(
-                    f"Bad Credentialsa. Reponse content: {str(response.content)}")
+                    f"Bad Credentials. Reponse content: "
+                    f"{str(response.content)}")
 
     if response.status_code not in (httpx.codes.OK, httpx.codes.CREATED):
         raise ResponseError(
             f"Error on call: url {response.url}"
-            f" | code {response.status_code} | content {str(response.content)}")
+            f" | code {response.status_code} | "
+            f"content {str(response.content)}")
 
 
 def dict_from_attr_list(
@@ -390,6 +392,128 @@ def check_keys(data: dict, keys: Iterable[str]):
                     data=data
                 ))
             raise exc
+
+
+class ThrottlingClient:
+    def __init__(
+            self,
+            *,
+            max_requests=10,
+            period_seconds=1,
+            **kwargs
+            ):
+        """
+        Wraps httpx.AsyncClient and throttle requests.
+
+
+        Parameters
+        ----------
+
+        max_requests
+            Maximum number of requests per `period_seconds` before throttling.
+            If <= 0, no limit.
+
+        period_seconds
+            Period on which to count requests.
+
+        kwargs
+            Additional keywords are passed to httpx.AsyncClient
+
+        """
+        self._max_requests = max_requests
+        self._period_s = period_seconds
+        self._requests_times = []
+        self._async_client: Optional[httpx.AsyncClient] = None
+        self._client_open: Optional[httpx.AsyncClient] = None
+        self._count_open = 0
+        self._kwargs = kwargs
+
+    @staticmethod
+    def _throttle(method):
+        "Wraps method to add throttling capabilities."
+        @functools.wraps(method)
+        async def wrapper(self, *args, **kwargs):
+            LOGGER.debug(
+                    "ThrottlingClient._throttle: "
+                    "len(self._requests_times) %s",
+                    len(self._requests_times))
+            while (
+                    self._max_requests > 0 and
+                    len(self._requests_times) >= self._max_requests
+                    ):
+                # Clean register
+                to_del = 0
+                for ind, timestamp in enumerate(self._requests_times):
+                    if time.time() - timestamp > self._period_s:
+                        to_del += 1
+                while to_del > 0:
+                    self._requests_times.pop(0)
+                    to_del -= 1
+                # requests_times might be empty now.
+                if len(self._requests_times) > 0:
+                    time_delta = (self._requests_times[0] + self._period_s
+                                  - time.time())
+                    if time_delta > 0:
+                        LOGGER.debug(
+                                "Throttle %s call for %.2f",
+                                method,
+                                time_delta)
+                        await asyncio.sleep(time_delta)
+            if self._max_requests > 0:
+                self._requests_times.append(time.time())
+            return await method(self, *args, **kwargs)
+        return wrapper
+
+    async def __aenter__(self):
+        if self._async_client is None:
+            self._async_client = httpx.AsyncClient(**self._kwargs)
+        if self._client_open is None:
+            self._client_open = await self._async_client.__aenter__()
+        self._count_open += 1
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        self._count_open -= 1
+        if self._count_open <= 0:
+            await self._async_client.__aexit__(exc_type, exc_val, exc_tb)
+            self._async_client = None
+            self._client_open = None
+        return self
+
+    @_throttle
+    @functools.wraps(httpx.AsyncClient.get)
+    async def get(self, *args, **kwargs):
+        return await self._client_open.get(*args, **kwargs)
+
+    @_throttle
+    @functools.wraps(httpx.AsyncClient.put)
+    async def put(self, *args, **kwargs):
+        return await self._client_open.put(*args, **kwargs)
+
+    @_throttle
+    @functools.wraps(httpx.AsyncClient.post)
+    async def post(self, *args, **kwargs):
+        return await self._client_open.post(*args, **kwargs)
+
+    @_throttle
+    @functools.wraps(httpx.AsyncClient.request)
+    async def request(self, *args, **kwargs):
+        return await self._client_open.request(*args, **kwargs)
+
+    @_throttle
+    @functools.wraps(httpx.AsyncClient.head)
+    async def head(self, *args, **kwargs):
+        return await self._client_open.head(*args, **kwargs)
+
+    @_throttle
+    @functools.wraps(httpx.AsyncClient.options)
+    async def options(self, *args, **kwargs):
+        return await self._client_open.options(*args, **kwargs)
+
+    @_throttle
+    @functools.wraps(httpx.AsyncClient.delete)
+    async def delete(self, *args, **kwargs):
+        return await self._client_open.delete(*args, **kwargs)
 
 
 # Logs helpers

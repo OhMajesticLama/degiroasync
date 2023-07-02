@@ -16,8 +16,6 @@ except ImportError:
 LOGGER_NAME = 'degiroasync'
 
 
-
-
 class _EnumBase(enum.Enum):
     """
     Base class for Enums that should behave as str or other types.

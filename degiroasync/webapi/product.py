@@ -552,7 +552,7 @@ async def get_products_info(
     LOGGER.debug('get_products_info products_ids| %s', products_ids)
     url = join_url(config.product_search_url,
                    'v5/products/info')
-    async with httpx.AsyncClient(timeout=TIMEOUT) as httpxclient:
+    async with session as httpxclient:
         response = await httpxclient.post(
             url,
             cookies=session.cookies,
@@ -589,7 +589,7 @@ async def get_company_profile(
     # Look for dgtbxdsservice in network logs for financial statements etc.
     # might have intraday data as well
     url = join_url(URLs.BASE, 'dgtbxdsservice/company-profile/v2', isin)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as httpxclient:
+    async with session as httpxclient:
         response = await httpxclient.get(
             url,
             cookies=session.cookies,
@@ -615,7 +615,7 @@ async def get_news_by_company(
     client = check_session_client(session)
     config = check_session_config(session)
     url = URLs.get_news_by_company_url(session)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as httpxclient:
+    async with session as httpxclient:
         response = await httpxclient.get(
             url,
             cookies=session.cookies,
@@ -751,7 +751,7 @@ async def get_price_data(
         'userToken': session.config.client_id
     }
     LOGGER.debug('get_price_data params| %s', params)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.get(url,
                                     cookies=session.cookies,
                                     params=params)
@@ -783,7 +783,7 @@ async def get_trading_update(
         Executed transactions.
     """
     url = URLs.get_portfolio_url(session)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.get(url,
                                     cookies=session._cookies,
                                     params=params)
@@ -874,7 +874,7 @@ async def search_product(
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
     LOGGER.debug("webapi.search_product params| %s", params)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.get(url,
                                     cookies=session._cookies,
                                     params=params)

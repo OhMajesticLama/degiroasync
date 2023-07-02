@@ -34,7 +34,7 @@ RUN_INTEGRATION_TESTS = 0
 try:
     _env_var = os.environ.get('DEGIROASYNC_INTEGRATION')
     RUN_INTEGRATION_TESTS = int(_env_var)
-except ValueError:
+except (ValueError, TypeError):
     LOGGER.info('degiroasync integration tests will *not* run.')
 
 
@@ -64,58 +64,46 @@ class TestDegiroAsyncWebAPI(unittest.IsolatedAsyncioTestCase):
             await degiroasync.webapi.login(credentials)
 
 
-def _get_credentials():
-    """
-    Helper to get credentials for integration tests
-    """
-    username = os.environ.get('DEGIRO_USERNAME')
-    password = os.environ.get('DEGIRO_PASSWORD')
-    assert username is not None, (
-        'DEGIRO_USERNAME environment variable not defined.')
-    assert password is not None, (
-        'DEGIRO_PASSWORD environment variable not defined.')
-    totp_secret = os.environ.get('DEGIRO_TOTP_SECRET')
-
-    return Credentials(username, password, totp_secret)
-
-
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.webapi integration tests will run.')
+    from tests.integration_login import _IntegrationLogin
 
-    class _IntegrationWebLogin:
-        """
-        Internal helper, can be inherited to make login for integration tests
-        easier.
-        """
-        async def asyncSetUp(self):
-            self._lock = asyncio.Lock()
-            self._login_attempted = False
-            self.session: Optional[SessionCore] = None
+    #class _IntegrationWebLogin:
+    #    """
+    #    Internal helper, can be inherited to make login for integration tests
+    #    easier.
+    #    """
+    #    async def asyncSetUp(self):
+    #        self._lock = asyncio.Lock()
+    #        _IntegrationLogin._login_attempted = False
+    #        self.session: Optional[SessionCore] = None
 
-        async def _login(self):
-            if self.session is not None:
-                return self.session
-            async with self._lock:
-                if not self._login_attempted and not self.session:
-                    self._login_attempted = True
-                    credentials = _get_credentials()
-                    self.session = await degiroasync.webapi.login(
-                            credentials)
-                    await degiroasync.webapi.get_config(self.session)
-                    await degiroasync.webapi.get_client_info(self.session)
-                else:
-                    LOGGER.warning(
-                            "Log in already attempted without success, skip.")
-            if not self.session:
-                raise ResponseError("No session available.")
-            return self.session
+    #    async def _login(self):
+    #        if self.session is not None:
+    #            return self.session
+    #        async with self._lock:
+    #            if not _IntegrationLogin._login_attempted and not self.session:
+    #                _IntegrationLogin._login_attempted = True
+    #                credentials = _get_credentials()
+    #                import degiroasync.api
+    #                # Use api.login here to benefit from wrong password check:
+    #                # if provided credentials are incorrect, don't try again
+    #                # This will block the degiro account.
+    #                self.session = await degiroasync.api.login(
+    #                        credentials)
+    #            else:
+    #                LOGGER.warning(
+    #                        "Log in already attempted without success, skip.")
+    #        if not self.session:
+    #            raise ResponseError("No session available.")
+    #        return self.session
 
     class TestDegiroAsyncWebAPIIntegration(
-            _IntegrationWebLogin,
+            _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
 
         async def test_login(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             self.assertTrue('JSESSIONID' in session.cookies,
                             "No JSESSIONID found.")
 
@@ -128,7 +116,7 @@ if RUN_INTEGRATION_TESTS:
                 await degiroasync.webapi.login(credentials)
 
         async def test_config(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             await get_config(session)
             LOGGER.debug('test_config| %s', session.config)
             self.assertTrue(
@@ -141,16 +129,16 @@ if RUN_INTEGRATION_TESTS:
                     session.config.trading_url is not None,
                     "tradingUrl not defined.")
 
-        async def test_porfolio(self):
-            session = await self._login()
+        async def test_portfolio(self):
+            session = await _IntegrationLogin._login()
 
             resp_json = await degiroasync.webapi.get_portfolio(session)
             LOGGER.debug("test_portfolio| %s", resp_json)
             self.assertTrue('portfolio' in resp_json)
             self.assertTrue('value' in resp_json['portfolio'])
 
-        async def test_porfolio_total(self):
-            session = await self._login()
+        async def test_portfolio_total(self):
+            session = await _IntegrationLogin._login()
 
             resp_json = await degiroasync.webapi.get_portfolio_total(session)
             LOGGER.debug("test_portfolio_total| %s", resp_json)
@@ -158,7 +146,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('value' in resp_json['totalPortfolio'])
 
         async def test_get_products_info(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             resp_json = await degiroasync.webapi.get_portfolio(session)
             portfolio = resp_json['portfolio']
@@ -176,7 +164,7 @@ if RUN_INTEGRATION_TESTS:
                          pprint.pformat(response))
 
         async def test_get_company_profile(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             isin = "FR0010242511"
             resp_json = await get_company_profile(session, isin)
@@ -186,7 +174,7 @@ if RUN_INTEGRATION_TESTS:
                          pprint.pformat(resp_json))
 
         async def test_get_news_by_company(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             isin = "FR0010242511"
             resp_json = await get_news_by_company(session, isin)
@@ -197,7 +185,7 @@ if RUN_INTEGRATION_TESTS:
             """
             Simply check that we don't have an error and data is not empty.
             """
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             vwdId = '360114899'
 
@@ -211,7 +199,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('data', resp_json['series'][0])
 
         async def test_get_price_data_month(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             vwdId = '360114899'
 
@@ -228,7 +216,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('data', resp_json['series'][0])
 
         async def test_get_price_data_month_pt1d(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             vwdId = '360114899'
 
@@ -247,7 +235,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('data', resp_json['series'][0])
 
         async def test_search_product(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             search = "AIRBUS"
             resp_json = await degiroasync.webapi.search_product(
@@ -260,7 +248,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('name', resp_json['products'][0], resp_json)
 
         async def test_product_dictionary(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             resp_json = await degiroasync.webapi.get_product_dictionary(
                     session
@@ -279,14 +267,14 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('eurexCountries', resp_json)
 
     class TestDegiroWebAPIOrdersIntegration(
-            _IntegrationWebLogin,
+            _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         """
         Set Orders will *not* be tested: this would imply being charged every
         time tests are executed.
         """
         async def test_get_orders(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             resp_json = await degiroasync.webapi.get_orders(session)
             LOGGER.debug("test_get_orders| %s", pprint.pformat(resp_json))
@@ -294,7 +282,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertIsInstance(resp_json['orders'], list)
 
         async def test_check_order(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
 
             # Leverage api.search_product to get a specific product_id
             # as example for integration testing of check_order.
@@ -356,7 +344,7 @@ if RUN_INTEGRATION_TESTS:
                     resp_json['data'])
 
         async def test_get_account_info(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             resp_json = await degiroasync.webapi.get_account_info(session)
             LOGGER.debug("test_get_account_info| response: %s", resp_json)
 
@@ -367,7 +355,7 @@ if RUN_INTEGRATION_TESTS:
             # usage has been identified.
 
         async def test_get_orders_history(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             to_date = datetime.datetime.today()
             from_date = datetime.datetime.today() - datetime.timedelta(days=7)
             date_format = degiroasync.webapi.orders.ORDER_DATE_FORMAT
@@ -398,7 +386,7 @@ if RUN_INTEGRATION_TESTS:
                 self.assertIn('totalTradedSize', order)
 
         async def test_get_orders_history_date_check(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             with self.assertRaises(ValueError):
                 await degiroasync.webapi.get_orders_history(
                     session,
@@ -406,7 +394,7 @@ if RUN_INTEGRATION_TESTS:
                     to_date='garbage')
 
         async def test_get_transactions(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             to_date = datetime.datetime.today()
             from_date = datetime.datetime.today() - datetime.timedelta(days=7)
             date_format = degiroasync.webapi.orders.ORDER_DATE_FORMAT
@@ -432,9 +420,21 @@ if RUN_INTEGRATION_TESTS:
                 self.assertIn('transactionTypeId', trans)
 
         async def test_get_transactions_date_check(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             with self.assertRaises(ValueError):
                 await degiroasync.webapi.get_orders_history(
                     session,
                     from_date='garbage',
                     to_date='garbage')
+
+
+if __name__ == '__main__':
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+            "%(asctime)s-%(name)s-%(levelname)s-%(message)",
+            "%Y%m%d"
+            )
+    LOGGER.addHandler(handler)
+    LOGGER.setLevel(logging.DEBUG)
+    unittest.main()

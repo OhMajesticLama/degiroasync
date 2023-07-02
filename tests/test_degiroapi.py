@@ -29,12 +29,12 @@ from degiroasync.core.constants import PRICE
 from degiroasync.core import BadCredentialsError
 from degiroasync.core import ResponseError
 
-from .test_degirowebapi import _get_credentials
+from .integration_login import _get_credentials
+from .integration_login import _IntegrationLogin
 
 
 LOGGER = logging.getLogger(degiroasync.core.LOGGER_NAME)
 LOGGER.setLevel(logging.DEBUG)
-#degiroasync.core.helpers.set_logs(LOGGER, logging.DEBUG)
 
 LOGGER.debug('Python Version: %s', sys.version)
 
@@ -386,25 +386,7 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.api integration tests will run.')
 
-    class _IntegrationLogin:
-        """
-        Internal helper, can be inherited to make login for integration tests
-        easier.
-        """
-        async def asyncSetUp(self):
-            self._lock = asyncio.Lock()
-            self.session: Optional[Session] = None
-            self._login_attempted = False
-
-        async def _login(self):
-            async with self._lock:
-                if not self.session and not self._login_attempted:
-                    self._login_attempted = True
-                    credentials = _get_credentials()
-                    self.session = await degiroasync.api.login(credentials)
-            if not self.session:
-                raise ResponseError("No session available.")
-            return self.session
+    from .integration_login import _IntegrationLogin
 
     class TestDegiroasyncIntegrationLogin(
             _IntegrationLogin,
@@ -419,7 +401,7 @@ if RUN_INTEGRATION_TESTS:
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         async def test_get_portfolio_total(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             total = await degiroasync.api.get_portfolio_total(session)
             LOGGER.debug("test_get_portfolio_total: %s", total.__dict__)
             self.assertIsNotNone(total.degiro_cash)
@@ -429,7 +411,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertIsNotNone(total.report_cash_bal)
 
         async def test_get_portfolio_products_info(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             positions = await degiroasync.api.get_portfolio(session)
             LOGGER.debug("test_get_portfolio_products_info: %s",
                          pprint.pformat(tuple(p.__dict__ for p in positions)))
@@ -454,7 +436,7 @@ if RUN_INTEGRATION_TESTS:
             unittest.IsolatedAsyncioTestCase):
 
         async def test_get_price_data(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             products = await degiroasync.api.search_product(
                     session,
                     by_isin='NL0000235190',
@@ -502,7 +484,7 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_get_price_data_symbol_exchange(self):
             # First get product
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             symbol = 'FGR'
             exchange = 'EPA'
             products = await degiroasync.api.search_product(
@@ -525,7 +507,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertEqual(len(date), len(price))
 
         async def test_get_price_data_day_resolution(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             products = await degiroasync.api.search_product(
                     session,
                     by_isin='NL0000235190',
@@ -591,7 +573,7 @@ if RUN_INTEGRATION_TESTS:
 
         #async def test_get_price_data_bulk(self):
         #    raise NotImplementedError
-        #    session = await self._login()
+        #    session = await _IntegrationLogin._login()
         #    #degiroasync.api.Product
         #    _, products = await degiroasync.api.get_portfolio(session)
         #    # In a context where we'd want to optimize, we want to 
@@ -606,7 +588,7 @@ if RUN_INTEGRATION_TESTS:
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         async def test_search_product_isin(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             isin = 'NL0000235190'  # Airbus ISIN
             products = await degiroasync.api.search_product(session,
                     by_isin=isin)
@@ -616,7 +598,7 @@ if RUN_INTEGRATION_TESTS:
                 self.assertTrue('airbus' in product.info.name.lower())
 
         async def test_search_product_symbol(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             symbol = 'AIR'
             products = await degiroasync.api.search_product(session,
                                                             by_symbol=symbol)
@@ -628,7 +610,7 @@ if RUN_INTEGRATION_TESTS:
                 #               product.info)
 
         async def test_search_product_symbol_air(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             symbol = 'AIR'  # GE symbol on EPA
             products = await degiroasync.api.search_product(session,
                                                             by_symbol=symbol,
@@ -640,7 +622,7 @@ if RUN_INTEGRATION_TESTS:
                         'airbus' in product.info.name.lower())
 
         async def test_search_product_text(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             products = await degiroasync.api.search_product(
                     session,
                     by_text='airbus')
@@ -650,7 +632,7 @@ if RUN_INTEGRATION_TESTS:
                 self.assertTrue('airbus' in product.info.name.lower())
 
         async def test_search_product_symbol_exchange(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             symbol = 'AIR'  # Airbus symbol
             exchange_hiq = 'EPA'
             products = await degiroasync.api.search_product(
@@ -669,7 +651,7 @@ if RUN_INTEGRATION_TESTS:
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         async def test_product_dictionary_attributes(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             dictionary = await degiroasync.api.ExchangeDictionary(session)
 
             regions = dictionary.regions
@@ -680,7 +662,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('XAMS', (e.mic_code for e in exchanges))
 
         async def test_product_dictionary_exchange_by(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             dictionary = await degiroasync.api.ExchangeDictionary(session)
             eam_exc = dictionary.exchange_by(hiq_abbr='EAM')
             self.assertEqual(eam_exc.mic_code, 'XAMS')
@@ -690,7 +672,7 @@ if RUN_INTEGRATION_TESTS:
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         async def test_get_orders(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             orders, orders_hist = await degiroasync.api.get_orders(session)
             LOGGER.debug("test_get_orders orders| %s", orders)
             LOGGER.debug("test_get_orders orders hist| %s", orders_hist)
@@ -698,7 +680,7 @@ if RUN_INTEGRATION_TESTS:
                 self.assertTrue(isinstance(o, Order))
 
         async def test_get_transactions(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             to_date = datetime.datetime.today()
             from_date = datetime.datetime(year=to_date.year - 2,
                                           month=1,
@@ -724,7 +706,7 @@ if RUN_INTEGRATION_TESTS:
                 self.assertTrue(hasattr(trans, 'fx_rate'))
 
         async def test_check_orders(self):
-            session = await self._login()
+            session = await _IntegrationLogin._login()
             products = await degiroasync.api.search_product(
                     session,
                     by_symbol='AIR',

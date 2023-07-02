@@ -103,7 +103,7 @@ async def confirm_order(
         timeType=time_type
     )
 
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.post(
             url,
             params=params,
@@ -227,7 +227,7 @@ async def check_order(
         timeType=time_type
     )
     LOGGER.debug("check_order data| %s", data)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.post(
             url,
             params=params,
@@ -353,7 +353,7 @@ async def get_orders_history(
         sessionId=jsessionid
     )
 
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.get(
             url,
             params=params,
@@ -427,7 +427,7 @@ async def get_transactions(
     )
 
     LOGGER.debug('get_transactions params| %s', params)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.get(
             url,
             params=params,

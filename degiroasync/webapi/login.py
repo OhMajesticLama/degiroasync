@@ -37,7 +37,7 @@ async def login(
         "isPassCodeReset": '',
         "queryParams": {"reason": "session_expired"}
     }
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         LOGGER.debug("login| url %s", url)
         response = await client.post(url, content=json.dumps(payload))
         LOGGER.debug("login| response %s", response.__dict__)
@@ -83,7 +83,7 @@ async def get_config(session: SessionCore) -> SessionCore:
     Populate session with configuration
     """
     _check_active_session(session)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         res = await client.get(URLs.CONFIG, cookies=session._cookies)
 
     check_response(res)
@@ -99,7 +99,8 @@ async def get_client_info(session: SessionCore) -> SessionCore:
     Get client information.
     """
     url = URLs.get_client_info_url(session)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+
+    async with session as client:
         res = await client.get(
             url,
             params={'sessionId': session._cookies[session.JSESSIONID]},
@@ -119,7 +120,7 @@ async def get_account_info(session: SessionCore) -> SessionCore:
     """
     _check_active_session(session)
     url = URLs.get_account_info_url(session)
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         res = await client.get(url,
                                cookies=session._cookies
                                )
@@ -145,7 +146,7 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
         intAccount=session.client.int_account,
         sessionId=session.config.session_id
     )
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with session as client:
         response = await client.get(url,
                                     cookies=session._cookies,
                                     params=params

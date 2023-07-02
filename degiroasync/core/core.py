@@ -15,7 +15,7 @@ except ImportError:
         def __str__(self):
             return str.__str__(self)
 
-from typing import Union, Optional, Any, Dict
+from typing import Union, Optional, Any
 
 import httpx
 from jsonloader import JSONclass
@@ -23,6 +23,7 @@ from jsonloader import JSONclass
 from .helpers import join_url
 from .constants import LOGGER_NAME
 from .constants import PRODUCT
+from ..core.helpers import ThrottlingClient
 from .exceptions import ContextError
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -153,11 +154,6 @@ class PAClient:
     is_allocation_available: Union[bool, None]
     is_am_client_active: Union[bool, None]
 
-    # def set_data(self, data: dict):
-    #    check_keys(data, ('intAccount', 'id'))
-    #    setattrs(self, **data)
-    #    return self
-
 
 @dataclasses.dataclass
 class SessionCore:
@@ -166,13 +162,30 @@ class SessionCore:
     config: Optional[Config] = None
     client: Optional[PAClient] = None
 
+    _max_requests_default: int = 30
+    _period_seconds_default: int = 1
+
     # Cookies
     # Wrap to not leak httpx
-    _cookies: Union[httpx.Cookies, None] = None
+    _cookies: Optional[httpx.Cookies] = None
+    _http_client: Optional[ThrottlingClient] = None
 
     @property
     def cookies(self):
         return dict(self._cookies)
+
+    def update_throttling(
+            self,
+            max_requests: int = 20,
+            period_seconds: float = 1
+            ):
+        "Update throttling parameters. No limit if max_requests <= 0."
+        if self._http_client is None:
+            self._max_requests_default = max_requests
+            self._period_seconds_default = period_seconds
+        else:
+            self._http_client._max_requests = max_requests
+            self._http_client._period_s = period_seconds
 
     @cookies.setter
     def cookies(self, cookies: dict):
@@ -180,6 +193,17 @@ class SessionCore:
 
     def __hash__(self):
         return hash(self.__dict__.values())
+
+    async def __aenter__(self) -> ThrottlingClient:
+        if self._http_client is None:
+            self._http_client = ThrottlingClient(
+                    max_requests=self._max_requests_default,
+                    period_seconds=self._period_seconds_default
+                    )
+        return await self._http_client.__aenter__()
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self._http_client.__aexit__(exc_type, exc_val, exc_tb)
 
 
 class URLs:
