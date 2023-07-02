@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quickstart with degiroasync &mdash; degiroasync  documentation</title>
@@ -12,10 +12,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> degiroasync
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            degiroasync
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -65,8 +70,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Quickstart with degiroasync</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quickstart with degiroasync</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,13 +82,13 @@
            <div itemprop="articleBody">
              
   <section id="quickstart-with-degiroasync">
-<span id="cookbook-quickstart"></span><h1><a class="toc-backref" href="#id1">Quickstart with degiroasync</a><a class="headerlink" href="#quickstart-with-degiroasync" title="Permalink to this headline"></a></h1>
+<span id="cookbook-quickstart"></span><h1><a class="toc-backref" href="#id1" role="doc-backlink">Quickstart with degiroasync</a><a class="headerlink" href="#quickstart-with-degiroasync" title="Permalink to this heading"></a></h1>
 <p>If you’re here, you’re probably looking for a way to directly interact
 with DEGIRO’s endpoints, with Python, in an asynchronous way.</p>
 <p>We’ll focus on higher level abstractions as they were built to limit
 headaches about rebuilding and linking useful objects from the endpoint
 returned information.</p>
-<div class="contents topic" id="contents">
+<nav class="contents" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#quickstart-with-degiroasync" id="id1">Quickstart with degiroasync</a></p>
@@ -95,9 +100,9 @@ returned information.</p>
 </ul>
 </li>
 </ul>
-</div>
+</nav>
 <section id="log-in-the-platform">
-<span id="cookbook-login"></span><h2><a class="toc-backref" href="#id2">Log in the platform</a><a class="headerlink" href="#log-in-the-platform" title="Permalink to this headline"></a></h2>
+<span id="cookbook-login"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Log in the platform</a><a class="headerlink" href="#log-in-the-platform" title="Permalink to this heading"></a></h2>
 <p><cite>degiroasync</cite> provides helpers to log in the endpoints. They will build a
 <cite>Session</cite> instance for you, that will need to be passed argument to most of
 the functions of this API.</p>
@@ -161,7 +166,7 @@ the functions of this API.</p>
 </div>
 </section>
 <section id="get-my-portfolio">
-<h2><a class="toc-backref" href="#id3">Get my Portfolio</a><a class="headerlink" href="#get-my-portfolio" title="Permalink to this headline"></a></h2>
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Get my Portfolio</a><a class="headerlink" href="#get-my-portfolio" title="Permalink to this heading"></a></h2>
 <p>Here we assume you know how to log-in the endpoints and you have a valid Session
 instance available. If you don’t, check <a class="reference internal" href="#cookbook-login"><span class="std std-ref">Log in the platform</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assumption: you&#39;re logged in and have a session, if that&#39;s not the</span>
@@ -206,7 +211,7 @@ instance available. If you don’t, check <a class="reference internal" href="#c
 </div>
 </section>
 <section id="find-a-product">
-<h2><a class="toc-backref" href="#id4">Find a product</a><a class="headerlink" href="#find-a-product" title="Permalink to this headline"></a></h2>
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Find a product</a><a class="headerlink" href="#find-a-product" title="Permalink to this heading"></a></h2>
 <p>There are two main ways to get a Product:</p>
 <ul class="simple">
 <li><p>The <cite>get_portfolio</cite> from the example above.</p></li>
@@ -261,7 +266,7 @@ instance available. If you don’t, check <a class="reference internal" href="#c
 </div>
 </section>
 <section id="get-price-data">
-<h2><a class="toc-backref" href="#id5">Get price data</a><a class="headerlink" href="#get-price-data" title="Permalink to this headline"></a></h2>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Get price data</a><a class="headerlink" href="#get-price-data" title="Permalink to this heading"></a></h2>
 <p>Now that we know how to get Product instances, we may want to get price data
 related to those products.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>

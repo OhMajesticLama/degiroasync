@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>degiroasync.core’s documentation &mdash; degiroasync  documentation</title>
@@ -12,10 +12,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,11 +29,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> degiroasync
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            degiroasync
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -42,7 +47,33 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart with degiroasync</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">degiroasync.api’s documentation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">degiroasync.core’s documentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">degiroasync.core’s documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.BadCredentialsError"><code class="docutils literal notranslate"><span class="pre">BadCredentialsError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.ContextError"><code class="docutils literal notranslate"><span class="pre">ContextError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.Credentials"><code class="docutils literal notranslate"><span class="pre">Credentials</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.ORDER"><code class="docutils literal notranslate"><span class="pre">ORDER</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.core.ORDER.ACTION"><code class="docutils literal notranslate"><span class="pre">ORDER.ACTION</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.core.ORDER.STATUS"><code class="docutils literal notranslate"><span class="pre">ORDER.STATUS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.core.ORDER.TIME"><code class="docutils literal notranslate"><span class="pre">ORDER.TIME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.core.ORDER.TYPE"><code class="docutils literal notranslate"><span class="pre">ORDER.TYPE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.PAClient"><code class="docutils literal notranslate"><span class="pre">PAClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.ResponseError"><code class="docutils literal notranslate"><span class="pre">ResponseError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.SessionCore"><code class="docutils literal notranslate"><span class="pre">SessionCore</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.core.SessionCore.update_throttling"><code class="docutils literal notranslate"><span class="pre">SessionCore.update_throttling()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.camelcase_dict_to_snake"><code class="docutils literal notranslate"><span class="pre">camelcase_dict_to_snake()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.camelcase_to_snake"><code class="docutils literal notranslate"><span class="pre">camelcase_to_snake()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.check_session_client"><code class="docutils literal notranslate"><span class="pre">check_session_client()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.check_session_config"><code class="docutils literal notranslate"><span class="pre">check_session_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.join_url"><code class="docutils literal notranslate"><span class="pre">join_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.lru_cache_timed"><code class="docutils literal notranslate"><span class="pre">lru_cache_timed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.core.set_params"><code class="docutils literal notranslate"><span class="pre">set_params()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="webapi.html">degiroasync.webapi’s documentation</a></li>
 </ul>
 
@@ -59,8 +90,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>degiroasync.core’s documentation</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">degiroasync.core’s documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/core.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -71,7 +102,7 @@
            <div itemprop="articleBody">
              
   <section id="degiroasync-core-s-documentation">
-<h1>degiroasync.core’s documentation<a class="headerlink" href="#degiroasync-core-s-documentation" title="Permalink to this headline"></a></h1>
+<h1>degiroasync.core’s documentation<a class="headerlink" href="#degiroasync-core-s-documentation" title="Permalink to this heading"></a></h1>
 <span class="target" id="module-degiroasync.core"><span id="core"></span></span><p>Contains core data structures and helpers for degiroasync.</p>
 <dl class="simple">
 <dt>Key structures that are reused regularly through degiroasync API the below:</dt><dd><ul class="simple">
@@ -86,14 +117,28 @@
 </dd>
 </dl>
 <p>Check out their respective documentation for more details.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="degiroasync.core.BadCredentialsError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">BadCredentialsError</span></span><a class="headerlink" href="#degiroasync.core.BadCredentialsError" title="Permalink to this definition"></a></dt>
+<dd><p>Error raised when web API returns a badCredentials error.
+This is a specialized class of ReponseError.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="degiroasync.core.Config">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#degiroasync.core.Config" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py exception">
+<dt class="sig sig-object py" id="degiroasync.core.ContextError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">ContextError</span></span><a class="headerlink" href="#degiroasync.core.ContextError" title="Permalink to this definition"></a></dt>
+<dd><p>Raised when unexpected or incorrect context is detected.</p>
+<p>Example: when some required Session attributes are missing.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="degiroasync.core.Credentials">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">Credentials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totp_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_time_password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.Credentials" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">Credentials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totp_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_time_password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.Credentials" title="Permalink to this definition"></a></dt>
 <dd><p>Holds credentials for Web API.</p>
 <p>If 2FA is enabled on the account, either totp_secret or one_time_password
 must be provided for the login to be successful.</p>
@@ -184,8 +229,14 @@ It’s used for investment funds.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="degiroasync.core.SessionCore">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">SessionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[Config]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[PAClient]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cookies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Union[httpx.Cookies,</span> <span class="pre">None]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.SessionCore" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">SessionCore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[Config]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[PAClient]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_max_requests_default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_period_seconds_default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cookies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[httpx.Cookies]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_http_client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[ThrottlingClient]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.SessionCore" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="degiroasync.core.SessionCore.update_throttling">
+<span class="sig-name descname"><span class="pre">update_throttling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_requests</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.SessionCore.update_throttling" title="Permalink to this definition"></a></dt>
+<dd><p>Update throttling parameters. No limit if max_requests &lt;= 0.</p>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="degiroasync.core.camelcase_dict_to_snake">
@@ -221,13 +272,13 @@ preceded by ‘_’.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="degiroasync.core.check_session_client">
-<span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">check_session_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.check_session_client" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">check_session_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CustomJSONWrapper</span></span></span><a class="headerlink" href="#degiroasync.core.check_session_client" title="Permalink to this definition"></a></dt>
 <dd><p>Raise an exception if session.client is not set</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="degiroasync.core.check_session_config">
-<span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">check_session_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">degiroasync.core.core.SessionCore</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.check_session_config" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">check_session_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CustomJSONWrapper</span></span></span><a class="headerlink" href="#degiroasync.core.check_session_config" title="Permalink to this definition"></a></dt>
 <dd><p>Raise an exception if session.config is not set</p>
 </dd></dl>
 
@@ -254,7 +305,7 @@ urllib.parse.urljoin, see example below.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="degiroasync.core.lru_cache_timed">
-<span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">lru_cache_timed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.lru_cache_timed" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">degiroasync.core.</span></span><span class="sig-name descname"><span class="pre">lru_cache_timed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.core.lru_cache_timed" title="Permalink to this definition"></a></dt>
 <dd><p>Time-sensitive LRU cache that works with async functions.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@lru_cache_timed</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">async</span> <span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
