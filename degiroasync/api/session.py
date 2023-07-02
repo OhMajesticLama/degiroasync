@@ -1,9 +1,9 @@
-from typing import Union, List, Dict, Any, Optional
+from typing import Union, List, Dict, Any
+from typing import Set
 import functools
 import logging
 import pprint
 import copy
-import time
 
 from jsonloader import JSONclass
 
@@ -186,7 +186,7 @@ async def get_exchange_dictionary(session: Session) -> ExchangeDictionary:
 
 
 #: Singleton to store hash of failed attempts credentials.
-_LOGIN_FAILURE_HASH: set[str] = set()
+_LOGIN_FAILURE_HASH: Set[str] = set()
 
 #: Minimum time before new login attempt is allowed with bad credentials (s).
 #: Default = 3 hours

@@ -428,9 +428,8 @@ class ThrottlingClient:
         self._count_open = 0
         self._kwargs = kwargs
 
-    @staticmethod
     def _throttle(method):
-        "Wraps method to add throttling capabilities."
+        "Decorator to wrap method to add throttling capabilities."
         @functools.wraps(method)
         async def wrapper(self, *args, **kwargs):
             LOGGER.debug(
