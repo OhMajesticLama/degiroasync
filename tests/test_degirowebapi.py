@@ -166,7 +166,7 @@ if RUN_INTEGRATION_TESTS:
         async def test_get_company_profile(self):
             session = await _IntegrationLogin._login()
 
-            isin = "FR0010242511"
+            isin = "NL0000235190"
             resp_json = await get_company_profile(session, isin)
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('businessSummary' in resp_json['data'], resp_json)
@@ -176,7 +176,7 @@ if RUN_INTEGRATION_TESTS:
         async def test_get_news_by_company(self):
             session = await _IntegrationLogin._login()
 
-            isin = "FR0010242511"
+            isin = "NL0000235190"
             resp_json = await get_news_by_company(session, isin)
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('items' in resp_json['data'], resp_json)

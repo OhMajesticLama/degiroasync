@@ -3,12 +3,11 @@ import itertools
 import logging
 import os
 import pprint
-import asyncio
 import unittest.mock
 import sys
 import datetime
 from unittest.mock import MagicMock
-from typing import Optional, Sequence
+from typing import Sequence
 
 
 import degiroasync
@@ -23,14 +22,12 @@ from degiroasync.api import ProductFactory
 from degiroasync.api import Order
 from degiroasync.api import ORDER
 from degiroasync.api import Exchange
-from degiroasync.api import Session
 from degiroasync.core.constants import PRODUCT
 from degiroasync.core.constants import PRICE
 from degiroasync.core import BadCredentialsError
-from degiroasync.core import ResponseError
 
-from .integration_login import _get_credentials
-from .integration_login import _IntegrationLogin
+from tests.integration_login import _get_credentials
+from tests.integration_login import _IntegrationLogin
 
 
 LOGGER = logging.getLogger(degiroasync.core.LOGGER_NAME)
@@ -386,8 +383,6 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
 if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.api integration tests will run.')
 
-    from .integration_login import _IntegrationLogin
-
     class TestDegiroasyncIntegrationLogin(
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
@@ -555,7 +550,7 @@ if RUN_INTEGRATION_TESTS:
 
             # We entered PT1D resolution, check that we have one data point
             # per day at most
-            start = datetime.datetime.now() - datetime.timedelta(days=32)
+            start = datetime.datetime.now() - datetime.timedelta(days=60)
             prior_day = datetime.datetime(start.year, start.month, start.day)
             for date_str in date_series:
                 date = datetime.datetime.fromisoformat(date_str)
@@ -570,27 +565,14 @@ if RUN_INTEGRATION_TESTS:
 
                 prior_day = day
 
-
-        #async def test_get_price_data_bulk(self):
-        #    raise NotImplementedError
-        #    session = await _IntegrationLogin._login()
-        #    #degiroasync.api.Product
-        #    _, products = await degiroasync.api.get_portfolio(session)
-        #    # In a context where we'd want to optimize, we want to 
-        #    # build the pipeline by awaiting on each product instead of a bulk
-        #    # gather to not block execution while we wait for data on some
-        #    # of the products.
-        #    await asyncio.gather(await p.await_product_info() for p in products)
-        #    products = filter(lambda p: p.info.productType == ProductConst.Type.STOCKS, products)
-        #    price_data = await degiroasync.api.get_price_data_bulk(session, products)
-
     class TestDegiroasyncIntegrationSearch(
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         async def test_search_product_isin(self):
             session = await _IntegrationLogin._login()
             isin = 'NL0000235190'  # Airbus ISIN
-            products = await degiroasync.api.search_product(session,
+            products = await degiroasync.api.search_product(
+                    session,
                     by_isin=isin)
             self.assertGreaterEqual(len(products), 1)
             for product in products:
@@ -726,3 +708,14 @@ if RUN_INTEGRATION_TESTS:
                     price=80
             )
             self.assertIn('confirmation_id', order_check)
+
+if __name__ == '__main__':
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+            "%(asctime)s-%(name)s-%(levelname)s-%(message)",
+            "%Y%m%d"
+            )
+    LOGGER.addHandler(handler)
+    LOGGER.setLevel(logging.DEBUG)
+    unittest.main()

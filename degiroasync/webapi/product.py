@@ -589,8 +589,8 @@ async def get_company_profile(
     # Look for dgtbxdsservice in network logs for financial statements etc.
     # might have intraday data as well
     url = join_url(URLs.BASE, 'dgtbxdsservice/company-profile/v2', isin)
-    async with session as httpxclient:
-        response = await httpxclient.get(
+    async with session as httpclient:
+        response = await httpclient.get(
             url,
             cookies=session.cookies,
             params={
