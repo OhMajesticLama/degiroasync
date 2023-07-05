@@ -162,11 +162,10 @@ class SessionCore:
     config: Optional[Config] = None
     client: Optional[PAClient] = None
 
-    _max_requests_default: int = 30
+    _max_requests_default: int = 40
     _period_seconds_default: int = 1
 
     # Cookies
-    # Wrap to not leak httpx
     _cookies: Optional[httpx.Cookies] = None
     _http_client: Optional[ThrottlingClient] = None
 
@@ -179,7 +178,21 @@ class SessionCore:
             max_requests: int = 20,
             period_seconds: float = 1
             ):
-        "Update throttling parameters. No limit if max_requests <= 0."
+        """
+        Update throttling parameters. No limit if max_requests <= 0.
+
+        Note: going over 40 requests per second seems to trigger API bans.
+
+        Parameters
+        ----------
+
+        max_requests
+            Maximum number of requests per `period_seconds` before throttling.
+            If <= 0, no limit.
+
+        period_seconds
+            Period on which to count requests.
+        """
         if self._http_client is None:
             self._max_requests_default = max_requests
             self._period_seconds_default = period_seconds
