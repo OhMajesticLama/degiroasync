@@ -646,94 +646,102 @@ async def get_price_data(
     """
     Get price data for a company.
 
+    Parameters
+    ----------
+
     data_type = 'ohlc' provides access to 'Open', 'High', 'Low', 'Close' in
     that order for each period, instead of price data.
 
     vwdIdentifierType can be 'issueid' or 'vwdkey'
 
+    Returns
+    -------
     Example returned JSON:
-    {
-        "requestid": "1",
-        "start": "2022-01-20T00:00:00",
-        "end": "2022-01-20T14:12:24",
-        "resolution": "PT1M",
-        "series": [
-            {
-                "expires": "2022-01-20T10:12:56+01:00",
-                "data": {
-                    "issueId": 360114899,
-                    "companyId": 1001,
-                    "name": "AIRBUS",
-                    "identifier": "issueid:360114899",
-                    "isin": "NL0000235190",
-                    "alfa": "AIR15598",
-                    "market": "XPAR",
-                    "currency": "EUR",
-                    "type": "AAN",
-                    "quality": "REALTIME",
-                    "lastPrice": 113.1,
-                    "lastTime": "2022-01-21T14:12:24",
-                    "absDiff": -2.62,
-                    "relDiff": -0.02264,
-                    "highPrice": 114.46,
-                    "highTime": "2022-01-21T10:31:14",
-                    "lowPrice": 112.78,
-                    "lowTime": "2022-01-21T13:56:36",
-                    "openPrice": 114.0,
-                    "openTime": "2022-01-21T09:00:19",
-                    "closePrice": 114.0,
-                    "closeTime": "2022-01-21T09:00:19",
-                    "cumulativeVolume": 857092.0,
-                    "previousClosePrice": 115.72,
-                    "previousCloseTime": "2022-01-20T17:35:03",
-                    "tradingStartTime": "09:00:00",
-                    "tradingEndTime": "17:40:00",
-                    "tradingAddedTime": "00:10:00",
-                    "lowPriceP1Y": 81.84,
-                    "highPriceP1Y": 121.1,
-                    "windowStart": "2022-01-20T00:00:00",
-                    "windowEnd": "2022-01-20T10:11:22",
-                    "windowFirst": "2022-01-20T09:00:00",
-                    "windowLast": "2022-01-20T10:11:00",
-                    "windowHighTime": "2022-01-20T10:11:00",
-                    "windowHighPrice": 114.46,
-                    "windowLowTime": "2022-01-20T10:16:00",
-                    "windowLowPrice": 112.78,
-                    "windowOpenTime": "2022-01-20T09:00:19",
-                    "windowOpenPrice": 114.0,
-                    "windowPreviousCloseTime": "2022-01-19T17:35:03",
-                    "windowPreviousClosePrice": 115.72,
-                    "windowTrend": -0.02264
-                },
-                "id": "issueid:360114899",
-                "type": "object"
-                "times": "2022-01-20T00:00:00",
-                "expires": "2022-01-20T10:12:56+01:00",
-                "data": [
-                    [
-                    540,
-                    114.0
-                    ],
-                    [
-                    541,
-                    114.08
-                    ],
-                    [
-                    542,
-                    113.62
-                    ],
-                    [
-                    543,
-                    113.8
-                    ],
-                    ...
-                    [
-                    552,
-                    113.7
-                    ]],
-            "id":"price:issueid:360114899",
-            "type":"time"}]
-        }
+
+    .. code-block:: json
+
+        {
+            "requestid": "1",
+            "start": "2022-01-20T00:00:00",
+            "end": "2022-01-20T14:12:24",
+            "resolution": "PT1M",
+            "series": [
+                {
+                    "expires": "2022-01-20T10:12:56+01:00",
+                    "data": {
+                        "issueId": 360114899,
+                        "companyId": 1001,
+                        "name": "AIRBUS",
+                        "identifier": "issueid:360114899",
+                        "isin": "NL0000235190",
+                        "alfa": "AIR15598",
+                        "market": "XPAR",
+                        "currency": "EUR",
+                        "type": "AAN",
+                        "quality": "REALTIME",
+                        "lastPrice": 113.1,
+                        "lastTime": "2022-01-21T14:12:24",
+                        "absDiff": -2.62,
+                        "relDiff": -0.02264,
+                        "highPrice": 114.46,
+                        "highTime": "2022-01-21T10:31:14",
+                        "lowPrice": 112.78,
+                        "lowTime": "2022-01-21T13:56:36",
+                        "openPrice": 114.0,
+                        "openTime": "2022-01-21T09:00:19",
+                        "closePrice": 114.0,
+                        "closeTime": "2022-01-21T09:00:19",
+                        "cumulativeVolume": 857092.0,
+                        "previousClosePrice": 115.72,
+                        "previousCloseTime": "2022-01-20T17:35:03",
+                        "tradingStartTime": "09:00:00",
+                        "tradingEndTime": "17:40:00",
+                        "tradingAddedTime": "00:10:00",
+                        "lowPriceP1Y": 81.84,
+                        "highPriceP1Y": 121.1,
+                        "windowStart": "2022-01-20T00:00:00",
+                        "windowEnd": "2022-01-20T10:11:22",
+                        "windowFirst": "2022-01-20T09:00:00",
+                        "windowLast": "2022-01-20T10:11:00",
+                        "windowHighTime": "2022-01-20T10:11:00",
+                        "windowHighPrice": 114.46,
+                        "windowLowTime": "2022-01-20T10:16:00",
+                        "windowLowPrice": 112.78,
+                        "windowOpenTime": "2022-01-20T09:00:19",
+                        "windowOpenPrice": 114.0,
+                        "windowPreviousCloseTime": "2022-01-19T17:35:03",
+                        "windowPreviousClosePrice": 115.72,
+                        "windowTrend": -0.02264
+                    },
+                    "id": "issueid:360114899",
+                    "type": "object"
+                    "times": "2022-01-20T00:00:00",
+                    "expires": "2022-01-20T10:12:56+01:00",
+                    "data": [
+                        [
+                        540,
+                        114.0
+                        ],
+                        [
+                        541,
+                        114.08
+                        ],
+                        [
+                        542,
+                        113.62
+                        ],
+                        [
+                        543,
+                        113.8
+                        ],
+                        ...
+                        [
+                        552,
+                        113.7
+                        ]],
+                "id":"price:issueid:360114899",
+                "type":"time"}]
+            }
     """
     if vwdIdentifierType not in ('issueid', 'vwdkey'):
         raise ValueError("vwdIdentifierType must be 'issueid' or 'vwdkey'")
@@ -743,17 +751,19 @@ async def get_price_data(
     LOGGER.debug('get_price_data url| %s', url)
     params = {
         'requestid': 1,
-        'resolution': resolution,
+        'resolution': str(resolution),
         'culture': culture,
-        'period': period,
-        'series': f'price:{vwdIdentifierType}:{vwdId}',
+        'period': str(period),
+        'series': f'{data_type}:{vwdIdentifierType}:{vwdId}',
         'format': 'json',
         'userToken': session.config.client_id
     }
     LOGGER.debug('get_price_data params| %s', params)
     async with session as client:
+        # 2023: Cookies are not needed for that call.
+        # Since it looks like a third party, don't share session id if not
+        # needed.
         response = await client.get(url,
-                                    cookies=session.cookies,
                                     params=params)
     check_response(response)
     resp_json = response.json()

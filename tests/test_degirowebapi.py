@@ -215,6 +215,28 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('series', resp_json)
             self.assertIn('data', resp_json['series'][0])
 
+        async def test_get_price_data_ohlc(self):
+            session = await _IntegrationLogin._login()
+
+            vwdId = '360114899'
+
+            resp_json = await degiroasync.webapi.get_price_data(
+                    session,
+                    vwdId=vwdId,
+                    period=PRICE.PERIOD.P1MONTH,
+                    resolution=PRICE.RESOLUTION.PT1M,
+                    vwdIdentifierType='issueid',
+                    data_type=PRICE.TYPE.OHLC,
+                    )
+            LOGGER.debug(resp_json)
+            self.assertIn('resolution', resp_json)
+            self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1M)
+            self.assertIn('series', resp_json)
+            self.assertIn('data', resp_json['series'][0])
+            self.assertEqual(
+                    len(resp_json['series'][0]['data'][0]), 5,
+                    "We should have 5 entries per row (index + O H L C)")
+
         async def test_get_price_data_month_pt1d(self):
             session = await _IntegrationLogin._login()
 
