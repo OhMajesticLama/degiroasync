@@ -50,7 +50,7 @@ Details can be found with each function documentation:
     - *search_product*
       Find and instantiate DEGIRO products from various search options (text,
       ISIN, symbol, exchange ...).
-    - *get_price_data*
+    - *get_price_series*
       Get price data on a Product.
     - *get_orders* and *check_order*
       Get orders on the account, start placing an order. Note: `webapi` module
@@ -69,14 +69,14 @@ from .session import ExchangeDictionary
 from .session import Exchange, Region, Country
 from .product import get_portfolio
 from .product import get_portfolio_total
-from .product import get_price_data
+from .product import get_price_series
 from .product import search_product
 from .product import Stock
 from .product import Currency
 from .product import ProductBase
 from .product import ProductFactory  # Don't expose in __all__
 from .product import ProductGeneric
-from .product import PriceSeriesTime
+from .product import PriceSeries
 from .product import TotalPortfolio
 from ..core import Credentials
 from ..core.constants import PRODUCT
@@ -102,10 +102,10 @@ __all__ = [
             # Product
             search_product,
             get_portfolio,
-            get_price_data,
+            get_price_series,
 
             # PriceData,
-            PriceSeriesTime,
+            PriceSeries,
             Stock,
             Currency,
             ProductBase,

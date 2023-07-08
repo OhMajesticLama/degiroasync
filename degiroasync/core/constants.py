@@ -271,13 +271,15 @@ class PRICE:
 
     class PERIOD(StrEnum):
         # Periods
-        # P stands for Prior
+        # P stands for Prior?
         P1DAY = 'P1D'
         P1WEEK = 'P1W'
         P1MONTH = 'P1M'
         P3MONTH = 'P3M'
         P6MONTH = 'P6M'
         P1YEAR = 'P1Y'
+        P3YEAR = 'P3Y'
+        P5YEAR = 'P5Y'
         P50YEAR = 'P50Y'
 
     class TYPE(StrEnum):

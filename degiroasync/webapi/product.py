@@ -633,12 +633,21 @@ async def get_news_by_company(
     return resp_json
 
 
-async def get_price_data(
+async def get_price_data(*args, **kwargs):
+    "DEPRECATED: Please use get_price_series instead"
+    LOGGER.warn(
+            "get_price_data is deprecated, please use get_price_series "
+            "instead."
+            )
+    return await get_price_series(*args, **kwargs)
+
+
+async def get_price_series(
         session: SessionCore,
         vwdId: str,
         vwdIdentifierType: str,
-        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1M,
-        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,
+        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
+        period: PRICE.PERIOD = PRICE.PERIOD.P1MONTH,
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
@@ -743,12 +752,13 @@ async def get_price_data(
                 "type":"time"}]
             }
     """
+    # TODO: There may be an issue with the above JSON example, review.
     if vwdIdentifierType not in ('issueid', 'vwdkey'):
         raise ValueError("vwdIdentifierType must be 'issueid' or 'vwdkey'")
 
     check_session_config(session)
     url = URLs.get_price_data_url(session)
-    LOGGER.debug('get_price_data url| %s', url)
+    LOGGER.debug('get_price_series url| %s', url)
     params = {
         'requestid': 1,
         'resolution': str(resolution),
@@ -758,7 +768,7 @@ async def get_price_data(
         'format': 'json',
         'userToken': session.config.client_id
     }
-    LOGGER.debug('get_price_data params| %s', params)
+    LOGGER.debug('get_price_series params| %s', params)
     async with session as client:
         # 2023: Cookies are not needed for that call.
         # Since it looks like a third party, don't share session id if not
@@ -767,7 +777,7 @@ async def get_price_data(
                                     params=params)
     check_response(response)
     resp_json = response.json()
-    LOGGER.debug('get_price_data response| %s', resp_json)
+    LOGGER.debug('get_price_series response| %s', resp_json)
     return resp_json
 
 
@@ -898,5 +908,5 @@ __all__ = [
     get_portfolio_total.__name__,
     get_news_by_company.__name__,
     get_company_profile.__name__,
-    get_price_data.__name__,
+    get_price_series.__name__,
 ]

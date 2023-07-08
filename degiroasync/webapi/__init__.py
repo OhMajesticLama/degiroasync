@@ -25,7 +25,7 @@ from .product import get_portfolio
 from .product import get_portfolio_total
 from .product import get_company_profile
 from .product import get_news_by_company
-from .product import get_price_data
+from .product import get_price_series
 from .orders import get_orders
 from .orders import get_orders_history
 from .orders import get_transactions
@@ -50,7 +50,7 @@ __all__ = [
                 search_product,
                 get_company_profile,
                 get_news_by_company,
-                get_price_data,
+                get_price_series,
                 # orders
                 get_orders,
                 get_orders_history,

@@ -181,7 +181,7 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('data' in resp_json, resp_json)
             self.assertTrue('items' in resp_json['data'], resp_json)
 
-        async def test_get_price_data(self):
+        async def test_get_price_series(self):
             """
             Simply check that we don't have an error and data is not empty.
             """
@@ -189,21 +189,21 @@ if RUN_INTEGRATION_TESTS:
 
             vwdId = '360114899'
 
-            resp_json = await degiroasync.webapi.get_price_data(
+            resp_json = await degiroasync.webapi.get_price_series(
                     session,
                     vwdId=vwdId,
                     vwdIdentifierType='issueid')
-            LOGGER.debug('get_price_data response: %s', resp_json)
+            LOGGER.debug('get_price_series response: %s', resp_json)
             LOGGER.debug(resp_json)
             self.assertIn('series', resp_json)
             self.assertIn('data', resp_json['series'][0])
 
-        async def test_get_price_data_month(self):
+        async def test_get_price_series_month(self):
             session = await _IntegrationLogin._login()
 
             vwdId = '360114899'
 
-            resp_json = await degiroasync.webapi.get_price_data(
+            resp_json = await degiroasync.webapi.get_price_series(
                     session,
                     vwdId=vwdId,
                     period=PRICE.PERIOD.P1MONTH,
@@ -215,12 +215,12 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('series', resp_json)
             self.assertIn('data', resp_json['series'][0])
 
-        async def test_get_price_data_ohlc(self):
+        async def test_get_price_series_ohlc(self):
             session = await _IntegrationLogin._login()
 
             vwdId = '360114899'
 
-            resp_json = await degiroasync.webapi.get_price_data(
+            resp_json = await degiroasync.webapi.get_price_series(
                     session,
                     vwdId=vwdId,
                     period=PRICE.PERIOD.P1MONTH,
@@ -237,18 +237,18 @@ if RUN_INTEGRATION_TESTS:
                     len(resp_json['series'][0]['data'][0]), 5,
                     "We should have 5 entries per row (index + O H L C)")
 
-        async def test_get_price_data_month_pt1d(self):
+        async def test_get_price_series_month_pt1d(self):
             session = await _IntegrationLogin._login()
 
             vwdId = '360114899'
 
-            resp_json = await degiroasync.webapi.get_price_data(
+            resp_json = await degiroasync.webapi.get_price_series(
                     session,
                     vwdId=vwdId,
                     period=PRICE.PERIOD.P1MONTH,
                     resolution=PRICE.RESOLUTION.PT1D,
                     vwdIdentifierType='issueid')
-            LOGGER.debug('get_price_data_month_pt1d| response: %s',
+            LOGGER.debug('get_price_series_month_pt1d| response: %s',
                          resp_json)
             LOGGER.debug(resp_json)
             self.assertIn('resolution', resp_json)
@@ -457,6 +457,7 @@ if __name__ == '__main__':
             "%(asctime)s-%(name)s-%(levelname)s-%(message)",
             "%Y%m%d"
             )
-    LOGGER.addHandler(handler)
+    if handler not in LOGGER.handlers:
+        LOGGER.addHandler(handler)
     LOGGER.setLevel(logging.DEBUG)
     unittest.main()

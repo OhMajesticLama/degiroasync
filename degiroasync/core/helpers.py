@@ -18,6 +18,9 @@ from .exceptions import BadCredentialsError
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
+# Logs helpers
+FORMAT_DEFAULT = '%(asctime)s-%(name)s-%(levelname)s- %(message)s'
+STREAMHANDLER_DEFAULT = logging.StreamHandler(stream=sys.stdout)
 
 
 class CoroCache:
@@ -513,8 +516,3 @@ class ThrottlingClient:
     @functools.wraps(httpx.AsyncClient.delete)
     async def delete(self, *args, **kwargs):
         return await self._client_open.delete(*args, **kwargs)
-
-
-# Logs helpers
-FORMAT_DEFAULT = '%(asctime)s-%(name)s-%(levelname)s- %(message)s'
-STREAMHANDLER_DEFAULT = logging.StreamHandler(stream=sys.stdout)

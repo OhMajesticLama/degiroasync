@@ -1,5 +1,7 @@
-from typing import Iterable, Any, List, Dict, Union, AnyStr
+from typing import Iterable, Any, List, Dict, Union
 from typing import Optional, AsyncGenerator, Sequence
+from typing import Tuple
+import re
 import logging
 import pprint
 import itertools
@@ -423,68 +425,278 @@ async def get_portfolio_total(
     return total_portfolio
 
 
-@JSONclass(annotations=True, annotations_type=True)
-class PriceSeries:
-    type: str
-    expires: str
-
-
-@JSONclass(annotations=True, annotations_type=True)
 class PriceSeriesTime:
     """
-    Converted Wrapper for PriceSeriestime for get_price_data.
-
-    times
-        Starting time of the series.
-
-    price
-        Price floats of the series
-
-    date
-        Dates in ISO 8601 format. A data point (`date`, `price`) shares the
-        same index in the `price` and `date` list attributes.
-
-    resolution
-        `PRICE.RESOLUTION` of the data, if known. It may differ from requested
-        resolution.
-
-    expires
-        As returned per end point. Can be used as indication when to query
-        for new data.
+    Deprecated: please use PriceSeries class. This will be removed in a future
+    version.
     """
-    times: str
-    price: List[float]
-    date: List[str]
-    resolution: Union[PRICE.RESOLUTION, str]
-    expires: str
+
+
+class PriceSeries(PriceSeriesTime):
+    type: PRICE.TYPE
+    start: datetime.datetime
+    end: datetime.datetime
+    expires: datetime.datetime
+    resolution: PRICE.RESOLUTION
+    __data: List[List[Union[int, float]]]
+
+    def __init__(
+            self,
+            *,
+            start: datetime.datetime,
+            end: datetime.datetime,
+            currency: str,
+            resolution: PRICE.RESOLUTION,
+            series: Dict[str, List[List[Union[int, float]]]]
+            ):
+        """
+        Base class for price data.
+
+        Attributes
+        ----------
+
+        start
+            Start time of the price data series returned by remote API.
+
+        end
+            End time of the price data series returned by remote API.
+
+        currency
+            Currency for the prices data.
+
+        resolution
+            Resolution of the price series.
+            See :class:`~degiroasync.core.PRICE.RESOLUTION`.
+
+        series
+            Price Data Series returned by remote API. For example:
+
+            .. code-block:: python
+                {
+                    'times': '2023-06-29/P1D',
+                    'expires': '2023-07-05T17:54:21.7030064+02:00',
+                    'data': [
+                        [0, 130.54, 131.64, 129.93, 130.46],
+                        [1, 131.16, 132.68, 130.42, 132.36],
+                        [4, 132.8, 133.7, 131.62, 132.61],
+                        [5, 132.6, 132.98, 130.96, 131.32],
+                        [6, 131.2, 133.5, 130.88, 132.82]],
+                    'id': 'ohlc:issueid:350118230',
+                    'type': 'ohlc'
+                }
+        """
+        # Example data containing series:
+        # {
+        #        'requestid': '1',
+        #        'start': '2023-06-29T00:00:00',
+        #        'end': '2023-07-05T00:00:00',
+        #        'resolution': 'P1D',
+        #        'series': [
+        #            {
+        #                'times': '2023-06-29/P1D',
+        #                'expires': '2023-07-05T17:54:21.7030064+02:00',
+        #                'data': [
+        #                    [0, 130.54, 131.64, 129.93, 130.46],
+        #                    [1, 131.16, 132.68, 130.42, 132.36],
+        #                    [4, 132.8, 133.7, 131.62, 132.61],
+        #                    [5, 132.6, 132.98, 130.96, 131.32],
+        #                    [6, 131.2, 133.5, 130.88, 132.82]],
+        #                'id': 'ohlc:issueid:350118230',
+        #                'type': 'ohlc'
+        #                }
+        #            ]
+        #        }
+        self.start = start
+        self.end = end
+
+        expires_str = series['expires']
+        # Example expire_str: '2023-07-05T17:54:21.7030064+02:00'
+        # microseconds will be more then enough, remove extra digit
+        expires_str = re.sub(r'\.(\d{6})\d\+', r'.\1+', expires_str)
+        expires_str = re.sub(r'\+(\d{2}):(\d{2})$', r'+\1\2', expires_str)
+        self.expires = datetime.datetime.strptime(
+                expires_str,
+                '%Y-%m-%dT%H:%M:%S.%f%z'
+                )
+
+        self.resolution = resolution
+        self.currency = currency
+        self.__series = series
+        if series['type'] == 'time':
+            self.type = PRICE.TYPE.PRICE
+        elif series['type'] == 'ohlc':
+            self.type = PRICE.TYPE.OHLC
+        else:
+            raise NotImplementedError(
+                    f"Series type {series['type']} not supported.")
+
+    def _get_delta(self):
+        if self.resolution == PRICE.RESOLUTION.PT1D:
+            delta = datetime.timedelta(days=1)
+        elif self.resolution == PRICE.RESOLUTION.PT1M:
+            delta = datetime.timedelta(minutes=1)
+        else:
+            raise NotImplementedError(
+                    f"Resolution {self.resolution} not supported.")
+        return delta
+
+    def _get_dates_it(self) -> Iterable[datetime.datetime]:
+        times_split = self.__series['times'].split('/')
+        start = datetime.datetime.fromisoformat(times_split[0])
+        if len(times_split) > 1:
+            assert PRICE.RESOLUTION(times_split[1]) == self.resolution
+        delta = self._get_delta()
+        data = self.__series['data']
+        delta = self._get_delta()
+        return [start + d[0] * delta for d in data]
+
+    def items(self) -> Iterable[
+            Tuple[str, List[Union[float, datetime.datetime]]]
+                ]:
+        """
+
+        """
+        data = self.__series['data']
+        yield ('date', self._get_dates_it())
+        if self.type == PRICE.TYPE.OHLC:
+            yield ('open', [x[1] for x in data])
+            yield ('high', [x[2] for x in data])
+            yield ('low', [x[3] for x in data])
+            yield ('close', [x[4] for x in data])
+        elif self.type == PRICE.TYPE.PRICE:
+            yield ('close', [x[1] for x in data])
+        else:
+            raise NotImplementedError(f"Price type {self.type} not supported.")
+
+    def iterrows(self) -> Iterable[Dict[str, Union[datetime.datetime, float]]]:
+        """
+        Provide data by columns, can be fed directly to instantiate a
+        `pandas.DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`
+
+        With `pandas.DataFrame`:
+
+            >>> pricedata = PriceData(
+                    start=datetime.datetime(2023, 6, 29),
+                    end=datetime.datetime(2023, 7, 5),
+                    resolution=PRICE.RESOLUTION.OHLC
+                    currency='EUR',
+                    data={
+                        'data': [
+                            [0, 1., 4., 0., 2.],
+                            [1, 2., 4., 0., 2.]
+                            ],
+                        'type': 'ohlc',
+                        'times': '2023-06-29/P1D',
+                        'expires': '2023-07-05T17:54:21.7030064+02:00',
+                        }
+                    )
+            >>> import pandas as pd
+            >>> df = pd.DataFrame(pricedata.iterrows())
+            >>> df.columns
+            Index(['date', 'open', 'high', 'low', 'close'], dtype='object')
+            >>> df.iloc[0]['date']
+            Timestamp('2023-06-29 00:00:00')
+            >>> df['open']
+            0    1.
+            1    2.
+            Name: open, dtype: float64
+        """
+
+        data = self.__series['data']
+        if self.type == PRICE.TYPE.PRICE:
+            for date, row in zip(self._get_dates_it(), data):
+                yield {'date': date, 'close': row[1]}
+        elif self.type == PRICE.TYPE.OHLC:
+            for date, row in zip(self._get_dates_it(), data):
+                yield {
+                        'date': date,
+                        'open': row[1],
+                        'high': row[2],
+                        'low': row[3],
+                        'close': row[4],
+                        }
+        else:
+            raise NotImplementedError(f"Price type {self.type} not supported.")
+
+    @property
+    def date(self):
+        #print(
+        #        "degiroasync.PriceSeries.date is deprecated and will be "
+        #        "removed in a future version. "
+        #        "Please use PriceSeries.items() or PriceSeries.iterrows().",
+        #        file=sys.stderr
+        #        )
+        return [d.isoformat() for d in self._get_dates_it()]
+
+    @property
+    def price(self) -> Sequence[Union[float, Sequence[float]]]:
+        #print(
+        #        "degiroasync.PriceSeries.price is deprecated and will be "
+        #        "removed in a future version. "
+        #        "Please use PriceSeries.items() or PriceSeries.iterrows()",
+        #        file=sys.stderr
+        #        )
+        if self.type == PRICE.TYPE.OHLC:
+            return [row[1:] for row in self.__series['data']]
+        if self.type == PRICE.TYPE.PRICE:
+            return [row[1] for row in self.__series['data']]
+        raise NotImplementedError(
+                f"price is supported only for PRICE.TYPE.PRICE, "
+                f"not {self.type}")
+
+
+class PriceSeriesTime(PriceSeries):
+    """
+    DEPRECATED: This will be removed in a future verison, please use
+    PriceSeries.
+    """
+
+
+async def get_price_data(*args, **kwargs):
+    "DEPRECATED: Please use get_price_series instead."
+    LOGGER.warn(
+            "get_price_data is deprecated, please use get_price_series instead"
+            )
+    return await get_price_series(*args, **kwargs)
 
 
 # 2022.04: mypy limited support for StrEnum, ignore until proper support.
-async def get_price_data(
+async def get_price_series(
         session: SessionCore,
         product: Stock,
-        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1M,  # type: ignore
-        period: PRICE.PERIOD = PRICE.PERIOD.P1DAY,  # type: ignore
+        resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,  # type: ignore
+        period: PRICE.PERIOD = PRICE.PERIOD.P1MONTH,  # type: ignore
         timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE  # type: ignore
-        ) -> PriceSeriesTime:
+        ) -> PriceSeries:
     """
     Get price data for `product`.
 
+    Parameters
+    ----------
     product
         Product to look for the data.
 
     resolution
-        How close do we request data points to be.
+        How often do we want data points.
+
+        See :class:`~degiroasync.core.constants.PRICE.RESOLUTION` for available
+        values.
 
     period
-        How long of data do we want
+        Period between now and data starting point.
+
+        See :class:`~degiroasync.core.constants.PRICE.PERIOD` for available
+        values.
 
     data_type
         Specify if we want raw price, or 'ohlc' (open, high, low, close)
         information. The latter might be useful for long periods where high
         resolution is not available.
+
+        See :class:`~degiroasync.core.constants.PRICE.TYPE` for available
+        values.
 
     Returns
     -------
@@ -496,8 +708,8 @@ async def get_price_data(
     if product.info.product_type_id != PRODUCT.TYPEID.STOCK:
         raise NotImplementedError(
             "Only productTypeId == PRODUCT.TYPEID.STOCK is currently "
-            "supported by get_price_data")
-    resp_json = await webapi.get_price_data(
+            "supported by get_price_series")
+    resp_json = await webapi.get_price_series(
         session,
         vwdId=product.info.vwd_id,
         vwdIdentifierType=product.info.vwd_identifier_type,
@@ -505,119 +717,41 @@ async def get_price_data(
         period=period,
         timezone=timezone,
         culture=culture,
-        data_type=data_type)
-    LOGGER.debug("api.get_price_data resp_json| %s", resp_json)
-    timeseries_ind = -1
+        data_type=data_type,
+        )
+    LOGGER.debug("api.get_price_series resp_json| %s", resp_json)
+
+    # Look for price series
+    series_ind = -1
     objectseries_ind = -1
-    # Look for time series
     for ind, series in enumerate(resp_json['series']):
         if series['type'] == 'time':
-            timeseries_ind = ind
+            assert series_ind < 0, "Unexpected more than 1 series."
+            series_ind = ind
         if series['type'] == 'object':
-            objectseries_ind = ind  # Might be used in later revisions.
-    if timeseries_ind < 0:
-        raise ResponseError("No 'time' series found in answer.")
-    converted_time_series = convert_time_series(resp_json['series'][ind])
-    converted_time_series['date'] = converted_time_series['data']['date']
-    converted_time_series['price'] = converted_time_series['data']['price']
-    try:
-        resolution_out = PRICE.RESOLUTION(converted_time_series['resolution'])
-        converted_time_series['resolution'] = resolution_out
-    except ValueError:
-        LOGGER.debug(
-                "converted_time_series['resolution'] is unknown: %s. "
-                "Leave as str",
-                converted_time_series['resolution']
-                )
-    del converted_time_series['data']
-    return PriceSeriesTime(converted_time_series)
+            # This is not always returned by API, don't rely on it
+            objectseries_ind = ind
+        if series['type'] == 'ohlc':
+            assert series_ind < 0, "Unexpected more than 1 series"
+            series_ind = ind
 
+    if series_ind < 0:
+        raise ResponseError("No 'time' or 'ohlc' series found in answer.")
+    if objectseries_ind < 0:
+        # Check currency if we have info
+        object_series = resp_json['series'][objectseries_ind]
+        if 'currency' in object_series.get('data', {}):
+            assert object_series['data']['currency'] == product.info.currency
 
-def convert_time_series(
-        data_series: Dict[str, Union[str, List[Union[float, int]]]]
-    ) -> Dict[str,
-              Union[str, Dict[str, Union[float, str]]]
-              ]:
-    """
-    Helper to convert data series.
-
-    Aims to make it easier to feed inin a pandas friendly format.
-
-    >>> data = {
-    ...     "times": "2022-01-20T00:00:00/PT1M",
-    ...     "expires": "2022-01-20T10:12:56+01:00",
-    ...     "data": [
-    ...         [
-    ...             540,
-    ...             114.0
-    ...         ],
-    ...         [
-    ...             541,
-    ...             114.08
-    ...         ],
-    ...         [
-    ...             542,
-    ...             114.12
-    ...         ]
-    ...     ]
-    ... }
-    >>> data_out = convert_time_series(data)
-    {
-
-        "type": "time",
-        "times": "2022-01-20T00:00:00",
-        "resolution": "PT1M",
-        "expires": "2022-01-20T10:11:53+01:00",
-        "data": {
-            'price': [114.0, 114.08, 114.12],
-            'date': [
-                '2022-01-20T09:00:00',
-                '2022-01-20T09:01:00',
-                '2022-01-20T09:02:00']
-        }
-    }
-
-    """
-    time_t, resolution_t = data_series['times'].split('/')
-    data_out: Dict[str, Any] = data_series.copy()
-
-    for key in ('times', 'expires', 'data'):
-        if key not in data_series:
-            raise KeyError(f'{key} not found in data_series {data_series}')
-
-    resolution_whitelist = (PRICE.RESOLUTION.PT1M, PRICE.RESOLUTION.PT1D)
-    if resolution_t not in resolution_whitelist:
-        raise NotImplementedError("convert_time_series has not been tested "
-                                  "with resolutions other than {}. "
-                                  "Received resolution: {}".format(
-                                        resolution_whitelist,
-                                        resolution_t
-                                        )
-                                  )
-
-    data_new: Dict[str, Union[Sequence[str], Sequence[float]]] = {
-        'price': [],
-        'date': [],
-        }
-    data_out['data'] = data_new
-    data_out['type'] = 'time'
-    data_out['resolution'] = resolution_t
-    data_out['times'] = time_t
-    # Multiplier to get time delta (in minutes) from time index
-    # returned by API.
-    time_multiplier: int = {
-        PRICE.RESOLUTION.PT1M: 1,
-        PRICE.RESOLUTION.PT1D: 60*24
-        }[resolution_t]
-
-    start_date = datetime.datetime.fromisoformat(time_t)
-    for kv in data_series['data']:
-        data_new['price'].append(float(kv[1]))
-        time_ind = kv[0]
-        time_delta = float(time_ind) * time_multiplier
-        measure_date = start_date + datetime.timedelta(minutes=time_delta)
-        data_new['date'].append(measure_date.isoformat())
-    return data_out
+    series_d = resp_json['series'][series_ind]
+    prices_series = PriceSeries(
+            start=datetime.datetime.fromisoformat(resp_json['start']),
+            end=datetime.datetime.fromisoformat(resp_json['end']),
+            resolution=PRICE.RESOLUTION(resp_json['resolution']),
+            currency=product.info.currency,
+            series=series_d,
+            )
+    return prices_series
 
 
 async def search_product(
@@ -668,7 +802,7 @@ async def search_product(
             raise AssertionError(
                     "by_text is None and no search parameters was set or "
                     "found. Have you set a search parameters to "
-                    "get_price_data?"
+                    "get_price_series?"
                     "\n If yes, this shouldn't be happening, please open a bug"
                     " report."
                     )
@@ -750,6 +884,7 @@ __all__ = [
         Session,
         SessionCore,
         Config,
+        PriceSeries,
 
         # Product data structures
         # PriceData,
@@ -757,7 +892,7 @@ __all__ = [
         Currency,
         ProductBase,
         get_portfolio,
-        get_price_data,
+        get_price_series,
         search_product
     )
 ]

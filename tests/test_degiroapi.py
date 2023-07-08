@@ -17,7 +17,7 @@ import degiroasync.webapi
 import degiroasync.core
 import degiroasync.core.helpers
 from degiroasync.core import Credentials
-from degiroasync.api.product import convert_time_series
+#from degiroasync.api.product import convert_time_series
 from degiroasync.api import ProductFactory
 from degiroasync.api import Order
 from degiroasync.api import ORDER
@@ -39,7 +39,7 @@ RUN_INTEGRATION_TESTS = 0
 try:
     _env_var = os.environ.get('DEGIROASYNC_INTEGRATION')
     RUN_INTEGRATION_TESTS = int(_env_var)
-except ValueError:
+except (ValueError, TypeError):
     LOGGER.info('degiroasync integration tests will *not* run.')
 del _env_var
 
@@ -153,44 +153,44 @@ class TestDegiroAsyncOrders(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(order.buysell, ORDER.ACTION.BUY)
 
 
-class TestDegiroAsyncAPIHelpers(unittest.TestCase):
-    def test_convert_time_series(self):
-        data = {
-            "times": "2022-01-20T00:00:00/PT1M",
-            "expires": "2022-01-20T10:12:56+01:00",
-            "data": [
-                [
-                    540,
-                    114.0
-                ],
-                [
-                    541,
-                    114.08
-                ],
-                [
-                    542,
-                    114.12
-                ]
-            ]
-        }
-        data_out = convert_time_series(data)
-        self.maxDiff = None
-        self.assertEqual(
-                data_out,
-                {
-
-                    "type": "time",
-                    "times": "2022-01-20T00:00:00",
-                    "resolution": "PT1M",
-                    "expires": "2022-01-20T10:12:56+01:00",
-                    "data": {
-                        'price': [114.0, 114.08, 114.12],
-                        'date': [
-                            '2022-01-20T09:00:00',
-                            '2022-01-20T09:01:00',
-                            '2022-01-20T09:02:00']
-                    }
-                })
+#class TestDegiroAsyncAPIHelpers(unittest.TestCase):
+#    def test_convert_time_series(self):
+#        data = {
+#            "times": "2022-01-20T00:00:00/PT1M",
+#            "expires": "2022-01-20T10:12:56+01:00",
+#            "data": [
+#                [
+#                    540,
+#                    114.0
+#                ],
+#                [
+#                    541,
+#                    114.08
+#                ],
+#                [
+#                    542,
+#                    114.12
+#                ]
+#            ]
+#        }
+#        data_out = convert_time_series(data)
+#        self.maxDiff = None
+#        self.assertEqual(
+#                data_out,
+#                {
+#
+#                    "type": "time",
+#                    "times": "2022-01-20T00:00:00",
+#                    "resolution": "PT1M",
+#                    "expires": "2022-01-20T10:12:56+01:00",
+#                    "data": {
+#                        'price': [114.0, 114.08, 114.12],
+#                        'date': [
+#                            '2022-01-20T09:00:00',
+#                            '2022-01-20T09:01:00',
+#                            '2022-01-20T09:02:00']
+#                    }
+#                })
 
 
 class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
@@ -331,20 +331,6 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
     @unittest.mock.patch('degiroasync.webapi.get_products_info')
     async def test_product_no_batch(self, wapi_prodinfo_m):
         # Same as test_product but with size=1 to test corner case.
-        # Mock get_products_info
-        #resp = MagicMock()
-        #resp.json = MagicMock(return_value={'data': {
-        #    '123': {
-        #        'id': '123',
-        #        'product_type_id': 'UNKNOWNPRODUCTID',
-        #        'name': 'foo',
-        #        'symbol': 'FOO',
-        #        'currency': 'EUR',
-        #        'exchangeId': 'exid',
-        #        'tradable': True,
-        #        'isin': 'isinexample',
-        #    }
-        #    }})
         wapi_prodinfo_m.return_value = {'data': {
                 '123': {
                     'id': '123',
@@ -375,6 +361,175 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(products[0].base.additional, 123)
         self.assertEqual(products[0].info.name, 'foo')
         self.assertEqual(products[0].info.symbol, 'FOO')
+
+
+class TestDegiroasyncPrice(
+        unittest.IsolatedAsyncioTestCase):
+
+    def test_priceseries_items(self):
+        resp_json = {
+                'requestid': '1',
+                'start': '2023-06-29T00:00:00',
+                'end': '2023-07-05T00:00:00',
+                'resolution': 'P1D',
+                'series': [
+                    {
+                        'times': '2023-06-29/P1D',
+                        'expires': '2023-07-05T17:54:21.7030064+02:00',
+                        'data': [
+                            [0, 130.54, 131.64, 129.93, 130.46],
+                            [1, 131.16, 132.68, 130.42, 132.36],
+                            [4, 132.8, 133.7, 131.62, 132.61],
+                            [5, 132.6, 132.98, 130.96, 131.32],
+                            [6, 131.2, 133.5, 130.88, 132.82]],
+                        'id': 'ohlc:issueid:350118230',
+                        'type': 'ohlc'
+                        }
+                    ]
+                }
+        series = resp_json['series'][0]
+        price_data = degiroasync.api.product.PriceSeries(
+                start=datetime.datetime.fromisoformat(resp_json['start']),
+                end=datetime.datetime.fromisoformat(resp_json['end']),
+                resolution=PRICE.RESOLUTION(resp_json['resolution']),
+                currency='EUR',
+                series=series,
+                )
+        price_dict = dict(price_data.items())
+        self.assertEqual(
+                price_dict['open'],
+                [130.54, 131.16, 132.8, 132.6, 131.2])
+        self.assertEqual(
+                price_dict['date'],
+                [
+                    datetime.datetime(2023, 6, 29),
+                    datetime.datetime(2023, 6, 30),
+                    datetime.datetime(2023, 7, 3),
+                    datetime.datetime(2023, 7, 4),
+                    datetime.datetime(2023, 7, 5),
+                ])
+
+    def test_priceseries_iterrows(self):
+        resp_json = {
+                'requestid': '1',
+                'start': '2023-06-29T00:00:00',
+                'end': '2023-07-05T00:00:00',
+                'resolution': 'P1D',
+                'series': [
+                    {
+                        'times': '2023-06-29/P1D',
+                        'expires': '2023-07-05T17:54:21.7030064+02:00',
+                        'data': [
+                            [0, 130.54, 131.64, 129.93, 130.46],
+                            [1, 131.16, 132.68, 130.42, 132.36],
+                            [4, 132.8, 133.7, 131.62, 132.61],
+                            [5, 132.6, 132.98, 130.96, 131.32],
+                            [6, 131.2, 133.5, 130.88, 132.82]],
+                        'id': 'ohlc:issueid:350118230',
+                        'type': 'ohlc'
+                        }
+                    ]
+                }
+        series = resp_json['series'][0]
+        price_data = degiroasync.api.product.PriceSeries(
+                start=datetime.datetime.fromisoformat(resp_json['start']),
+                end=datetime.datetime.fromisoformat(resp_json['end']),
+                resolution=PRICE.RESOLUTION(resp_json['resolution']),
+                currency='EUR',
+                series=series,
+                )
+
+        data = series['data']
+        for ind, row in enumerate(price_data.iterrows()):
+            self.assertEqual(row['open'], data[ind][1])
+            self.assertEqual(row['high'], data[ind][2])
+            self.assertEqual(row['low'], data[ind][3])
+            self.assertEqual(row['close'], data[ind][4])
+
+        self.assertEqual(ind, 4)
+
+    def test_priceseries_pandas(self):
+        resp_json = {
+                'requestid': '1',
+                'start': '2023-06-29T00:00:00',
+                'end': '2023-07-05T00:00:00',
+                'resolution': 'P1D',
+                'series': [
+                    {
+                        'times': '2023-06-29/P1D',
+                        'expires': '2023-07-05T17:54:21.7030064+02:00',
+                        'data': [
+                            [0, 130.54, 131.64, 129.93, 130.46],
+                            [1, 131.16, 132.68, 130.42, 132.36],
+                            [4, 132.8, 133.7, 131.62, 132.61],
+                            [5, 132.6, 132.98, 130.96, 131.32],
+                            [6, 131.2, 133.5, 130.88, 132.82]],
+                        'id': 'ohlc:issueid:350118230',
+                        'type': 'ohlc'
+                        }
+                    ]
+                }
+        series = resp_json['series'][0]
+        price_data = degiroasync.api.product.PriceSeries(
+                start=datetime.datetime.fromisoformat(resp_json['start']),
+                end=datetime.datetime.fromisoformat(resp_json['end']),
+                resolution=PRICE.RESOLUTION(resp_json['resolution']),
+                currency='EUR',
+                series=series,
+                )
+
+        import pandas as pd
+        df = pd.DataFrame(price_data.iterrows())
+        self.assertEqual(df['open'][0], 130.54)
+        self.assertEqual(df['open'][2], 132.8)
+        self.assertEqual(df['close'][4], 132.82)
+
+    @unittest.mock.patch('degiroasync.webapi.get_price_series')
+    async def test_get_price_series_ohlc(self, price_m):
+        resp_json = {
+                'requestid': '1',
+                'start': '2023-06-29T00:00:00',
+                'end': '2023-07-05T00:00:00',
+                'resolution': 'P1D',
+                'series': [
+                    {
+                        'times': '2023-06-29/P1D',
+                        'expires': '2023-07-05T17:54:21.7030064+02:00',
+                        'data': [
+                            [0, 130.54, 131.64, 129.93, 130.46],
+                            [1, 131.16, 132.68, 130.42, 132.36],
+                            [4, 132.8, 133.7, 131.62, 132.61],
+                            [5, 132.6, 132.98, 130.96, 131.32],
+                            [6, 131.2, 133.5, 130.88, 132.82]],
+                        'id': 'ohlc:issueid:350118230',
+                        'type': 'ohlc'
+                        },
+                    {
+                        'type': 'object',
+                        'data': {'currency': 'EUR'}
+                    }
+                    ]
+                }
+        price_m.return_value = resp_json
+        product = MagicMock()
+        product.info = MagicMock()
+        product.info.product_type_id = PRODUCT.TYPEID.STOCK
+
+        ohlc_series = await degiroasync.api.get_price_series(
+                None,
+                product,
+                None,
+                None,
+                None,
+                None,
+                None
+                )
+        data = resp_json['series'][0]['data']
+        for ind, row in enumerate(ohlc_series.iterrows()):
+            self.assertEqual(row['open'], data[ind][1])
+            self.assertEqual(row['high'], data[ind][2])
+            self.assertEqual(row['low'], data[ind][3])
+            self.assertEqual(row['close'], data[ind][4])
 
 
 #####################
@@ -430,25 +585,21 @@ if RUN_INTEGRATION_TESTS:
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
 
-        async def test_get_price_data(self):
+        async def test_get_price_series(self):
             session = await _IntegrationLogin._login()
             products = await degiroasync.api.search_product(
                     session,
                     by_isin='NL0000235190',
                     product_type_id=PRODUCT.TYPEID.STOCK
                     )
-            #products_awaitable = [p.await_product_info() for p in products]
-            #LOGGER.debug('test_get_price_data products_awaitable| %s', products_awaitable)
 
             # In a context where we'd want to optimize, we want to
             # build the pipeline by awaiting on each product instead of a bulk
             # gather to not block execution while we wait for data on some
             # of the products.
-            #await asyncio.gather(*[p.await_product_info() for p in products])
-            #products = [p async for p in products_gen]
             self.assertGreaterEqual(len(products), 1, products)
 
-            LOGGER.debug('test_get_price_data products| %s',
+            LOGGER.debug('test_get_price_series products| %s',
                          tuple(p.__dict__ for p in products))
 
             products = filter(
@@ -459,7 +610,7 @@ if RUN_INTEGRATION_TESTS:
                         ),
                     products)
             products = list(products)
-            LOGGER.debug('test_get_price_data products filtered| %s',
+            LOGGER.debug('test_get_price_series products filtered| %s',
                          pprint.pformat(tuple(p.__dict__ for p in products)))
 
             self.assertGreaterEqual(len(products), 1)
@@ -469,15 +620,29 @@ if RUN_INTEGRATION_TESTS:
                     # Let's take the first stock as example
                     break
 
-            LOGGER.debug('test_get_price_data price_data 1| %s',
+            LOGGER.debug('test_get_price_series price_data 1| %s',
                          product.__dict__)
-            price_data = await degiroasync.api.get_price_data(session, product)
-            LOGGER.debug('test_get_price_data price_data 2| %s',
+            price_data = await degiroasync.api.get_price_series(session, product)
+            LOGGER.debug('test_get_price_series price_data 2| %s',
                          price_data)
             self.assertGreaterEqual(len(price_data.price), 1)
             self.assertGreaterEqual(len(price_data.date), 1)
 
-        async def test_get_price_data_symbol_exchange(self):
+            price_data = await degiroasync.api.get_price_series(
+                    session,
+                    product,
+                    period=PRICE.PERIOD.P1WEEK,
+                    resolution=PRICE.RESOLUTION.PT1D,
+                    data_type=PRICE.TYPE.OHLC)
+            LOGGER.debug('test_get_price_series price_data ohlc 3| %s',
+                         price_data)
+            self.assertGreaterEqual(len(price_data.price), 1)
+            self.assertEqual(len(price_data.price[0]), 4)
+            self.assertGreaterEqual(
+                    len(price_data.date),
+                    len(price_data.price))
+
+        async def test_get_price_series_symbol_exchange(self):
             # First get product
             session = await _IntegrationLogin._login()
             symbol = 'FGR'
@@ -491,9 +656,9 @@ if RUN_INTEGRATION_TESTS:
             product = products[0]
             self.assertEqual(symbol, product.info.symbol, product.info)
 
-            price_data = await degiroasync.api.get_price_data(session, product)
-            LOGGER.debug("test_get_price_data| %s", price_data.price)
-            LOGGER.debug("test_get_price_data| %s", price_data.date)
+            price_data = await degiroasync.api.get_price_series(session, product)
+            LOGGER.debug("test_get_price_series| %s", price_data.price)
+            LOGGER.debug("test_get_price_series| %s", price_data.date)
             self.assertGreaterEqual(len(price_data.price), 1)
             self.assertGreaterEqual(len(price_data.date), 1)
 
@@ -501,7 +666,7 @@ if RUN_INTEGRATION_TESTS:
             price = price_data.price
             self.assertEqual(len(date), len(price))
 
-        async def test_get_price_data_day_resolution(self):
+        async def test_get_price_series_day_resolution(self):
             session = await _IntegrationLogin._login()
             products = await degiroasync.api.search_product(
                     session,
@@ -509,9 +674,8 @@ if RUN_INTEGRATION_TESTS:
                     by_exchange='EPA',
                     product_type_id=PRODUCT.TYPEID.STOCK
                     )
-            LOGGER.debug('test_get_price_data_day_resolution| products %s',
+            LOGGER.debug('test_get_price_series_day_resolution| products %s',
                          pprint.pformat([p.__dict__ for p in products]))
-            #LOGGER.debug('test_get_price_data products_awaitable| %s', products_awaitable)
 
             # In a context where we'd want to optimize, we want to
             # build the pipeline by awaiting on each product instead of a bulk
@@ -522,26 +686,26 @@ if RUN_INTEGRATION_TESTS:
             self.assertEqual(len(products), 1)
             product = products[0]
 
-            LOGGER.debug('test_get_price_data_day_resolution| product %s',
+            LOGGER.debug('test_get_price_series_day_resolution| product %s',
                          pprint.pformat(product.__dict__))
 
             self.assertEqual(product.info.product_type_id,
                              PRODUCT.TYPEID.STOCK)
 
-            price_data = await degiroasync.api.get_price_data(
+            price_data = await degiroasync.api.get_price_series(
                     session,
                     product,
                     resolution=PRICE.RESOLUTION.PT1D,
                     period=PRICE.PERIOD.P1MONTH,
                     )
-            LOGGER.debug('test_get_price_data_day_resolution| price_data %s',
+            LOGGER.debug('test_get_price_series_day_resolution| price_data %s',
                          price_data)
             self.assertGreaterEqual(len(price_data.price), 1)
             self.assertGreaterEqual(len(price_data.date), 1)
             date_series = price_data.date
             price_series = price_data.price
             self.assertEqual(len(date_series), len(price_series))
-            LOGGER.debug("test_get_price_data_day_resolution| "
+            LOGGER.debug("test_get_price_series_day_resolution| "
                          "date_series len %s", len(date_series))
             self.assertGreaterEqual(
                     len(date_series), 15,
@@ -716,6 +880,7 @@ if __name__ == '__main__':
             "%(asctime)s-%(name)s-%(levelname)s-%(message)",
             "%Y%m%d"
             )
-    LOGGER.addHandler(handler)
+    if handler not in LOGGER.handlers:
+        LOGGER.addHandler(handler)
     LOGGER.setLevel(logging.DEBUG)
     unittest.main()

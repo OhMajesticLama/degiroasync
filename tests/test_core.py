@@ -144,3 +144,4 @@ class TestThrottlingClient(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(
                 time.time() - start,
                 (n_calls-max_requests) * period_seconds / max_requests)
+
