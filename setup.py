@@ -27,17 +27,18 @@ if __name__ == '__main__':
             },
         packages=setuptools.find_packages(),
         install_requires=[
-            'httpx >= 0.21.3',
-            'jsonloader >= 0.8.1',
-            'typeguard >= 2.13.3',
-            'asyncstdlib >= 3.10.3',
-            'more_itertools >= 8.12.0'
+            'httpx >= 0.21.3, < 1.0',
+            'jsonloader >= 0.8.1, < 1.0',
+            'typeguard >= 2.13.3, < 3.0',
+            'asyncstdlib >= 3.10.3, < 4.0',
+            'more_itertools >= 8.12.0, < 9'
             ],
         extras_require={
             'dev': [
                 # Tests
                 'pytest >= 7.0.1',
                 'coverage >= 6.3',
+                'pandas >= 2.0.3, <3.0',  # For testing integration w/ pandas
                 # Code quality
                 'flake8 >= 4.0.1',
                 'mypy >= 0.931',
