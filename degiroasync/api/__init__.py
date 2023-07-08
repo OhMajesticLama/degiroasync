@@ -70,6 +70,7 @@ from .session import Exchange, Region, Country
 from .product import get_portfolio
 from .product import get_portfolio_total
 from .product import get_price_series
+from .product import get_price_data
 from .product import search_product
 from .product import Stock
 from .product import Currency
@@ -102,6 +103,7 @@ __all__ = [
             # Product
             search_product,
             get_portfolio,
+            get_price_data,
             get_price_series,
 
             # PriceData,
