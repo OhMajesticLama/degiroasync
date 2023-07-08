@@ -231,7 +231,7 @@ related to those products.
         # (50 years) resolution will not return the requested result but
         # whatever best quality is available.
         # Only trust the date and price fields of the PriceSeriesTime
-        priceseries = await api.get_price_data(
+        priceseries = await api.get_price_series(
             session,
             product=product,
             resolution=PRICE.RESOLUTION.PT1M,

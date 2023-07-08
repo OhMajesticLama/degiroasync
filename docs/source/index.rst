@@ -87,7 +87,7 @@ straightforward.
     +---------------------+--------------------+--------------------+
     | get_products_info   | |checkmarklight|   | |checkmarklight|   |
     +---------------------+--------------------+--------------------+
-    | get_price_data      | |checkmarklight|   | |checkmarklight|   |
+    | get_price_series    | |checkmarklight|   | |checkmarklight|   |
     +---------------------+--------------------+--------------------+
     | search_product      | |checkmarklight|   | |checkmarklight|   |
     +---------------------+--------------------+--------------------+
