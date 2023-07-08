@@ -60,7 +60,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.Order"><code class="docutils literal notranslate"><span class="pre">Order</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.PriceSeriesTime"><code class="docutils literal notranslate"><span class="pre">PriceSeriesTime</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.PriceSeries"><code class="docutils literal notranslate"><span class="pre">PriceSeries</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.api.PriceSeries.items"><code class="docutils literal notranslate"><span class="pre">PriceSeries.items()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.api.PriceSeries.iterrows"><code class="docutils literal notranslate"><span class="pre">PriceSeries.iterrows()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.Region"><code class="docutils literal notranslate"><span class="pre">Region</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.TotalPortfolio"><code class="docutils literal notranslate"><span class="pre">TotalPortfolio</span></code></a></li>
@@ -70,7 +74,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_orders"><code class="docutils literal notranslate"><span class="pre">get_orders()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_portfolio"><code class="docutils literal notranslate"><span class="pre">get_portfolio()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_portfolio_total"><code class="docutils literal notranslate"><span class="pre">get_portfolio_total()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_price_data"><code class="docutils literal notranslate"><span class="pre">get_price_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_price_series"><code class="docutils literal notranslate"><span class="pre">get_price_series()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_transactions"><code class="docutils literal notranslate"><span class="pre">get_transactions()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.login"><code class="docutils literal notranslate"><span class="pre">login()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.search_product"><code class="docutils literal notranslate"><span class="pre">search_product()</span></code></a></li>
@@ -154,7 +158,7 @@ Provide data on products currently held on the account.</p></li>
 <li><p><em>search_product</em>
 Find and instantiate DEGIRO products from various search options (text,
 ISIN, symbol, exchange …).</p></li>
-<li><p><em>get_price_data</em>
+<li><p><em>get_price_series</em>
 Get price data on a Product.</p></li>
 <li><p><em>get_orders</em> and <em>check_order</em>
 Get orders on the account, start placing an order. Note: <cite>webapi</cite> module
@@ -208,9 +212,49 @@ micCode (e.g. XPAR).</p>
 <dd></dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="degiroasync.api.PriceSeriesTime">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">PriceSeriesTime</span></span><a class="headerlink" href="#degiroasync.api.PriceSeriesTime" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="degiroasync.api.PriceSeries">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">PriceSeries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RESOLUTION</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.PriceSeries" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="degiroasync.api.PriceSeries.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.api.PriceSeries.items" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="degiroasync.api.PriceSeries.iterrows">
+<span class="sig-name descname"><span class="pre">iterrows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.api.PriceSeries.iterrows" title="Permalink to this definition"></a></dt>
+<dd><p>Provide data by columns, can be fed directly to instantiate a
+<cite>pandas.DataFrame &lt;https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html&gt;</cite></p>
+<p>With <cite>pandas.DataFrame</cite>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pricedata</span> <span class="o">=</span> <span class="n">PriceData</span><span class="p">(</span>
+<span class="go">        start=datetime.datetime(2023, 6, 29),</span>
+<span class="go">        end=datetime.datetime(2023, 7, 5),</span>
+<span class="go">        resolution=PRICE.RESOLUTION.OHLC</span>
+<span class="go">        currency=&#39;EUR&#39;,</span>
+<span class="go">        data={</span>
+<span class="go">            &#39;data&#39;: [</span>
+<span class="go">                [0, 1., 4., 0., 2.],</span>
+<span class="go">                [1, 2., 4., 0., 2.]</span>
+<span class="go">                ],</span>
+<span class="go">            &#39;type&#39;: &#39;ohlc&#39;,</span>
+<span class="go">            &#39;times&#39;: &#39;2023-06-29/P1D&#39;,</span>
+<span class="go">            &#39;expires&#39;: &#39;2023-07-05T17:54:21.7030064+02:00&#39;,</span>
+<span class="go">            }</span>
+<span class="go">        )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pricedata</span><span class="o">.</span><span class="n">iterrows</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+<span class="go">Index([&#39;date&#39;, &#39;open&#39;, &#39;high&#39;, &#39;low&#39;, &#39;close&#39;], dtype=&#39;object&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">]</span>
+<span class="go">Timestamp(&#39;2023-06-29 00:00:00&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;open&#39;</span><span class="p">]</span>
+<span class="go">0    1.</span>
+<span class="go">1    2.</span>
+<span class="go">Name: open, dtype: float64</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="degiroasync.api.Region">
@@ -300,27 +344,34 @@ available attributes.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="degiroasync.api.get_price_data">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_price_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RESOLUTION</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RESOLUTION.PT1M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PERIOD</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PERIOD.P1DAY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Europe/Paris'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">culture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fr-FR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TYPE</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">TYPE.PRICE</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CustomJSONWrapper</span></span></span><a class="headerlink" href="#degiroasync.api.get_price_data" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="degiroasync.api.get_price_series">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_price_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">product</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Stock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RESOLUTION</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RESOLUTION.PT1D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PERIOD</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PERIOD.P1MONTH</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Europe/Paris'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">culture</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fr-FR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TYPE</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">TYPE.PRICE</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#degiroasync.api.PriceSeries" title="degiroasync.api.product.PriceSeries"><span class="pre">PriceSeries</span></a></span></span><a class="headerlink" href="#degiroasync.api.get_price_series" title="Permalink to this definition"></a></dt>
 <dd><p>Get price data for <cite>product</cite>.</p>
-<dl class="simple">
-<dt>product</dt><dd><p>Product to look for the data.</p>
-</dd>
-<dt>resolution</dt><dd><p>How close do we request data points to be.</p>
-</dd>
-<dt>period</dt><dd><p>How long of data do we want</p>
-</dd>
-<dt>data_type</dt><dd><p>Specify if we want raw price, or ‘ohlc’ (open, high, low, close)
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>product</strong> – Product to look for the data.</p></li>
+<li><p><strong>resolution</strong> – <p>How often do we want data points.</p>
+<p>See <code class="xref py py-class docutils literal notranslate"><span class="pre">RESOLUTION</span></code> for available
+values.</p>
+</p></li>
+<li><p><strong>period</strong> – <p>Period between now and data starting point.</p>
+<p>See <code class="xref py py-class docutils literal notranslate"><span class="pre">PERIOD</span></code> for available
+values.</p>
+</p></li>
+<li><p><strong>data_type</strong> – <p>Specify if we want raw price, or ‘ohlc’ (open, high, low, close)
 information. The latter might be useful for long periods where high
 resolution is not available.</p>
+<p>See <code class="xref py py-class docutils literal notranslate"><span class="pre">TYPE</span></code> for available
+values.</p>
+</p></li>
+</ul>
 </dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Contains price data and time information.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Contains price data and time information.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#degiroasync.api.PriceSeriesTime" title="degiroasync.api.PriceSeriesTime">PriceSeriesTime</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PriceSeriesTime</p>
 </dd>
 </dl>
 </dd></dl>

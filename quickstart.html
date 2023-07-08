@@ -301,7 +301,7 @@ related to those products.</p>
     <span class="c1"># (50 years) resolution will not return the requested result but</span>
     <span class="c1"># whatever best quality is available.</span>
     <span class="c1"># Only trust the date and price fields of the PriceSeriesTime</span>
-    <span class="n">priceseries</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">get_price_data</span><span class="p">(</span>
+    <span class="n">priceseries</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api</span><span class="o">.</span><span class="n">get_price_series</span><span class="p">(</span>
         <span class="n">session</span><span class="p">,</span>
         <span class="n">product</span><span class="o">=</span><span class="n">product</span><span class="p">,</span>
         <span class="n">resolution</span><span class="o">=</span><span class="n">PRICE</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="o">.</span><span class="n">PT1M</span><span class="p">,</span>
