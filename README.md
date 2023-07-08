@@ -9,10 +9,6 @@ Check out the online documentation [here](https://ohmajesticlama.github.io/degir
 This project aims to provide an *unofficial* API for Degiro platform that works
 asynchronously.
 
-There are currently several Degiro Python Libraries that were
-active in 2021, check the _Other Python Degiro Libraries_ section for a
-non-exhaustive list and assess which one best fits your needs.
-
 
 ## Precautions
 
