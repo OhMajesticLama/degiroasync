@@ -286,13 +286,12 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
     """
     Local tests for Product.
     """
-    @unittest.mock.patch('degiroasync.api.ExchangeDictionary.exchange_by')
     @unittest.mock.patch('degiroasync.webapi.get_products_info')
-    async def test_product(self, wapi_prodinfo_m, exchange_by_m):
+    async def test_product(self, wapi_prodinfo_m):
         wapi_prodinfo_m.return_value = {'data': {
                 '123': {
                     'id': '123',
-                    'product_type_id': 99,
+                    'productTypeId': 99,
                     'name': 'foo',
                     'symbol': 'FOO',
                     'currency': 'EUR',
@@ -302,15 +301,19 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
                 }
             }
         }
-        exchange_by_m.return_value = Exchange(dict(
-            id='idex',
-            name='EuroNext',
-            country_name='France',
-            hiq_abbr='EPA'
+
+        session = MagicMock()  # Don't care
+        session.exchange_dictionary = MagicMock()
+        session.exchange_dictionary.exchange_by = MagicMock(
+                return_value=Exchange(dict(
+                    id='exid',
+                    name='EuroNext',
+                    country_name='France',
+                    hiq_abbr='EPA',
             )
         )
 
-        session = MagicMock()  # Don't care
+                )
 
         # Test that degiroasync.api returns properly initiated products
         products_gen = ProductFactory.init_batch(
@@ -344,10 +347,21 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
                 }
             }
         }
+        session = MagicMock()  # Don't care
+        session.exchange_dictionary = MagicMock()
+        session.exchange_dictionary.exchange_by = MagicMock(
+                return_value=Exchange(dict(
+                    id='exid',
+                    name='EuroNext',
+                    country_name='France',
+                    hiq_abbr='EPA',
+                        )
+                    )
+            )
 
         # Test that degiroasync.api returns properly initiated products
         products_gen = ProductFactory.init_batch(
-                MagicMock(),  # Don't care about session here
+                session,  # Don't care about session here
                 [
                     {
                         'id': '123',
@@ -751,9 +765,6 @@ if RUN_INTEGRATION_TESTS:
             self.assertGreaterEqual(len(products), 1)
             for product in products:
                 self.assertEqual(symbol, product.info.symbol, product.info)
-                # We should only have airbus products here
-                #self.assertTrue('airbus' in product.info.name.lower(),
-                #               product.info)
 
         async def test_search_product_symbol_air(self):
             session = await _IntegrationLogin._login()
@@ -792,6 +803,24 @@ if RUN_INTEGRATION_TESTS:
             for product in products:
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
+
+        async def test_search_product_country(self):
+            session = await _IntegrationLogin._login()
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_country='FR',
+                    max_iter=1,  # We don't need every product for this test.
+                    )
+            # The point of implementing filtering on symbol and exchange
+            # is to target one specific product. Raise an error if it doesn't
+            # work.
+            self.assertGreaterEqual(len(products), 1)
+            for product in products:
+                self.assertEqual(
+                        session.exchange_dictionary.exchange_by(
+                            id=product.info.exchange_id).country_name,
+                        'FR'
+                        )
 
     class TestDegiroasyncIntegrationExchangeDictionary(
             _IntegrationLogin,

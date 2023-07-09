@@ -1,5 +1,6 @@
 from typing import Union, List, Dict, Any
 from typing import Set
+from typing import Optional
 import functools
 import logging
 import pprint
@@ -30,7 +31,7 @@ class Region:
 @JSONclass(annotations=True, annotations_type=True)
 class Country:
     id: str
-    name: str  # 2 letters country codename
+    name: str  # ISO 3166-1 alpha-2 country codename
     region: 'Region'
 
 
@@ -38,11 +39,11 @@ class Country:
 class Exchange:
     id: str
     name: str
-    city: Union[str, None] = None
-    code: Union[str, None] = None
+    city: Optional[str] = None
+    code: Optional[str] = None
     country_name: str  # renamed from 'country' as it is country name
     hiq_abbr: str
-    mic_code: Union[str, None] = None
+    mic_code: Optional[str] = None
 
 
 class ExchangeDictionary:
@@ -114,12 +115,14 @@ class ExchangeDictionary:
     def exchange_by(
             self,
             *,
-            name: Union[str, None] = None,
-            id: Union[int, None] = None,
-            hiq_abbr: Union[str, None] = None,
-            mic_code: Union[str, None] = None) -> Exchange:
-        """Get Exchange by *either* name, hiqAbbr (e.g. EPA),
-        micCode (e.g. XPAR)."""
+            name: Optional[str] = None,
+            id: Optional[int] = None,
+            hiq_abbr: Optional[str] = None,
+            mic_code: Optional[str] = None) -> Exchange:
+        """
+        Get Exchange by *either* name, hiqAbbr (e.g. EPA),
+        micCode (e.g. XPAR).
+        """
         if sum(attr is not None for attr in (name,
                                              id,
                                              hiq_abbr,
@@ -148,6 +151,12 @@ class ExchangeDictionary:
             raise AssertionError(
                 "Exactly one of (name, id) must be not None.")
         if name is not None:
+            if name not in self._countries_name:
+                raise KeyError(
+                        "{} not found. List of available countries: {}".format(
+                            name,
+                            [c for c in self._countries_name]
+                            ))
             return self._countries_name[name]
         if id is not None:
             return self._countries_id[id]
@@ -202,6 +211,7 @@ def _should_fail(credentials: Credentials) -> bool:
         return True
     else:
         return False
+
 
 
 async def login(

@@ -22,6 +22,7 @@ from degiroasync.core.constants import ORDER
 from degiroasync.core.constants import LOGIN
 from degiroasync.core import ResponseError
 from degiroasync.core import BadCredentialsError
+from degiroasync.core.helpers import ThrottlingClient
 from degiroasync.webapi import get_config
 from degiroasync.webapi import get_products_info
 from degiroasync.webapi import get_company_profile
@@ -37,9 +38,15 @@ try:
 except (ValueError, TypeError):
     LOGGER.info('degiroasync integration tests will *not* run.')
 
+try:
+    _env_var = os.environ.get('DEGIROASYNC_INTEGRATION_BAD_CREDENTIALS')
+    RUN_BAD_CREDENTIALS = int(_env_var)
+except (ValueError, TypeError):
+    LOGGER.info('degiroasync Bad Credentials integration test will *not* run.')
+
 
 class TestDegiroAsyncWebAPI(unittest.IsolatedAsyncioTestCase):
-    @unittest.mock.patch('httpx.AsyncClient.post')
+    @unittest.mock.patch('degiroasync.core.helpers.ThrottlingClient.post')
     async def test_login_bad_credentials(
             self,
             post_m
@@ -68,36 +75,6 @@ if RUN_INTEGRATION_TESTS:
     LOGGER.info('degiroasync.webapi integration tests will run.')
     from tests.integration_login import _IntegrationLogin
 
-    #class _IntegrationWebLogin:
-    #    """
-    #    Internal helper, can be inherited to make login for integration tests
-    #    easier.
-    #    """
-    #    async def asyncSetUp(self):
-    #        self._lock = asyncio.Lock()
-    #        _IntegrationLogin._login_attempted = False
-    #        self.session: Optional[SessionCore] = None
-
-    #    async def _login(self):
-    #        if self.session is not None:
-    #            return self.session
-    #        async with self._lock:
-    #            if not _IntegrationLogin._login_attempted and not self.session:
-    #                _IntegrationLogin._login_attempted = True
-    #                credentials = _get_credentials()
-    #                import degiroasync.api
-    #                # Use api.login here to benefit from wrong password check:
-    #                # if provided credentials are incorrect, don't try again
-    #                # This will block the degiro account.
-    #                self.session = await degiroasync.api.login(
-    #                        credentials)
-    #            else:
-    #                LOGGER.warning(
-    #                        "Log in already attempted without success, skip.")
-    #        if not self.session:
-    #            raise ResponseError("No session available.")
-    #        return self.session
-
     class TestDegiroAsyncWebAPIIntegration(
             _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
@@ -107,13 +84,14 @@ if RUN_INTEGRATION_TESTS:
             self.assertTrue('JSESSIONID' in session.cookies,
                             "No JSESSIONID found.")
 
-        async def test_login_bad_credentials(self):
-            credentials = Credentials(
-                username='dummyaccount123456',
-                password='dummydummy'
-                    )
-            with self.assertRaises(BadCredentialsError):
-                await degiroasync.webapi.login(credentials)
+        if RUN_BAD_CREDENTIALS:
+            async def test_login_bad_credentials(self):
+                credentials = Credentials(
+                    username='dummyaccount123456',
+                    password='dummydummy'
+                        )
+                with self.assertRaises(BadCredentialsError):
+                    await degiroasync.webapi.login(credentials)
 
         async def test_config(self):
             session = await _IntegrationLogin._login()

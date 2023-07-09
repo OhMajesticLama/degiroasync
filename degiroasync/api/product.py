@@ -166,7 +166,7 @@ class ProductFactory:
     @classmethod
     async def _create_batch(
             cls,
-            session: SessionCore,
+            session: Session,
             attributes_batch: Iterable[Dict[str, Any]]
     ) -> Iterable[ProductBase]:
         """
@@ -234,7 +234,7 @@ class ProductFactory:
                         product_info['product_type_id']
                         )
                 except ValueError:
-                    # Let int live its life, it'll be a generic product.
+                    # Let int stay, it'll be a generic product.
                     pass
 
                 product_type_id = product_info['product_type_id']
@@ -250,6 +250,17 @@ class ProductFactory:
                         "api.ProductFactory.init_product| type_id %s class %s",
                         product_type_id, inst_cls)
                 product_info = camelcase_dict_to_snake(product_info)
+                #if inst_cls is Stock:
+                if (
+                        product_info.get('exchange_id')
+                        and issubclass(inst_cls, Stock)
+                        ):
+                    # WARNING: There could be exchange_id key, but empty value,
+                    # We don't want to set it here if that's the case
+                    product_info['exchange'] = (
+                            session.exchange_dictionary.exchange_by(
+                                id=product_info['exchange_id'])
+                            )
                 # 2022.04 JSONclass poor compatibility with mypy
                 info = inst_cls.Info(product_info)  # type: ignore
                 instance = inst_cls(force_init=True)
@@ -279,6 +290,7 @@ class Stock(ProductBase):
         isin: str
         symbol: str
         name: str
+        exchange: Exchange
         vwd_id: Optional[str] = None  # not set if non-tradable
         vwd_identifier_type: Optional[str] = None  # not set if non-tradable
         product_type: str
@@ -760,34 +772,59 @@ async def search_product(
         by_text: Optional[str] = None,
         by_isin: Optional[str] = None,
         by_symbol: Optional[str] = None,
-        by_exchange: Union[str, Exchange, None] = None,
+        by_country: Optional[str] = None,
+        by_exchange: Optional[Union[str, Exchange]] = None,
         product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
-        max_iter: Union[int, None] = 1000
+        max_iter: Optional[int] = 1000
         ) -> List[ProductBase]:
     """
     Access `product_search` endpoint.
 
     Exactly one of `by_text`, `by_isin`, `by_symbol` be set.
-    This is done because endpoint API doesn't return expected results
-    with both text and ISIN search.
+    Note: API endpoint doesn't return expected results with both text and
+    ISIN search.
 
-    product_type_id
-        Restricts search to one type of products.
+    Parameters
+    ----------
 
-    by_exchange
-        Restricts results to products in a exchange. Can be either an Exchange
-        instance or an `hiq_abbr` str (e.g. EPA for Paris, AEX for Amsterdam)
+        by_text
+            As a search text in Degiro search field website.
 
-    max_iter
-        Pull `max_iter` pages of results. If `None`, don't stop until end is
-        reached. Default value: 1000.
+        by_isin
+            Will look-up products with provided ISIN identifier.
 
-    Return a list of ProductBase objects returned by Degiro for `search_txt`
-    attribute.
+        by_symbol
+            Product outputs will be filtered on their 'symbol'.
+
+        by_country
+            Products matching this argument, string must be ISO 3166-1 alpha-2
+            2 letters code.
+
+        product_type_id
+            Restricts search to one type of products.
+            See :class:`~degiroasync.core.PRODUCT.TYPEID`
+
+        by_exchange
+            Restricts results to products in a exchange. Can be either an
+            Exchange instance or an `hiq_abbr` str (e.g. EPA for Paris, AEX
+            for Amsterdam)
+
+        product_type_id
+            Restricts search to one type of products.
+
+        max_iter
+            Pull `max_iter` pages of results. If `None`, don't stop until end
+            is reached. Default value: 1000.
+
+    Returns
+    -------
+
+        Return a list of ProductBase objects returned by Degiro for `search_txt`
+        attribute.
     """
-    if sum(k is not None for k in (by_text, by_isin, by_symbol)) != 1:
+    if sum(k is not None for k in (by_text, by_isin, by_symbol)) > 1:
         raise AssertionError(
-            "Exactly one of by_text, by_isin, by_symbol must "
+            "Only one of by_text, by_isin, by_symbol can "
             "be not None.")
     # Degiro API doesn't support well 2 or more attribute in searchTxt:
     # e.g. we can't search for "AIRBUS NL0000235190" and get all the AIRBUS
@@ -798,14 +835,23 @@ async def search_product(
             by_text = by_symbol
         elif by_isin is not None:
             by_text = by_isin
+        elif by_country is not None:
+            pass  # Could also be set without text deal with it after
         else:
             raise AssertionError(
                     "by_text is None and no search parameters was set or "
                     "found. Have you set a search parameters to "
-                    "get_price_series?"
+                    "search_product?"
                     "\n If yes, this shouldn't be happening, please open a bug"
                     " report."
                     )
+
+    country_id = None
+    if by_country is not None:
+        country = session.exchange_dictionary.country_by(
+            name=by_country
+                )
+        country_id = country.id
 
     exchange_id = None
     if by_exchange is not None:
@@ -832,7 +878,8 @@ async def search_product(
         for attr, key in ((product_type_id, 'productTypeId'),
                           (by_isin, 'isin'),
                           (by_symbol, 'symbol'),
-                          (exchange_id, 'exchangeId')):
+                          (exchange_id, 'exchangeId'),
+                          ):
             if attr is not None and p_json.get(key) != attr:
                 return False
         return True
@@ -847,10 +894,15 @@ async def search_product(
             session,
             by_text,
             product_type_id=product_type_id,
+            country_id=country_id,
             limit=limit,
             offset=offset)
         LOGGER.debug("api.search_product response| %s",
                      pprint.pformat(resp_json))
+        # Calls with more than one page could be parallelized:
+        # First page is needed first to get the total answers, but
+        # further pages could be fetched several at a time.
+        total = resp_json['total']  # Total number of products returned
         if 'products' in resp_json:
             products_json = resp_json['products']
             LOGGER.debug("api.search_product n_products| %s",

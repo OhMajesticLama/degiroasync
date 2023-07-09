@@ -2,7 +2,7 @@
 
 ## Documentation
 
-Check out the online documentation [here](https://ohmajesticlama.github.io/degiroasync/index.html).
+Check out the [online documentation](https://ohmajesticlama.github.io/degiroasync/index.html).
 
 ## Introduction
 

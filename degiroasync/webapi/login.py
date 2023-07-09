@@ -1,4 +1,4 @@
-from typing import Union, Dict, Any
+from typing import Union, Dict, Any, Optional
 import logging
 import json
 import base64
@@ -7,8 +7,6 @@ import hmac
 import hashlib
 import time
 
-import httpx
-
 from ..core.constants import LOGGER_NAME
 from ..core.constants import LOGIN
 from ..core.constants import TIMEOUT
@@ -16,13 +14,18 @@ from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import check_session_config
 from ..core.helpers import check_response
 from ..core.helpers import camelcase_dict_to_snake
+from ..core.helpers import ThrottlingClient
 
 LOGGER = logging.getLogger(LOGGER_NAME)
 
 
+# Dedicated Throttling client for login as it is much more restricted.
+_LOGIN_THROTTLE = ThrottlingClient(max_requests=1, period_seconds=2)
+
+
 async def login(
         credentials: Credentials,
-        session: Union[SessionCore, None] = None) -> SessionCore:
+        session: Optional[SessionCore] = None) -> SessionCore:
     """
     Authentify with Degiro API.
     `session` will be updated with required data for further connections.
@@ -37,7 +40,7 @@ async def login(
         "isPassCodeReset": '',
         "queryParams": {"reason": "session_expired"}
     }
-    async with session as client:
+    async with _LOGIN_THROTTLE as client:
         LOGGER.debug("login| url %s", url)
         response = await client.post(url, content=json.dumps(payload))
         LOGGER.debug("login| response %s", response.__dict__)

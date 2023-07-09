@@ -1,7 +1,6 @@
 import logging
 from typing import Union, Any, List, Dict
-
-import httpx
+from typing import Optional
 
 from ..core import SessionCore, URLs
 from ..core import join_url
@@ -10,7 +9,6 @@ from ..core import check_session_client
 from ..core.constants import LOGGER_NAME
 from ..core.constants import PRICE
 from ..core.constants import PRODUCT
-from ..core.constants import TIMEOUT
 from ..core.helpers import check_response
 
 
@@ -815,73 +813,78 @@ async def get_trading_update(
 
 async def search_product(
         session: SessionCore,
-        search_txt: str,
-        product_type_id: Union[PRODUCT.TYPEID, None] = None,
-        limit: int = 10,
+        search_txt: Optional[str] = None,
+        *,
+        product_type_id: Optional[PRODUCT.TYPEID] = None,
+        country_id: Optional[str] = None,
+        index_id: Optional[str] = None,
+        limit: int = 50,
         offset: int = 0) -> Dict[str, Any]:
     """
     Access `product_search` endpoint.
 
-    Example JSON response:
-    {
-        "offset": 0,
-        "products": [
-            {
-                "active": true,
-                "buyOrderTypes": [
-                    "LIMIT",
-                    "MARKET",
-                    "STOPLOSS",
-                    "STOPLIMIT"
-                ],
-                "category": "B",
-                "closePrice": 113.3,
-                "closePriceDate": "2022-02-02",
-                "contractSize": 1.0,
-                "currency": "EUR",
-                "exchangeId": "710",
-                "feedQuality": "R",
-                "feedQualitySecondary": "CX",
-                "id": "96008",
-                "isin": "NL0000235190",
-                "name": "AIRBUS",
-                "onlyEodPrices": false,
-                "orderBookDepth": 0,
-                "orderBookDepthSecondary": 0,
-                "orderTimeTypes": [
-                    "DAY",
-                    "GTC"
-                ],
-                "productBitTypes": [],
-                "productType": "STOCK",
-                "productTypeId": 1,
-                "qualitySwitchFree": false,
-                "qualitySwitchFreeSecondary": false,
-                "qualitySwitchable": false,
-                "qualitySwitchableSecondary": false,
-                "sellOrderTypes": [
-                    "LIMIT",
-                    "MARKET",
-                    "STOPLOSS",
-                    "STOPLIMIT"
-                ],
-                "strikePrice": -0.0001,
-                "symbol": "AIR",
-                "tradable": true,
-                "vwdId": "360114899",
-                "vwdIdSecondary": "955000256",
-                "vwdIdentifierType": "issueid",
-                "vwdIdentifierTypeSecondary": "issueid",
-                "vwdModuleId": 1,
-                "vwdModuleIdSecondary": 2
-            }
-        ]
-    }
+    Example response:
+
+    .. code-block:: python
+
+        {
+            "offset": 0,
+            "products": [
+                {
+                    "active": true,
+                    "buyOrderTypes": [
+                        "LIMIT",
+                        "MARKET",
+                        "STOPLOSS",
+                        "STOPLIMIT"
+                    ],
+                    "category": "B",
+                    "closePrice": 113.3,
+                    "closePriceDate": "2022-02-02",
+                    "contractSize": 1.0,
+                    "currency": "EUR",
+                    "exchangeId": "710",
+                    "feedQuality": "R",
+                    "feedQualitySecondary": "CX",
+                    "id": "96008",
+                    "isin": "NL0000235190",
+                    "name": "AIRBUS",
+                    "onlyEodPrices": false,
+                    "orderBookDepth": 0,
+                    "orderBookDepthSecondary": 0,
+                    "orderTimeTypes": [
+                        "DAY",
+                        "GTC"
+                    ],
+                    "productBitTypes": [],
+                    "productType": "STOCK",
+                    "productTypeId": 1,
+                    "qualitySwitchFree": false,
+                    "qualitySwitchFreeSecondary": false,
+                    "qualitySwitchable": false,
+                    "qualitySwitchableSecondary": false,
+                    "sellOrderTypes": [
+                        "LIMIT",
+                        "MARKET",
+                        "STOPLOSS",
+                        "STOPLIMIT"
+                    ],
+                    "strikePrice": -0.0001,
+                    "symbol": "AIR",
+                    "tradable": true,
+                    "vwdId": "360114899",
+                    "vwdIdSecondary": "955000256",
+                    "vwdIdentifierType": "issueid",
+                    "vwdIdentifierTypeSecondary": "issueid",
+                    "vwdModuleId": 1,
+                    "vwdModuleIdSecondary": 2
+                }
+            ]
+        }
 
     """
     check_session_config(session)
     url = URLs.get_product_search_url(session, product_type_id)
-    # TODO: Implement to target specialized URLs
     # Example query for stocks:
     # indexId=5&stockCountryId=886&requireTotal=true&offset=0&limit=100&sortColumns=name&sortTypes=asc&intAccount=123123123&sessionId=sdfasdfasdf
     params = dict(
@@ -889,10 +892,15 @@ async def search_product(
         limit=limit,
         searchText=search_txt,
         intAccount=session.client.int_account,
-        sessionId=session.config.session_id
+        sessionId=session.config.session_id,
+        requireTotal=True
     )
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
+    if country_id is not None:
+        params['stockCountryId'] = country_id
+    if index_id is not None:
+        params['indexId'] = index_id
     LOGGER.debug("webapi.search_product params| %s", params)
     async with session as client:
         response = await client.get(url,

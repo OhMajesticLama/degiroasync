@@ -50,11 +50,11 @@ class CoroCache:
 
 
 def lru_cache_timed(
-        func: Union[Callable, None] = None,
+        func: Optional[Callable] = None,
         /,
         maxsize: int = 128,
         typed: bool = False,
-        seconds: Union[None, float] = None,
+        seconds: Optional[float] = None,
 ):
     """
     Time-sensitive LRU cache that works with async functions.
@@ -480,7 +480,6 @@ class ThrottlingClient:
             await self._async_client.__aexit__(exc_type, exc_val, exc_tb)
             self._async_client = None
             self._client_open = None
-        return self
 
     @_throttle
     @functools.wraps(httpx.AsyncClient.get)
