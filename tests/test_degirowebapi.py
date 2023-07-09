@@ -38,6 +38,7 @@ try:
 except (ValueError, TypeError):
     LOGGER.info('degiroasync integration tests will *not* run.')
 
+RUN_BAD_CREDENTIALS = 0
 try:
     _env_var = os.environ.get('DEGIROASYNC_INTEGRATION_BAD_CREDENTIALS')
     RUN_BAD_CREDENTIALS = int(_env_var)
