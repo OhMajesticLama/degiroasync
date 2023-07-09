@@ -23,6 +23,7 @@ from jsonloader import JSONclass
 from .helpers import join_url
 from .constants import LOGGER_NAME
 from .constants import PRODUCT
+from .constants import TIMEOUT
 from ..core.helpers import ThrottlingClient
 from .exceptions import ContextError
 
@@ -211,7 +212,8 @@ class SessionCore:
         if self._http_client is None:
             self._http_client = ThrottlingClient(
                     max_requests=self._max_requests_default,
-                    period_seconds=self._period_seconds_default
+                    period_seconds=self._period_seconds_default,
+                    timeout=TIMEOUT
                     )
         return await self._http_client.__aenter__()
 

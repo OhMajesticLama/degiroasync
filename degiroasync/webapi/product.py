@@ -752,7 +752,9 @@ async def get_price_series(
     """
     # TODO: There may be an issue with the above JSON example, review.
     if vwdIdentifierType not in ('issueid', 'vwdkey'):
-        raise ValueError("vwdIdentifierType must be 'issueid' or 'vwdkey'")
+        raise ValueError(
+                f"vwdIdentifierType must be 'issueid' or 'vwdkey', "
+                f"not {vwdIdentifierType}")
 
     check_session_config(session)
     url = URLs.get_price_data_url(session)
@@ -890,11 +892,12 @@ async def search_product(
     params = dict(
         offset=offset,
         limit=limit,
-        searchText=search_txt,
         intAccount=session.client.int_account,
         sessionId=session.config.session_id,
         requireTotal=True
     )
+    if search_txt is not None:
+        params['searchText'] = search_txt
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
     if country_id is not None:
