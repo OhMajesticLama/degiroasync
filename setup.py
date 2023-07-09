@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.18.1",
+        version="0.19.0",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
@@ -29,7 +29,6 @@ if __name__ == '__main__':
         install_requires=[
             'httpx >= 0.21.3, < 1.0',
             'jsonloader >= 0.8.1, < 1.0',
-            'typeguard >= 2.13.3, < 3.0',
             'asyncstdlib >= 3.10.3, < 4.0',
             'more_itertools >= 8.12.0, < 9'
             ],
