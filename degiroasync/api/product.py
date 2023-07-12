@@ -766,6 +766,81 @@ async def get_price_series(
     return prices_series
 
 
+async def _search_one(
+        session: Session,
+        *,
+        by_text: Optional[str] = None,
+        by_isin: Optional[str] = None,
+        by_symbol: Optional[str] = None,
+        country_id: Optional[str] = None,
+        exchange_id: Optional[Union[str, Exchange]] = None,
+        product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
+        offset: int = 0,
+        limit: int = 100,
+        ) -> (Sequence[ProductBase], int, int):
+    """
+    Returns
+    -------
+
+    products
+        Instantiated products found.
+
+    n_unfiltered
+        Number of products returned by the API before local filtering.
+
+    total
+        Total number of products that could be returned by API, before local
+        filtering.
+    """
+    def __custom_filter(p_json: Dict[str, Any]) -> bool:
+        "Return True if product match user parameters"
+
+        # Web API should already filter by typeId, recheck TypeID here to be
+        # sure we don't have garbage in.
+        for attr, key in ((product_type_id, 'productTypeId'),
+                          (by_isin, 'isin'),
+                          (by_symbol, 'symbol'),
+                          (exchange_id, 'exchangeId'),
+                          ):
+            if attr is not None and p_json.get(key) != attr:
+                return False
+        return True
+
+    resp_json = await webapi.search_product(
+        session,
+        by_text,
+        product_type_id=product_type_id,
+        country_id=country_id,
+        limit=limit,
+        offset=offset)
+    LOGGER.debug("api.search_product response| %s",
+                 pprint.pformat(resp_json))
+    # Calls with more than one page could be parallelized:
+    # First page is needed first to get the total answers, but
+    # further pages could be fetched several at a time.
+    total = resp_json['total']  # Total number of products returned
+    if 'products' in resp_json:
+        n_unfiltered = len(resp_json['products'])
+        products_json = resp_json['products']
+        LOGGER.debug("api.search_product n_products| %s",
+                     products_json)
+        batch_gen = ProductFactory.init_batch(
+                session,
+                filter(__custom_filter,
+                       products_json))
+        products = [p async for p in batch_gen]
+        # This could be optimized later on with a generator class to be
+        # able to yield data as soon as we receive it while still not
+        # blocking further calls to be launched, should it be needed.
+        LOGGER.debug("api.search_product (batch len, symbol)| (%s, %s)",
+                     len(products), by_symbol)
+        return products, n_unfiltered, total
+
+    else:
+        LOGGER.debug("No 'products' key in response. Stop.")
+        raise ResponseError(f"No 'products' key in response {resp_json} ")
+
+
 async def search_product(
         session: Session,
         *,
@@ -819,8 +894,8 @@ async def search_product(
     Returns
     -------
 
-        Return a list of ProductBase objects returned by Degiro for `search_txt`
-        attribute.
+        Return a list of ProductBase objects returned by Degiro for
+        `search_txt` attribute.
     """
     if sum(k is not None for k in (by_text, by_isin, by_symbol)) > 1:
         raise AssertionError(
@@ -867,65 +942,43 @@ async def search_product(
                 "Only Exchange or str types supported for 'by_exchange'.")
 
     limit = 100
-    offset = 0
     products = []
 
-    def __custom_filter(p_json: Dict[str, Any]) -> bool:
-        "Return True if product match user parameters"
-
-        # Web API should already filter by typeId, recheck TypeID here to be
-        # sure we don't have garbage in.
-        for attr, key in ((product_type_id, 'productTypeId'),
-                          (by_isin, 'isin'),
-                          (by_symbol, 'symbol'),
-                          (exchange_id, 'exchangeId'),
-                          ):
-            if attr is not None and p_json.get(key) != attr:
-                return False
-        return True
-
-    iter_n = 0
-    run_forever = max_iter is None
-    if max_iter is None:
-        max_iter = -1
-    while iter_n < max_iter or run_forever:
-        iter_n += 1
-        resp_json = await webapi.search_product(
+    # trigger first call to get total:
+    products, n_unfiltered, total = await _search_one(
             session,
-            by_text,
-            product_type_id=product_type_id,
+            by_text=by_text,
+            by_isin=by_isin,
+            by_symbol=by_symbol,
             country_id=country_id,
-            limit=limit,
-            offset=offset)
-        LOGGER.debug("api.search_product response| %s",
-                     pprint.pformat(resp_json))
-        # Calls with more than one page could be parallelized:
-        # First page is needed first to get the total answers, but
-        # further pages could be fetched several at a time.
-        total = resp_json['total']  # Total number of products returned
-        if 'products' in resp_json:
-            products_json = resp_json['products']
-            LOGGER.debug("api.search_product n_products| %s",
-                         products_json)
-            batch_gen = ProductFactory.init_batch(
-                    session,
-                    filter(__custom_filter,
-                           products_json))
-            batch = [p async for p in batch_gen]
-            # This could be optimized later on with a generator class to be
-            # able to yield data as soon as we receive it while still not
-            # blocking further calls to be launched, should it be needed.
-            products += batch
-            LOGGER.debug("api.search_product (batch len, symbol)| (%s, %s)",
-                         len(batch), by_symbol)
-            if len(products_json) < limit:
-                break
-            else:
-                offset += len(products_json)
-        else:
-            LOGGER.debug("No 'products' key in response. Stop.")
-            break
-    # return a unique list
+            exchange_id=exchange_id,
+            offset=0,
+            limit=limit
+            )
+
+    if n_unfiltered < total:
+        # Generate args
+        args = ({
+            'session': session,
+            'by_text': by_text,
+            'by_isin': by_isin,
+            'by_symbol': by_symbol,
+            'country_id': country_id,
+            'exchange_id': exchange_id,
+            'offset': offset,
+            'limit': limit,
+            } for offset in range(n_unfiltered, total, limit)
+            )
+        # The use of _search_one and gather improves performance over
+        # sequential queries in a while loop as before.
+        # 20230713 FR symbols query, throttling at 10 queries per 1 second:
+        #   - With gather+_search_one: 3.6s
+        #   - With legacy sequential calls: 6.9s
+        answers = await asyncio.gather(
+                    *[_search_one(**kwa) for kwa in args])
+        for prods, _, _ in answers:
+            products += prods
+
     return list(unique_everseen(products, lambda p: p.info.id))
 
 
