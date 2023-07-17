@@ -295,4 +295,4 @@ class POSITION:
 # HTTP Requests global timeout, in seconds. DEGIRO endpoints are sometimes
 # a bit slow to answer, maybe due to endpoint throttling: this is necessary
 # to limit number of call failure.
-TIMEOUT: float = 20
+TIMEOUT: float = 30
