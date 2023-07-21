@@ -33,6 +33,7 @@ from ..core.helpers import dict_from_attr_list
 from ..core.helpers import camelcase_dict_to_snake
 from .session import Session
 from .session import Exchange
+from .session import Index
 from .session import check_session_dictionary
 
 
@@ -774,6 +775,7 @@ async def _search_one(
         by_symbol: Optional[str] = None,
         country_id: Optional[str] = None,
         exchange_id: Optional[Union[str, Exchange]] = None,
+        index_id: Optional[Union[str, Index]] = None,
         product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
         offset: int = 0,
         limit: int = 100,
@@ -811,6 +813,7 @@ async def _search_one(
         by_text,
         product_type_id=product_type_id,
         country_id=country_id,
+        index_id=index_id,
         limit=limit,
         offset=offset)
     LOGGER.debug("api.search_product response| %s",
@@ -849,6 +852,7 @@ async def search_product(
         by_symbol: Optional[str] = None,
         by_country: Optional[str] = None,
         by_exchange: Optional[Union[str, Exchange]] = None,
+        by_index: Optional[Union[str, Index]] = None,
         product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
         max_iter: Optional[int] = 1000
         ) -> List[ProductBase]:
@@ -880,9 +884,13 @@ async def search_product(
             See :class:`~degiroasync.core.PRODUCT.TYPEID`
 
         by_exchange
-            Restricts results to products in a exchange. Can be either an
+            Restricts results to products in an exchange. Can be either an
             Exchange instance or an `hiq_abbr` str (e.g. EPA for Paris, AEX
             for Amsterdam)
+
+        by_index
+            Restricts results to products in an index. Can be either an
+            Index instance or an index `name` str.
 
         product_type_id
             Restricts search to one type of products.
@@ -912,6 +920,8 @@ async def search_product(
             by_text = by_isin
         elif by_country is not None:
             pass  # Could also be set without text deal with it after
+        elif by_index is not None:
+            pass  # Manage below
         else:
             raise AssertionError(
                     "by_text is None and no search parameters was set or "
@@ -941,6 +951,18 @@ async def search_product(
             raise TypeError(
                 "Only Exchange or str types supported for 'by_exchange'.")
 
+    index_id = None
+    if by_index is not None:
+        if isinstance(by_index, Index):
+            index_id = by_index.id
+        elif isinstance(by_index, str):
+            check_session_dictionary(session)
+            index = session.dictionary.index_by(name=by_index)
+            index_id = index.id
+        else:
+            raise TypeError(
+                "Only Index or str types supported for 'by_index'.")
+
     limit = 100
     products = []
 
@@ -952,6 +974,7 @@ async def search_product(
             by_symbol=by_symbol,
             country_id=country_id,
             exchange_id=exchange_id,
+            index_id=index_id,
             offset=0,
             limit=limit
             )
@@ -963,6 +986,7 @@ async def search_product(
             'by_text': by_text,
             'by_isin': by_isin,
             'by_symbol': by_symbol,
+            'index_id': index_id,
             'country_id': country_id,
             'exchange_id': exchange_id,
             'offset': offset,

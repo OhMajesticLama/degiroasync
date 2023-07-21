@@ -363,6 +363,98 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(index.info.isin, "FR0003500008")
 
 
+class TestSearchProduct(unittest.IsolatedAsyncioTestCase):
+    @unittest.mock.patch('degiroasync.webapi.get_products_info')
+    @unittest.mock.patch('degiroasync.webapi.search_product')
+    async def test_search_by_index(
+            self,
+            search_product_m,
+            get_products_info_m,
+            ):
+        get_products_info_m.return_value = {'data': {
+                '123': {
+                    'id': '123',
+                    'productTypeId': 99,
+                    'name': 'foo',
+                    'symbol': 'FOO',
+                    'currency': 'EUR',
+                    'exchangeId': 'exid',
+                    'tradable': True,
+                    'isin': 'isinexample',
+                }
+            }
+        }
+        session = MagicMock()
+        session.dictionary = MagicMock()
+        index = MagicMock()
+        index.id = '123'
+        index.name = 'CAC 40'
+        session.dictionary.index_by = MagicMock(return_value=index)
+
+        search_product_m.return_value = {
+            "total": 1,
+            "offset": 0,
+            "products": [
+                {
+                    "active": True,
+                    "buyOrderTypes": [
+                        "LIMIT",
+                        "MARKET",
+                        "STOPLOSS",
+                        "STOPLIMIT"
+                    ],
+                    "category": "B",
+                    "closePrice": 113.3,
+                    "closePriceDate": "2022-02-02",
+                    "contractSize": 1.0,
+                    "currency": "EUR",
+                    "exchangeId": "710",
+                    "feedQuality": "R",
+                    "feedQualitySecondary": "CX",
+                    "id": "123",
+                    "isin": "NL0000235190",
+                    "name": "AIRBUS",
+                    "onlyEodPrices": False,
+                    "orderBookDepth": 0,
+                    "orderBookDepthSecondary": 0,
+                    "orderTimeTypes": [
+                        "DAY",
+                        "GTC"
+                    ],
+                    "productBitTypes": [],
+                    "productType": "STOCK",
+                    "productTypeId": 1,
+                    "qualitySwitchFree": False,
+                    "qualitySwitchFreeSecondary": False,
+                    "qualitySwitchable": False,
+                    "qualitySwitchableSecondary": False,
+                    "sellOrderTypes": [
+                        "LIMIT",
+                        "MARKET",
+                        "STOPLOSS",
+                        "STOPLIMIT"
+                    ],
+                    "strikePrice": -0.0001,
+                    "symbol": "AIR",
+                    "tradable": True,
+                    "vwdId": "360114899",
+                    "vwdIdSecondary": "955000256",
+                    "vwdIdentifierType": "issueid",
+                    "vwdIdentifierTypeSecondary": "issueid",
+                    "vwdModuleId": 1,
+                    "vwdModuleIdSecondary": 2
+                }
+            ]
+        }
+
+        products = await degiroasync.api.search_product(
+                session,
+                by_index='CAC 40'
+                )
+        # There should be only one product returned by the mock
+        self.assertGreaterEqual(len(products), 1)
+
+
 class TestProduct(unittest.IsolatedAsyncioTestCase):
     """
     Local tests for Product.
@@ -391,10 +483,9 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
                     name='EuroNext',
                     country_name='France',
                     hiq_abbr='EPA',
-            )
-        )
-
+                    )
                 )
+        )
 
         # Test that degiroasync.api returns properly initiated products
         products_gen = ProductFactory.init_batch(
@@ -456,6 +547,7 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(products[0].base.additional, 123)
         self.assertEqual(products[0].info.name, 'foo')
         self.assertEqual(products[0].info.symbol, 'FOO')
+
 
 
 class TestDegiroasyncPrice(
@@ -902,6 +994,19 @@ if RUN_INTEGRATION_TESTS:
                             id=product.info.exchange_id).country_name,
                         'FR'
                         )
+
+        async def test_search_product_index(self):
+            session = await _IntegrationLogin._login()
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_index='CAC 40',
+                    max_iter=1,  # We don't need every product for this test.
+                    )
+            LOGGER.debug("Integration Test search_product_index| %s", products)
+            # The point of implementing filtering on symbol and exchange
+            # is to target one specific product. Raise an error if it doesn't
+            # work.
+            self.assertEqual(len(products), 40)
 
     class TestDegiroasyncIntegrationExchangeDictionary(
             unittest.IsolatedAsyncioTestCase):
