@@ -63,8 +63,9 @@ from .orders import get_transactions
 from .orders import Order
 from .orders import Transaction
 from .session import Session
+from .session import Index
 from .session import login
-from .session import get_exchange_dictionary
+from .session import get_dictionary
 from .session import ExchangeDictionary
 from .session import Exchange, Region, Country
 from .product import get_portfolio
@@ -96,9 +97,12 @@ __all__ = [
             login,
             Credentials,
             Session,
-            get_exchange_dictionary,
+            get_dictionary,
             ExchangeDictionary,
-            Exchange, Region, Country,
+            Exchange,
+            Region,
+            Country,
+            Index,
 
             # Product
             search_product,

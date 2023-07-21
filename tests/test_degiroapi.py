@@ -17,14 +17,15 @@ import degiroasync.webapi
 import degiroasync.core
 import degiroasync.core.helpers
 from degiroasync.core import Credentials
-#from degiroasync.api.product import convert_time_series
 from degiroasync.api import ProductFactory
 from degiroasync.api import Order
 from degiroasync.api import ORDER
 from degiroasync.api import Exchange
+from degiroasync.api import Index
 from degiroasync.core.constants import PRODUCT
 from degiroasync.core.constants import PRICE
 from degiroasync.core import BadCredentialsError
+from degiroasync.core import camelcase_dict_to_snake
 
 from tests.integration_login import _get_credentials
 from tests.integration_login import _IntegrationLogin
@@ -239,12 +240,23 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
                         'id': 200, 'code': 'XAMS', 'hiqAbbr': 'EAM',
                         'country': 'NL', 'city': 'Amsterdam',
                         'micCode': 'XAMS', 'name': 'Euronext Amsterdam'}
-                    ]
+                    ],
+                'indices': [{'id': '106002', 'name': 'SDAX'},
+                            {'id': '106001', 'name': 'MDAX'},
+                            {'id': '5',
+                             'name': 'CAC 40',
+                             'productId': 4824940},
+                            {'id': '121003',
+                             'name': 'SMIM',
+                             'productId': 11875105},
+                            {'id': 114003, 'name': 'ISEQ Overall'},
+                            {'id': 121002, 'name': 'SLI',
+                             'productId': 11875104}],
             }
         self.get_product_dictionary_mock = resp_mock
 
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
-    async def test_exchange_dictionary_attributes(self, get_dict_mock):
+    async def test_dictionary_attributes(self, get_dict_mock):
         # Mock webapi.get_product_dictionary
         get_dict_mock.return_value = self._product_dictionary_dummy
         session = object()  # dummy is enough, we mocked the class
@@ -258,7 +270,7 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
         self.assertIn('XAMS', (e.mic_code for e in exchanges))
 
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
-    async def test_exchange_dictionary_exchange(self, get_dict_mock):
+    async def test_dictionary_exchange(self, get_dict_mock):
         # Mock webapi.get_product_dictionary
         get_dict_mock.return_value = self._product_dictionary_dummy
         session = object()  # dummy is enough, we mocked the class
@@ -269,7 +281,7 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(eam_exc.country_name, 'NL')
 
     @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
-    async def test_exchange_dictionary_country(self, get_dict_mock):
+    async def test_dictionary_country(self, get_dict_mock):
         # Mock webapi.get_product_dictionary
         get_dict_mock.return_value = self._product_dictionary_dummy
         session = object()  # dummy is enough, we mocked the class
@@ -280,6 +292,75 @@ class TestExchangeDictionary(unittest.IsolatedAsyncioTestCase):
 
         country = dictionary.country_by(name='NL')
         self.assertEqual(country.region.name, 'Europe')
+
+    @unittest.mock.patch('degiroasync.webapi.get_product_dictionary')
+    async def test_dictionary_index(self, get_dict_mock):
+        # Mock webapi.get_product_dictionary
+        get_dict_mock.return_value = self._product_dictionary_dummy
+        session = object()  # dummy is enough, we mocked the class
+        dictionary = await degiroasync.api.ExchangeDictionary(session)
+
+        index = dictionary.index_by(name='CAC 40')
+        self.assertEqual(index.name, 'CAC 40')
+        index = dictionary.index_by(id='5')
+        self.assertEqual(index.name, 'CAC 40')
+
+    @unittest.mock.patch('degiroasync.webapi.get_products_info')
+    async def test_dictionary_index_info(
+            self,
+            get_products_info_mock):
+        # Mock webapi.get_product_dictionary
+        get_products_info_mock.return_value = {
+              "data": {
+                "4824940": {
+                  "id": "4824940",
+                  "name": "CAC 40",
+                  "isin": "FR0003500008",
+                  "symbol": "CAC INDEX",
+                  "contractSize": 1,
+                  "productType": "INDEX",
+                  "productTypeId": 180,
+                  "tradable": False,
+                  "category": "H",
+                  "currency": "EUR",
+                  "active": True,
+                  "exchangeId": "710",
+                  "onlyEodPrices": False,
+                  "orderTimeTypes": [],
+                  "buyOrderTypes": [],
+                  "sellOrderTypes": [],
+                  "productBitTypes": [],
+                  "closePrice": 7384.91,
+                  "closePriceDate": "2023-07-20",
+                  "feedQuality": "R",
+                  "orderBookDepth": 0,
+                  "vwdIdentifierType": "issueid",
+                  "vwdId": "360015511",
+                  "qualitySwitchable": False,
+                  "qualitySwitchFree": False,
+                  "vwdModuleId": 1
+                }
+              }
+            }
+
+        session = MagicMock()  # dummy is enough, the call is mocked
+        session.dictionary = MagicMock()
+        session.dictionary.exchange_by = MagicMock(
+                return_value=Exchange(dict(
+                    id='id',
+                    name='name',
+                    country_name='COUNTRYCODE',
+                    hiq_abbr='TDG'
+                    ))
+                )
+        data = self._product_dictionary_dummy['indices'][2]
+        data['productId'] = str(data['productId'])
+        data = camelcase_dict_to_snake(data)
+        index = Index(data)
+
+        self.assertEqual(index.name, 'CAC 40')
+        await index.get_info(session)
+        self.assertEqual(index.info.isin, "FR0003500008")
 
 
 class TestProduct(unittest.IsolatedAsyncioTestCase):
@@ -303,8 +384,8 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
         }
 
         session = MagicMock()  # Don't care
-        session.exchange_dictionary = MagicMock()
-        session.exchange_dictionary.exchange_by = MagicMock(
+        session.dictionary = MagicMock()
+        session.dictionary.exchange_by = MagicMock(
                 return_value=Exchange(dict(
                     id='exid',
                     name='EuroNext',
@@ -348,8 +429,8 @@ class TestProduct(unittest.IsolatedAsyncioTestCase):
             }
         }
         session = MagicMock()  # Don't care
-        session.exchange_dictionary = MagicMock()
-        session.exchange_dictionary.exchange_by = MagicMock(
+        session.dictionary = MagicMock()
+        session.dictionary.exchange_by = MagicMock(
                 return_value=Exchange(dict(
                     id='exid',
                     name='EuroNext',
@@ -817,13 +898,12 @@ if RUN_INTEGRATION_TESTS:
             self.assertGreaterEqual(len(products), 1)
             for product in products:
                 self.assertEqual(
-                        session.exchange_dictionary.exchange_by(
+                        session.dictionary.exchange_by(
                             id=product.info.exchange_id).country_name,
                         'FR'
                         )
 
     class TestDegiroasyncIntegrationExchangeDictionary(
-            _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         async def test_product_dictionary_attributes(self):
             session = await _IntegrationLogin._login()
@@ -843,8 +923,21 @@ if RUN_INTEGRATION_TESTS:
             self.assertEqual(eam_exc.mic_code, 'XAMS')
             self.assertEqual(eam_exc.country_name, 'NL')
 
+        async def test_index_populate_indices(self):
+            session = await _IntegrationLogin._login()
+            await session.dictionary.populate_indices_info(session)
+
+            index = session.dictionary.index_by(name='CAC 40')
+            self.assertEqual(index.info.symbol, 'CAC INDEX')
+
+        async def test_index_info(self):
+            session = await _IntegrationLogin._login()
+            index = session.dictionary.index_by(name='CAC 40')
+            await index.get_info(session)
+
+            self.assertEqual(index.info.symbol, 'CAC INDEX')
+
     class TestDegiroasyncIntegrationOrders(
-            _IntegrationLogin,
             unittest.IsolatedAsyncioTestCase):
         async def test_get_orders(self):
             session = await _IntegrationLogin._login()
@@ -901,6 +994,7 @@ if RUN_INTEGRATION_TESTS:
                     price=80
             )
             self.assertIn('confirmation_id', order_check)
+
 
 if __name__ == '__main__':
     handler = logging.StreamHandler()

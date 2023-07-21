@@ -232,6 +232,7 @@ class PRODUCT:
 
         """
         STOCK = 1
+        INDEX = 180
         BONDS = 2
         FUTURES = 7
         OPTIONS = 8
@@ -244,8 +245,10 @@ class PRODUCT:
 
     class TYPE(StrEnum):
         STOCK = 'STOCK'
+        INDEX = 'INDEX'
         FUND = 'FUND'
         CASH = 'CASH'
+        CFD = 'CFD'
         CURRENCY = 'CURRENCY'
 
 

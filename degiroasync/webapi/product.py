@@ -19,7 +19,13 @@ async def get_portfolio(session: SessionCore) -> Dict[str, Any]:
     """
     Get portfolio web call.
 
-    Example return:
+
+    Returns
+    -------
+
+    Example dictionary portfolio:
+
+    .. code-block:: python
 
         {'portfolio': {'isAdded': True,
          'lastUpdated': 1088,
@@ -569,7 +575,7 @@ async def get_products_info(
             LOGGER.error('get_products_info products_ids| %s', products_ids)
             raise
         resp_json = response.json()
-        LOGGER.debug('get_products_info|', resp_json)
+        LOGGER.debug('get_products_info| %s', resp_json)
     return resp_json
 
 
@@ -825,9 +831,12 @@ async def search_product(
     """
     Access `product_search` endpoint.
 
-    Example response:
+    Returns
+    -------
 
-    .. code-block:: python
+    Example JSON response below, will be returned as a Python dict.
+
+    .. code-block:: JSON
 
         {
             "offset": 0,

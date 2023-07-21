@@ -1,9 +1,11 @@
 from typing import Union, List, Dict, Any
 from typing import Set
+import sys
 from typing import Optional
 import functools
 import logging
 import pprint
+import dataclasses
 import copy
 
 from jsonloader import JSONclass
@@ -16,6 +18,7 @@ from ..core import Credentials
 from ..core import camelcase_dict_to_snake
 from ..core import BadCredentialsError
 from ..core import lru_cache_timed
+from ..core import PRODUCT
 from .. import webapi
 
 
@@ -46,6 +49,103 @@ class Exchange:
     mic_code: Optional[str] = None
 
 
+@JSONclass(annotations=True, annotations_type=True)
+class Index:
+    # Example of JSON
+    # {
+    #   "data": {
+    #     "4824940": {
+    #       "id": "4824940",
+    #       "name": "CAC 40",
+    #       "isin": "FR0003500008",
+    #       "symbol": "CAC INDEX",
+    #       "contractSize": 1,
+    #       "productType": "INDEX",
+    #       "productTypeId": 180,
+    #       "tradable": false,
+    #       "category": "H",
+    #       "currency": "EUR",
+    #       "active": true,
+    #       "exchangeId": "710",
+    #       "onlyEodPrices": false,
+    #       "orderTimeTypes": [],
+    #       "buyOrderTypes": [],
+    #       "sellOrderTypes": [],
+    #       "productBitTypes": [],
+    #       "closePrice": 7384.91,
+    #       "closePriceDate": "2023-07-20",
+    #       "feedQuality": "R",
+    #       "orderBookDepth": 0,
+    #       "vwdIdentifierType": "issueid",
+    #       "vwdId": "360015511",
+    #       "qualitySwitchable": false,
+    #       "qualitySwitchFree": false,
+    #       "vwdModuleId": 1
+    #     }
+    #   }
+    # }
+    @JSONclass(annotations=True)
+    class Info:
+        id: str
+        isin: str
+        name: str
+        symbol: str
+        product_type: PRODUCT.TYPE
+        product_type_id: PRODUCT.TYPEID
+        currency: str
+        exchange_id: str
+        exchange: Exchange
+        close_price: Optional[float] = None
+        close_price_date: Optional[str] = None
+        vwd_id: Optional[str] = None
+        vwd_identifier_type: Optional[str] = None
+
+    id: str
+    name: str
+    product_id: Optional[str] = None
+    info: Optional[Info] = None
+
+    async def get_info(self, session: 'Session') -> Optional[Info]:
+        """
+        Populate and return Index.Info. Provides more information about Index,
+        such as isin, symbol, exchange ...
+
+        If no Info is available for this Index, returns None.
+
+        In the event you need to instantiate all or most indices, you should
+        use :class:`~degiroasync.api.Session.populate_indices_info` that
+        will reduce web API calls.
+
+        See :class:`~degiroasync.api.Index.Info` for details.
+        """
+        if self.info is None and self.product_id is None:
+            return None
+        elif self.info is None and self.product_id is not None:
+            ind_id = self.product_id
+            resp = await webapi.get_products_info(
+                    session,
+                    products_ids=[ind_id],
+                    )
+            # Info needs to be populated.
+            LOGGER.debug("Index.get_info| %s", resp)
+            self.info = self._dict2info(session, resp['data'][ind_id])
+        return self.info
+
+    @classmethod
+    def _dict2info(
+            cls: type,
+            session: 'Session',
+            web_response: Dict[str, Any]) -> Info:
+        info_dict = camelcase_dict_to_snake(web_response)
+        info_dict['product_type_id'] = PRODUCT.TYPEID(
+                info_dict['product_type_id'])
+        info_dict['product_type'] = PRODUCT.TYPE(
+                info_dict['product_type'])
+        info_dict['exchange'] = session.dictionary.exchange_by(
+                id=info_dict['exchange_id'])
+        return cls.Info(info_dict)
+
+
 class ExchangeDictionary:
     """
     Usage:
@@ -60,6 +160,7 @@ class ExchangeDictionary:
     exchanges: List[Exchange]
     countries: List[Country]
     regions: List[Region]
+    indices: List[Index]
 
     _exchanges: Dict[str, Any]
 
@@ -97,19 +198,46 @@ class ExchangeDictionary:
             self._exchanges[exchange['id']] = Exchange(
                     camelcase_dict_to_snake(exchange))
 
+        self._indices = {}
+        self._indices_name = {}
+        for index in product_dictionary['indices']:
+            index = camelcase_dict_to_snake(index)
+            index['id'] = str(index['id'])
+            if 'product_id' in index:
+                index['product_id'] = str(index['product_id'])
+            self._indices[index['id']] = Index(index)
+            self._indices_name[index['name'].lower()] = Index(index)
+
         return self
 
     @property
     def exchanges(self):
-        return self._exchanges.values()
+        return [v for v in self._exchanges.values()]
 
     @property
     def countries(self):
-        return self._countries_name.values()
+        return [c for c in self._countries_name.values()]
 
     @property
     def regions(self):
-        return self._regions.values()
+        return [r for r in self._regions.values()]
+
+    @property
+    def indices(self):
+        return [i for i in self._indices.values()]
+
+    @functools.lru_cache(32)
+    def index_by(
+            self,
+            name: Optional[str] = None,
+            id: Optional[int] = None,
+            ) -> Index:
+        if name is not None and id is not None:
+            raise AssertionError("Exactly one of (name, id) must be not None.")
+        if name is not None:
+            return self._indices_name[name.lower()]
+        if id is not None:
+            return self._indices[id]
 
     @functools.lru_cache(32)
     def exchange_by(
@@ -161,20 +289,40 @@ class ExchangeDictionary:
         if id is not None:
             return self._countries_id[id]
 
+    async def populate_indices_info(self, session: 'Session'):
+        """
+        Populate info attribute for all indices.
+        """
+        # Get ids
+        ids = [
+                i.product_id
+                for i in self._indices.values()
+                if i.product_id
+                ]
+        # Query data
+        resp = await webapi.get_products_info(session, ids)
+        # Populate info parameter for all indices
+        for index in self._indices.values():
+            if index.product_id:
+                index.info = Index._dict2info(
+                        session,
+                        resp['data'][index.product_id]
+                        )
+
 
 class Session(SessionCore):
     config: Config
     client: PAClient
-    exchange_dictionary: ExchangeDictionary
+    dictionary: ExchangeDictionary
 
     def __init__(self,
                  session_core: SessionCore,
-                 exchange_dictionary: ExchangeDictionary):
+                 dictionary: ExchangeDictionary):
         """
         Use `api.login` to get a populated Session instance.
 
         Build a `Session` instance from a `SessionCore` and an
-        exchange_dictionary.
+        ExchangeDictionary.
         """
         LOGGER.debug("Session.__init__: session_core %s", session_core)
         if session_core.config is None:
@@ -184,12 +332,19 @@ class Session(SessionCore):
         self.__dict__.update(copy.copy(session_core.__dict__))
         self.config = session_core.config
         self.client = session_core.client
-        self.exchange_dictionary = exchange_dictionary
+        self.dictionary = dictionary
+
+    @property
+    def exchange_dictionary(self):
+        print(
+            'Session.exchange_dictionary is deprecated. Please use '
+            'Session.dictionary instead.', file=sys.stderr)
+        return self.dictionary
 
 
-async def get_exchange_dictionary(session: Session) -> ExchangeDictionary:
+async def get_dictionary(session: Session) -> ExchangeDictionary:
     """
-    Populate session with exchange_dictionary.
+    Return a new ExchangeDictionary from Session.
     """
     return await ExchangeDictionary(session)
 
@@ -211,7 +366,6 @@ def _should_fail(credentials: Credentials) -> bool:
         return True
     else:
         return False
-
 
 
 async def login(
@@ -278,21 +432,21 @@ async def login(
 
     await webapi.get_config(session_core)
     await webapi.get_client_info(session_core)
-    exchange_dictionary = await get_exchange_dictionary(session_core)
+    dictionary = await get_dictionary(session_core)
     if session is not None:
         session.__dict__.update(copy.deepcopy(session_core))
-        session.exchange_dictionary = exchange_dictionary
+        session.dictionary = dictionary
     else:
-        return Session(session_core, exchange_dictionary)
+        return Session(session_core, dictionary)
     return session
 
 
-def check_session_exchange_dictionary(session: Session):
+def check_session_dictionary(session: Session):
     """
     Check that session exchange dictionary has been populated.
     Raise AssertionError if not.
     """
-    if session.exchange_dictionary is None:
+    if session.dictionary is None:
         raise AssertionError(
-            "session.exchange_dictionary is not set. "
+            "session.dictionary is not set. "
             "Use api.login to build your session or call ")

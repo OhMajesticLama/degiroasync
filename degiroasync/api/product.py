@@ -33,7 +33,7 @@ from ..core.helpers import dict_from_attr_list
 from ..core.helpers import camelcase_dict_to_snake
 from .session import Session
 from .session import Exchange
-from .session import check_session_exchange_dictionary
+from .session import check_session_dictionary
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -258,7 +258,7 @@ class ProductFactory:
                     # WARNING: There could be exchange_id key, but empty value,
                     # We don't want to set it here if that's the case
                     product_info['exchange'] = (
-                            session.exchange_dictionary.exchange_by(
+                            session.dictionary.exchange_by(
                                 id=product_info['exchange_id'])
                             )
                 # 2022.04 JSONclass poor compatibility with mypy
@@ -923,7 +923,7 @@ async def search_product(
 
     country_id = None
     if by_country is not None:
-        country = session.exchange_dictionary.country_by(
+        country = session.dictionary.country_by(
             name=by_country
                 )
         country_id = country.id
@@ -933,8 +933,8 @@ async def search_product(
         if isinstance(by_exchange, Exchange):
             exchange_id = by_exchange.id
         elif isinstance(by_exchange, str):
-            check_session_exchange_dictionary(session)
-            exchange = session.exchange_dictionary.exchange_by(
+            check_session_dictionary(session)
+            exchange = session.dictionary.exchange_by(
                 hiq_abbr=by_exchange)
             exchange_id = exchange.id
         else:

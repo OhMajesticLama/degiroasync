@@ -248,6 +248,36 @@ if RUN_INTEGRATION_TESTS:
             self.assertIn('isin', resp_json['products'][0], resp_json)
             self.assertIn('name', resp_json['products'][0], resp_json)
 
+        #async def test_search_product_exchange(self):
+        #    raise NotImplementedError()
+        #    session = await _IntegrationLogin._login()
+
+        #    search = "AIRBUS"
+        #    resp_json = await degiroasync.webapi.search_product(
+        #            session,
+        #            search)
+        #    self.assertIn('products', resp_json, resp_json)
+        #    self.assertGreaterEqual(len(resp_json['products']), 1)
+        #    self.assertIn('id', resp_json['products'][0], resp_json)
+        #    self.assertIn('isin', resp_json['products'][0], resp_json)
+        #    self.assertIn('name', resp_json['products'][0], resp_json)
+
+        async def test_search_product_by_index(self):
+            session = await _IntegrationLogin._login()
+            resp_json = await degiroasync.webapi.get_product_dictionary(
+                    session,
+                    )
+
+            index = session.exchange_dictionary.index_by(name='CAC 40')
+            resp_json = await degiroasync.webapi.search_product(
+                    session,
+                    index_id=index.id,
+                    limit=100
+                    )
+            self.assertIn('products', resp_json, resp_json)
+            # We should have 40 products in CAC 40
+            self.assertGreaterEqual(len(resp_json['products']), 40)
+
         async def test_product_dictionary(self):
             session = await _IntegrationLogin._login()
 
