@@ -807,6 +807,10 @@ async def _search_one(
             if attr is not None and p_json.get(key) != attr:
                 return False
         return True
+    if exchange_id is not None:
+        exchange = session.dictionary.exchange_by(id=exchange_id)
+        country = session.dictionary.country_by(name=exchange.country_name)
+        country_id = country.id
 
     resp_json = await webapi.search_product(
         session,
@@ -839,6 +843,9 @@ async def _search_one(
                      len(products), by_symbol)
         return products, n_unfiltered, total
 
+    elif total <= offset:
+        # It's expected to be empty here. Return.
+        return [], 0, total
     else:
         LOGGER.debug("No 'products' key in response. Stop.")
         raise ResponseError(f"No 'products' key in response {resp_json} ")
@@ -922,6 +929,8 @@ async def search_product(
             pass  # Could also be set without text deal with it after
         elif by_index is not None:
             pass  # Manage below
+        elif by_exchange is not None:
+            pass  # Manage below
         else:
             raise AssertionError(
                     "by_text is None and no search parameters was set or "
@@ -998,6 +1007,9 @@ async def search_product(
         # 20230713 FR symbols query, throttling at 10 queries per 1 second:
         #   - With gather+_search_one: 3.6s
         #   - With legacy sequential calls: 6.9s
+        # Waiting times could be further reduced by making a queue and an async
+        # generator for the consumer instead of using a gather here.
+        # However, consumption is less straightforward.
         answers = await asyncio.gather(
                     *[_search_one(**kwa) for kwa in args])
         for prods, _, _ in answers:

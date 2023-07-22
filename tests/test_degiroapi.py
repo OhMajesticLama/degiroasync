@@ -977,6 +977,21 @@ if RUN_INTEGRATION_TESTS:
                 # We should only have airbus products here
                 self.assertTrue('airbus' in product.info.name.lower())
 
+        async def test_search_product_exchange(self):
+            session = await _IntegrationLogin._login()
+            exchange_hiq = 'EPA'
+            products = await degiroasync.api.search_product(
+                    session,
+                    by_exchange=exchange_hiq)
+            self.assertGreater(len(products), 40)
+            # Let's see if we can find airbus
+            found = False
+            for product in products:
+                # We should only have airbus products here
+                if 'airbus' in product.info.name.lower():
+                    found = True
+            self.assertEqual(found, True)
+
         async def test_search_product_country(self):
             session = await _IntegrationLogin._login()
             products = await degiroasync.api.search_product(
