@@ -309,61 +309,64 @@ STOP_LIMITED.</p>
 <dt class="sig sig-object py" id="degiroasync.webapi.get_portfolio">
 <em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">get_portfolio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.get_portfolio" title="Permalink to this definition"></a></dt>
 <dd><p>Get portfolio web call.</p>
-<p>Example return:</p>
-<blockquote>
-<div><dl>
-<dt>{‘portfolio’: {‘isAdded’: True,</dt><dd><p>‘lastUpdated’: 1088,
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul>
+<li><p><em>Example dictionary portfolio</em></p></li>
+<li><p><em>.. code-block:: python</em> –</p>
+<dl>
+<dt>{‘portfolio’: {‘isAdded’: True,</dt><dd><p>’lastUpdated’: 1088,
 ‘name’: ‘portfolio’,
 ‘value’: [</p>
 <blockquote>
 <div><dl>
-<dt>{‘id’: ‘8614787’,</dt><dd><p>‘isAdded’: True,
+<dt>{‘id’: ‘8614787’,</dt><dd><p>’isAdded’: True,
 ‘name’: ‘positionrow’,
 ‘value’: [</p>
 <blockquote>
 <div><dl class="simple">
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘id’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘id’,
 ‘value’: ‘8614787’},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘positionType’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘positionType’,
 ‘value’: ‘PRODUCT’},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘size’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘size’,
 ‘value’: 100},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘price’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘price’,
 ‘value’: 73.0},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘value’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘value’,
 ‘value’: 7300.0},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘accruedInterest’},</p>
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘accruedInterest’},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘plBase’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘plBase’,
 ‘value’: {‘EUR’: -6716.901595272}},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘todayPlBase’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘todayPlBase’,
 ‘value’: {‘EUR’: -7300.0}},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘portfolioValueCorrection’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘portfolioValueCorrection’,
 ‘value’: 0},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘breakEvenPrice’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘breakEvenPrice’,
 ‘value’: 68.15},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘averageFxRate’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘averageFxRate’,
 ‘value’: 1},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘realizedProductPl’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘realizedProductPl’,
 ‘value’: 98.098404728},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘realizedFxPl’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘realizedFxPl’,
 ‘value’: 0},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘todayRealizedProductPl’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘todayRealizedProductPl’,
 ‘value’: 0.0},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘todayRealizedFxPl’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘todayRealizedFxPl’,
 ‘value’: 0}
 ]</p>
 </dd>
@@ -376,7 +379,7 @@ STOP_LIMITED.</p>
 </div></blockquote>
 </dd>
 <dt>},</dt><dd><dl>
-<dt>{‘id’: ‘EUR’,</dt><dd><p>‘isAdded’: True,
+<dt>{‘id’: ‘EUR’,</dt><dd><p>’isAdded’: True,
 ‘name’: ‘positionrow’,
 ‘value’: [</p>
 <blockquote>
@@ -430,17 +433,17 @@ STOP_LIMITED.</p>
 <p>},
 {‘id’: ‘USD’,</p>
 <blockquote>
-<div><p>‘isAdded’: True,
+<div><p>’isAdded’: True,
 ‘name’: ‘positionrow’,
 ‘value’: [{‘isAdded’: True,
 ‘name’: ‘id’,
 ‘value’: ‘USD’},</p>
 </div></blockquote>
 <dl class="simple">
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘positionType’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘positionType’,
 ‘value’: ‘CASH’},</p>
 </dd>
-<dt>{‘isAdded’: True,</dt><dd><p>‘name’: ‘size’,
+<dt>{‘isAdded’: True,</dt><dd><p>’name’: ‘size’,
 ‘value’: 0.0},</p>
 </dd>
 </dl>
@@ -831,7 +834,11 @@ STOP_LIMITED.</p>
 </dd>
 </dl>
 <p>}</p>
-</div></blockquote>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -969,6 +976,297 @@ STOP_LIMITED.</p>
 <li><p>ETF fees types.</p></li>
 <li><p>Countries.</p></li>
 </ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul>
+<li><p><em>Example JSON below, most rows were removed to keepsome structure</em></p></li>
+<li><p><em>readibility. Example from 2023.07.</em></p></li>
+<li><p><a href="#id19"><span class="problematic" id="id20">``</span></a>` JSON</p></li>
+<li><p><strong>{‘bondExchanges’</strong> (<em>[{‘country’: 905, ‘exchange’: 5001, ‘id’: 5001},</em>) –</p>
+<blockquote>
+<div><dl class="simple">
+<dt>{‘country’: 846,</dt><dd><p>’exchange’: 676,
+‘id’: 676,
+‘postfix’: ‘NYSE’},</p>
+</dd>
+</dl>
+<p>{‘country’: 957, ‘exchange’: 999, ‘id’: 999},
+{‘country’: 846,</p>
+<blockquote>
+<div><p>’exchange’: 663,
+‘id’: 663,
+‘postfix’: ‘NASDAQ’},</p>
+</div></blockquote>
+<p>{‘country’: 915, ‘exchange’: 608, ‘id’: 608}],</p>
+</div></blockquote>
+<dl>
+<dt>’bondIssuerTypes’: [{‘id’: 0,</dt><dd><blockquote>
+<div><p>’name’: ‘all’,
+‘translation’: ‘Koersen.step1.530’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘id’: 2,</dt><dd><p>’name’: ‘company’,
+‘translation’: ‘Koersen.step1.544’}],</p>
+</dd>
+</dl>
+</dd>
+<dt>’bondSortColumns’: [{‘id’: ‘exchangeHiqAbbr’},</dt><dd><p>{‘id’: ‘name’},
+{‘id’: ‘exchangeName’}],</p>
+</dd>
+<dt>’cfdExchanges’: [{‘country’: 906, ‘exchange’: 194, ‘id’: 194},</dt><dd><p>{‘country’: 975, ‘exchange’: 508, ‘id’: 508},
+{‘country’: 915, ‘exchange’: 608, ‘id’: 608}],</p>
+</dd>
+<dt>’cfdSortColumns’: [{‘id’: ‘exchangeHiqAbbr’},</dt><dd><p>{‘id’: ‘name’},
+{‘id’: ‘exchangeName’}],</p>
+</dd>
+<dt>’combinationExchanges’: [{‘id’: 1, ‘name’: ‘Euronext Amsterdam’},</dt><dd><p>{‘id’: 2, ‘name’: ‘Euronext Brussels’},
+{‘id’: 3, ‘name’: ‘Euronext Paris’}],</p>
+</dd>
+<dt>’countries’: [{‘id’: 908,</dt><dd><blockquote>
+<div><p>’name’: ‘FI’,
+‘region’: 1,
+‘translation’: ‘list.country.908’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘id’: 906,</dt><dd><p>’name’: ‘DE’,
+‘region’: 1,
+‘translation’: ‘list.country.906’}],</p>
+</dd>
+</dl>
+</dd>
+<dt>’etfAggregateTypes’: [{‘id’: ‘quoteCurrency’,</dt><dd><blockquote>
+<div><p>’name’: ‘quoteCurrency’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘id’: ‘totalExpenseRatioInterval’,</dt><dd><p>’name’: ‘totalExpenseRatioInterval’},</p>
+</dd>
+<dt>{‘id’: ‘administrator’,</dt><dd><p>’name’: ‘administrator’},</p>
+</dd>
+</dl>
+<p>{‘id’: ‘etpType’, ‘name’: ‘etpType’},
+{‘id’: ‘exchange’, ‘name’: ‘exchange’},
+{‘id’: ‘region’, ‘name’: ‘region’},
+{‘id’: ‘assetAllocation’,</p>
+<blockquote>
+<div><p>’name’: ‘assetAllocation’},</p>
+</div></blockquote>
+<p>{‘id’: ‘issuer’, ‘name’: ‘issuer’},
+{‘id’: ‘benchmark’, ‘name’: ‘benchmark’}],</p>
+</dd>
+<dt>’etfFeeTypes’: [{‘id’: 1,</dt><dd><blockquote>
+<div><p>’name’: ‘Trackers’,
+‘translation’: ‘contract.type.131’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘id’: 2,</dt><dd><p>’name’: ‘Free’,
+‘translation’: ‘translation.label.388’}],</p>
+</dd>
+</dl>
+</dd>
+<dt>’etfSortColumns’: [{‘id’: ‘quoteCurrency’},</dt><dd><p>{‘id’: ‘administrator’},
+{‘id’: ‘etpType’},
+{‘id’: ‘exchangeHiqAbbr’},
+{‘id’: ‘name’},
+{‘id’: ‘exchangeName’},
+{‘id’: ‘region’},
+{‘id’: ‘assetAllocation’},
+{‘id’: ‘benchmark’}],</p>
+</dd>
+<dt>’eurexCountries’: [{‘exchanges’: [{‘city’: ‘Helsinki’,</dt><dd><blockquote>
+<div><blockquote>
+<div><p>’code’: ‘HE’,
+‘country’: ‘FI’,
+‘hiqAbbr’: ‘HSE’,
+‘id’: 1001,
+‘micCode’: ‘XHEL’,
+‘name’: ‘OMX Helsinki’}],</p>
+</div></blockquote>
+<p>’id’: 908,
+‘name’: ‘FI’,
+‘underlyingExchangeIds’: [1001]},</p>
+</div></blockquote>
+<dl>
+<dt>{‘exchanges’: [{‘city’: ‘Frankfurt’,</dt><dd><blockquote>
+<div><p>’code’: ‘XETR’,
+‘country’: ‘DE’,
+‘hiqAbbr’: ‘XET’,
+‘id’: 194,
+‘micCode’: ‘XETR’,
+‘name’: ‘Xetra’}],</p>
+</div></blockquote>
+<p>’id’: 906,
+‘name’: ‘DE’,
+‘underlyingExchangeIds’: [194]}],</p>
+</dd>
+</dl>
+</dd>
+<dt>’exchanges’: [{‘city’: ‘Frankfurt’,</dt><dd><blockquote>
+<div><p>’code’: ‘CATS’,
+‘country’: ‘DE’,
+‘hiqAbbr’: ‘CAT’,
+‘id’: 190,
+‘micCode’: ‘CATS’,
+‘name’: ‘CATS’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘city’: ‘Amsterdam’,</dt><dd><p>’country’: ‘XX’,
+‘hiqAbbr’: ‘FSM’,
+‘id’: 10000,
+‘name’: ‘FundShare Matching’},</p>
+</dd>
+<dt>{‘city’: ‘Copenhagen’,</dt><dd><p>’code’: ‘CO’,
+‘country’: ‘DK’,
+‘hiqAbbr’: ‘OMK’,
+‘id’: 508,
+‘micCode’: ‘XCSE’,
+‘name’: ‘OMX Copenhagen’}],</p>
+</dd>
+</dl>
+</dd>
+<dt>’futureExchanges’: [{‘id’: 1, ‘name’: ‘Euronext Liffe’},</dt><dd><dl>
+<dt>{‘eurexCountries’: [908,</dt><dd><blockquote>
+<div><p>915,
+906],</p>
+</div></blockquote>
+<p>’id’: 2,
+‘name’: ‘Eurex’},</p>
+</dd>
+</dl>
+<p>{‘id’: 9, ‘name’: ‘COMEX’}],</p>
+</dd>
+<dt>’futureSortColumns’: [{‘id’: ‘exchangeHiqAbbr’},</dt><dd><p>{‘id’: ‘name’},
+{‘id’: ‘exchangeName’},
+{‘id’: ‘expirationDate’}],</p>
+</dd>
+<dt>’indices’: [{‘id’: 106002, ‘name’: ‘SDAX’},</dt><dd><p>{‘id’: 106001, ‘name’: ‘MDAX’},
+{‘id’: 121003, ‘name’: ‘SMIM’, ‘productId’: 11875105},
+{‘id’: 114003, ‘name’: ‘ISEQ Overall’},
+{‘id’: 121002, ‘name’: ‘SLI’, ‘productId’: 11875104}],</p>
+</dd>
+</dl>
+<p>’investmentFundAggregateTypes’: [{‘id’: ‘issuer’, ‘name’: ‘issuer’}],
+‘investmentFundFeeTypes’: [{‘id’: 0,</p>
+<blockquote>
+<div><blockquote>
+<div><p>’name’: ‘Rebate-free’,
+‘translation’: ‘translation.label.387’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘id’: 3,</dt><dd><p>’name’: ‘Rebate-free FREE’,
+‘translation’: ‘translation.label.386’}],</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl>
+<dt>’investmentFundSortColumns’: [{‘id’: ‘exchangeHiqAbbr’},</dt><dd><p>{‘id’: ‘name’},
+{‘id’: ‘exchangeName’}],</p>
+</dd>
+<dt>’leveragedAggregateTypes’: [{‘id’: ‘shortLong’, ‘name’: ‘shortLong’},</dt><dd><dl class="simple">
+<dt>{‘id’: ‘underlyingProductId’,</dt><dd><p>’name’: ‘underlyingProductId’},</p>
+</dd>
+</dl>
+<p>{‘id’: ‘exchange’, ‘name’: ‘exchange’},
+{‘id’: ‘underlying’, ‘name’: ‘underlying’},
+{‘id’: ‘issuer’, ‘name’: ‘issuer’},
+{‘id’: ‘expirationDateRange’,</p>
+<blockquote>
+<div><p>’name’: ‘expirationDateRange’}],</p>
+</div></blockquote>
+</dd>
+<dt>’leveragedSortColumns’: [{‘id’: ‘leverage’},</dt><dd><p>{‘id’: ‘financingLevel’},
+{‘id’: ‘stoploss’},
+{‘id’: ‘exchangeHiqAbbr’},
+{‘id’: ‘name’},
+{‘id’: ‘exchangeName’},
+{‘id’: ‘expirationDate’}],</p>
+</dd>
+<dt>’lookupSortColumns’: [{‘id’: ‘exchangeHiqAbbr’},</dt><dd><p>{‘id’: ‘name’},
+{‘id’: ‘exchangeName’},
+{‘id’: ‘productType’}],</p>
+</dd>
+<dt>’optionAggregateTypes’: [{‘id’: ‘month’, ‘name’: ‘month’},</dt><dd><dl class="simple">
+<dt>{‘id’: ‘derivativeExchange’,</dt><dd><p>’name’: ‘derivativeExchange’},</p>
+</dd>
+</dl>
+<p>{‘id’: ‘year’, ‘name’: ‘year’},
+{‘id’: ‘strike’, ‘name’: ‘strike’}],</p>
+</dd>
+<dt>’optionExchanges’: [{‘exchangeId’: 365, ‘id’: 11, ‘name’: ‘NYMEX’},</dt><dd><dl>
+<dt>{‘exchangeId’: 1006,</dt><dd><p>’id’: 1,
+‘name’: ‘Euronext Amsterdam’,
+‘underlyingExchangeIds’: [200, 212, 3001]},</p>
+</dd>
+<dt>{‘eurexCountries’: [908,</dt><dd><blockquote>
+<div><p>982,
+906],</p>
+</div></blockquote>
+<p>’exchangeId’: 185,
+‘id’: 5,
+‘name’: ‘Eurex’,
+‘underlyingExchangeIds’: [1001,</p>
+<blockquote>
+<div><p>320,
+608,
+194]},</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>{‘exchangeId’: 359, ‘id’: 9, ‘name’: ‘CME’}],</p>
+</dd>
+</dl>
+<p>’optionSortColumns’: [{‘id’: ‘strike’}, {‘id’: ‘expirationDate’}],
+‘productTypes’: [{‘briefTranslation’: ‘contract.type.brief.13’,</p>
+<blockquote>
+<div><blockquote>
+<div><p>’contractType’: ‘FND’,
+‘id’: 13,
+‘name’: ‘fund’,
+‘translation’: ‘contract.type.13’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘briefTranslation’: ‘contract.type.brief.8’,</dt><dd><p>’contractType’: ‘OPT’,
+‘id’: 8,
+‘name’: ‘option’,
+‘translation’: ‘contract.type.8’}],</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl>
+<dt>’regions’: [{‘id’: 1,</dt><dd><blockquote>
+<div><p>’name’: ‘Europe’,
+‘translation’: ‘translation.label.117’},</p>
+</div></blockquote>
+<dl class="simple">
+<dt>{‘id’: 2,</dt><dd><p>’name’: ‘America’,
+‘translation’: ‘translation.label.118’},</p>
+</dd>
+<dt>{‘id’: 3,</dt><dd><p>’name’: ‘Other’,
+‘translation’: ‘translation.label.121’}],</p>
+</dd>
+</dl>
+</dd>
+<dt>’stockCountries’: [{‘country’: 908,</dt><dd><blockquote>
+<div><p>’id’: 908,
+‘indices’: [112002, 16, 112001, 120005]},</p>
+</div></blockquote>
+<p>{‘country’: 849, ‘id’: 849, ‘indices’: [124001]},
+{‘country’: 905, ‘id’: 905, ‘indices’: [123001]},
+{‘country’: 906,</p>
+<blockquote>
+<div><p>’id’: 906,
+‘indices’: [6, 106002, 106003, 106001]}],</p>
+</div></blockquote>
+</dd>
+<dt>’stockSortColumns’: [{‘id’: ‘exchangeHiqAbbr’},</dt><dd><p>{‘id’: ‘name’},
+{‘id’: ‘exchangeName’}]}</p>
+</dd>
+</dl>
+</li>
+<li><p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -988,7 +1286,7 @@ STOP_LIMITED.</p>
 </dd>
 </dl>
 <p>Example return in json():
-<a href="#id19"><span class="problematic" id="id20">``</span></a>`
+<a href="#id25"><span class="problematic" id="id26">``</span></a>`
 {</p>
 <blockquote>
 <div><dl>
@@ -1020,8 +1318,8 @@ STOP_LIMITED.</p>
 </dl>
 <p>}</p>
 </div></blockquote>
-<section id="id21">
-<h2>}<a class="headerlink" href="#id21" title="Permalink to this heading"></a></h2>
+<section id="id27">
+<h2>}<a class="headerlink" href="#id27" title="Permalink to this heading"></a></h2>
 </section>
 </dd></dl>
 
@@ -1035,19 +1333,22 @@ If no <cite>session</cite> is provided, create one.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="degiroasync.webapi.search_product">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">search_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_txt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TYPEID</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.search_product" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.webapi.</span></span><span class="sig-name descname"><span class="pre">search_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_txt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TYPEID</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">country_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.webapi.search_product" title="Permalink to this definition"></a></dt>
 <dd><p>Access <cite>product_search</cite> endpoint.</p>
-<p>Example JSON response:
-{</p>
-<blockquote>
-<div><p>“offset”: 0,
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul>
+<li><p><em>Example JSON response below, will be returned as a Python dict.</em></p></li>
+<li><p><em>.. code-block:: JSON</em> –</p>
+<dl>
+<dt>{</dt><dd><p>“offset”: 0,
 “products”: [</p>
 <blockquote>
 <div><dl>
 <dt>{</dt><dd><p>“active”: true,
 “buyOrderTypes”: [</p>
 <blockquote>
-<div><p>“LIMIT”,
+<div><p>”LIMIT”,
 “MARKET”,
 “STOPLOSS”,
 “STOPLIMIT”</p>
@@ -1069,7 +1370,7 @@ If no <cite>session</cite> is provided, create one.</p>
 “orderBookDepthSecondary”: 0,
 “orderTimeTypes”: [</p>
 <blockquote>
-<div><p>“DAY”,
+<div><p>”DAY”,
 “GTC”</p>
 </div></blockquote>
 <p>],
@@ -1082,7 +1383,7 @@ If no <cite>session</cite> is provided, create one.</p>
 “qualitySwitchableSecondary”: false,
 “sellOrderTypes”: [</p>
 <blockquote>
-<div><p>“LIMIT”,
+<div><p>”LIMIT”,
 “MARKET”,
 “STOPLOSS”,
 “STOPLIMIT”</p>
@@ -1102,8 +1403,14 @@ If no <cite>session</cite> is provided, create one.</p>
 <p>}</p>
 </div></blockquote>
 <p>]</p>
-</div></blockquote>
+</dd>
+</dl>
 <p>}</p>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

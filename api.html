@@ -57,8 +57,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.Exchange"><code class="docutils literal notranslate"><span class="pre">Exchange</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary"><code class="docutils literal notranslate"><span class="pre">ExchangeDictionary</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary.exchange_by"><code class="docutils literal notranslate"><span class="pre">ExchangeDictionary.exchange_by()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary.populate_indices_info"><code class="docutils literal notranslate"><span class="pre">ExchangeDictionary.populate_indices_info()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.Index"><code class="docutils literal notranslate"><span class="pre">Index</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.Order"><code class="docutils literal notranslate"><span class="pre">Order</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.PriceSeries"><code class="docutils literal notranslate"><span class="pre">PriceSeries</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#degiroasync.api.PriceSeries.items"><code class="docutils literal notranslate"><span class="pre">PriceSeries.items()</span></code></a></li>
@@ -70,7 +72,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.TotalPortfolio"><code class="docutils literal notranslate"><span class="pre">TotalPortfolio</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.Transaction"><code class="docutils literal notranslate"><span class="pre">Transaction</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.check_order"><code class="docutils literal notranslate"><span class="pre">check_order()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_exchange_dictionary"><code class="docutils literal notranslate"><span class="pre">get_exchange_dictionary()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_dictionary"><code class="docutils literal notranslate"><span class="pre">get_dictionary()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_orders"><code class="docutils literal notranslate"><span class="pre">get_orders()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_portfolio"><code class="docutils literal notranslate"><span class="pre">get_portfolio()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#degiroasync.api.get_portfolio_total"><code class="docutils literal notranslate"><span class="pre">get_portfolio_total()</span></code></a></li>
@@ -205,7 +207,18 @@ must be called promptly as one_time_password expires frequently.</p>
 micCode (e.g. XPAR).</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="degiroasync.api.ExchangeDictionary.populate_indices_info">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">populate_indices_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.api.Session" title="degiroasync.api.session.Session"><span class="pre">Session</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.ExchangeDictionary.populate_indices_info" title="Permalink to this definition"></a></dt>
+<dd><p>Populate info attribute for all indices.</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="degiroasync.api.Index">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Index</span></span><a class="headerlink" href="#degiroasync.api.Index" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="degiroasync.api.Order">
@@ -264,7 +277,7 @@ micCode (e.g. XPAR).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="degiroasync.api.Session">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_core</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exchange_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary" title="degiroasync.api.session.ExchangeDictionary"><span class="pre">ExchangeDictionary</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.Session" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_core</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#degiroasync.core.SessionCore" title="degiroasync.core.core.SessionCore"><span class="pre">SessionCore</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary" title="degiroasync.api.session.ExchangeDictionary"><span class="pre">ExchangeDictionary</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#degiroasync.api.Session" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
@@ -312,9 +325,9 @@ than transaction_fee.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="degiroasync.api.get_exchange_dictionary">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_exchange_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.api.Session" title="degiroasync.api.session.Session"><span class="pre">Session</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary" title="degiroasync.api.session.ExchangeDictionary"><span class="pre">ExchangeDictionary</span></a></span></span><a class="headerlink" href="#degiroasync.api.get_exchange_dictionary" title="Permalink to this definition"></a></dt>
-<dd><p>Populate session with exchange_dictionary.</p>
+<dt class="sig sig-object py" id="degiroasync.api.get_dictionary">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">get_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#degiroasync.api.Session" title="degiroasync.api.session.Session"><span class="pre">Session</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#degiroasync.api.ExchangeDictionary" title="degiroasync.api.session.ExchangeDictionary"><span class="pre">ExchangeDictionary</span></a></span></span><a class="headerlink" href="#degiroasync.api.get_dictionary" title="Permalink to this definition"></a></dt>
+<dd><p>Return a new ExchangeDictionary from Session.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -430,23 +443,39 @@ avoid blocking account in case of inaccurate credentials.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="degiroasync.api.search_product">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">search_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session:</span> <span class="pre">~degiroasync.api.session.Session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_text:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_isin:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_symbol:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_exchange:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type_id:</span> <span class="pre">~degiroasync.core.constants.PRODUCT.TYPEID</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">TYPEID.STOCK</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ProductBase</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.api.search_product" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">degiroasync.api.</span></span><span class="sig-name descname"><span class="pre">search_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session:</span> <span class="pre">~degiroasync.api.session.Session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_text:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_isin:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_symbol:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_country:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_exchange:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_index:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~jsonloader.jsonloader.JSONclass.&lt;locals&gt;.decorator.&lt;locals&gt;.CustomJSONWrapper</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type_id:</span> <span class="pre">~degiroasync.core.constants.PRODUCT.TYPEID</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">TYPEID.STOCK</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ProductBase</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#degiroasync.api.search_product" title="Permalink to this definition"></a></dt>
 <dd><p>Access <cite>product_search</cite> endpoint.</p>
 <p>Exactly one of <cite>by_text</cite>, <cite>by_isin</cite>, <cite>by_symbol</cite> be set.
-This is done because endpoint API doesn’t return expected results
-with both text and ISIN search.</p>
-<dl class="simple">
-<dt>product_type_id</dt><dd><p>Restricts search to one type of products.</p>
+Note: API endpoint doesn’t return expected results with both text and
+ISIN search.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>by_text</strong> – As a search text in Degiro search field website.</p></li>
+<li><p><strong>by_isin</strong> – Will look-up products with provided ISIN identifier.</p></li>
+<li><p><strong>by_symbol</strong> – Product outputs will be filtered on their ‘symbol’.</p></li>
+<li><p><strong>by_country</strong> – Products matching this argument, string must be ISO 3166-1 alpha-2
+2 letters code.</p></li>
+<li><p><strong>product_type_id</strong> – Restricts search to one type of products.
+See <code class="xref py py-class docutils literal notranslate"><span class="pre">TYPEID</span></code></p></li>
+<li><p><strong>by_exchange</strong> – Restricts results to products in an exchange. Can be either an
+Exchange instance or an <cite>hiq_abbr</cite> str (e.g. EPA for Paris, AEX
+for Amsterdam)</p></li>
+<li><p><strong>by_index</strong> – Restricts results to products in an index. Can be either an
+Index instance or an index <cite>name</cite> str.</p></li>
+<li><p><strong>product_type_id</strong> – Restricts search to one type of products.</p></li>
+<li><p><strong>max_iter</strong> – Pull <cite>max_iter</cite> pages of results. If <cite>None</cite>, don’t stop until end
+is reached. Default value: 1000.</p></li>
+</ul>
 </dd>
-<dt>by_exchange</dt><dd><p>Restricts results to products in a exchange. Can be either an Exchange
-instance or an <cite>hiq_abbr</cite> str (e.g. EPA for Paris, AEX for Amsterdam)</p>
-</dd>
-<dt>max_iter</dt><dd><p>Pull <cite>max_iter</cite> pages of results. If <cite>None</cite>, don’t stop until end is
-reached. Default value: 1000.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>Return a list of ProductBase objects returned by Degiro for</em></p></li>
+<li><p><cite>search_txt</cite> attribute.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
-<p>Return a list of ProductBase objects returned by Degiro for <cite>search_txt</cite>
-attribute.</p>
 </dd></dl>
 
 </section>
