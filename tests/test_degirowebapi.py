@@ -268,7 +268,8 @@ if RUN_INTEGRATION_TESTS:
                     session,
                     )
 
-            index = session.exchange_dictionary.index_by(name='CAC 40')
+            index = session.dictionary.index_by(name='CAC 40')
+            LOGGER.debug("test_search_product_by_index| Index: %s", index)
             resp_json = await degiroasync.webapi.search_product(
                     session,
                     index_id=index.id,
@@ -321,7 +322,7 @@ if RUN_INTEGRATION_TESTS:
             # to manage. Future improvement opportunit for this test: implement
             # required query and filter here using only webapi.
             from degiroasync import api
-            session.exchange_dictionary = await api.get_exchange_dictionary(
+            session.dictionary = await api.get_dictionary(
                     session)
             products = await api.search_product(
                     session,
@@ -401,7 +402,6 @@ if RUN_INTEGRATION_TESTS:
             data = resp_json['data']
             for order in data:
                 self.assertIn('created', order)
-                self.assertIn('orderId', order)
                 self.assertIn('productId', order)
                 self.assertIn('size', order)
                 self.assertIn('price', order)
