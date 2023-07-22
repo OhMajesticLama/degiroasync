@@ -905,14 +905,18 @@ async def search_product(
         sessionId=session.config.session_id,
         requireTotal=True
     )
-    if search_txt is not None:
-        params['searchText'] = search_txt
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
     if country_id is not None:
         params['stockCountryId'] = country_id
     if index_id is not None:
         params['indexId'] = index_id
+        if search_txt is None:
+            # 202307: Searching by indexId with no 'searchTxt' triggers
+            # internal server error. We must provide an empty string
+            search_txt = ''
+    if search_txt is not None:
+        params['searchText'] = search_txt
     LOGGER.debug("webapi.search_product params| %s", params)
     async with session as client:
         response = await client.get(url,
