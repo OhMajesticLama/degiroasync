@@ -129,8 +129,9 @@ __all__ = [
             Transaction,
 
             # Constants
-            #PRODUCT,
-            #ORDER,
-            #PRICE,
-            #POSITION
-)]
+            # PRODUCT,
+            # ORDER,
+            # PRICE,
+            # POSITION
+        )
+        ]

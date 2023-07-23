@@ -5,7 +5,6 @@ from typing import Optional
 import functools
 import logging
 import pprint
-import dataclasses
 import copy
 
 from jsonloader import JSONclass

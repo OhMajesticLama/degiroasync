@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Dict, Any, Iterable, Callable, Union, Coroutine
+from typing import List, Dict, Any, Iterable, Callable, Coroutine
 from typing import Optional
 import logging
 import sys
@@ -281,7 +281,8 @@ def dict_from_attr_list(
     dict_out = {}
     for attr in attributes_list:
         if 'name' not in attr or 'value' not in attr:
-            message = f"A provided params does not have a 'name' or 'value': {attr}"
+            message = (f"A provided params does not have a 'name' or 'value': "
+                       f"{attr}")
             LOGGER.info(message)
             if not ignore_error:
                 raise ValueError(message)

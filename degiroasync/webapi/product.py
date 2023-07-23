@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Any, List, Dict
+from typing import Any, List, Dict
 from typing import Optional
 
 from ..core import SessionCore, URLs

@@ -14,7 +14,6 @@ from ..core import ORDER
 from ..core import TRANSACTION
 from ..core import LOGGER_NAME
 from ..core import camelcase_dict_to_snake
-from ..core.helpers import dict_from_attr_list
 
 
 LOGGER = logging.getLogger(LOGGER_NAME)
@@ -44,7 +43,24 @@ class Order:
     #: Not always available for "Outstanding" orders
     status: Optional[ORDER.STATUS] = None
 
-# {'id': 182722888, 'productId': 65153, 'date': '2020-02-07T09:00:10+01:00', 'buysell': 'B', 'price': 36.07, 'quantity': 20, 'total': -721.4, 'orderTypeId': 0, 'counterParty': 'MK', 'transfered': False, 'fxRate': 0, 'totalInBaseCurrency': -721.4, 'feeInBaseCurrency': -0.29, 'totalPlusFeeInBaseCurrency': -721.69, 'transactionTypeId': 0, 'tradingVenue': 'XPAR'})
+    # {
+    # 'id': 182722888,
+    # 'productId': 65153,
+    # 'date': '2020-02-07T09:00:10+01:00',
+    # 'buysell': 'B',
+    # 'price': 36.07,
+    # 'quantity': 20,
+    # 'total': -721.4,
+    # 'orderTypeId': 0,
+    # 'counterParty': 'MK',
+    # 'transfered': False,
+    # 'fxRate': 0,
+    # 'totalInBaseCurrency': -721.4,
+    # 'feeInBaseCurrency': -0.29,
+    # 'totalPlusFeeInBaseCurrency': -721.69,
+    # 'transactionTypeId': 0,
+    # 'tradingVenue': 'XPAR'
+    # }
 
 
 @JSONclass(annotations=True, annotations_type=True)

@@ -2,14 +2,11 @@ import logging
 from typing import Union, Dict, Any
 import datetime
 
-import httpx
-
 from .product import get_trading_update
 from ..core import SessionCore
 from ..core import URLs
 from ..core import constants
 from ..core import ORDER
-from ..core.constants import TIMEOUT
 from ..core import join_url
 from ..core import check_session_client
 from ..core import check_session_config
@@ -55,23 +52,30 @@ async def confirm_order(
     Check `degiroasync.core.ORDER` for details.
 
     Example data with request:
-    ```
-    {
-        "buySell": "BUY",
-        "orderType": 0,
-        "price": 10,
-        "productId": "96008",
-        "size": 1,
-        "timeType": 1
-    }
-    ```
+
+    .. code-block:: python
+        {
+            "buySell": "BUY",
+            "orderType": 0,
+            "price": 10,
+            "productId": "96008",
+            "size": 1,
+            "timeType": 1
+        }
 
     Example JSON response:
-    ```
-    # TODO: Next time we place an order
-    {'data': {'confirmationId': 'a8e49a7e-4d79-4f21-961b-988dc0806d09', 'freeSpaceNew': 55395, 'transactionFee': 0.5, 'showExAnteReportLink': True}}
 
-    ```
+    .. code-block:: python
+
+        {
+            'data': {
+            'confirmationId': 'a8e49a7e-4d79-4f21-961b-988dc0806d09',
+            'freeSpaceNew': 55395,
+            'transactionFee': 0.5,
+            'showExAnteReportLink': True
+            }
+        }
+
     """
     # This call will not have integration tests to prevent misplaced orders
     # All changes must be manually verified to work as intended.
@@ -281,7 +285,7 @@ async def get_orders(session: SessionCore) -> Dict[str, Any]:
         params={
             'orders': 0,
             }
-            #'historicalOrders': 0}
+        # 'historicalOrders': 0}
     )
     LOGGER.debug("webapi.get_orders| orders %s", orders)
     orders = {
