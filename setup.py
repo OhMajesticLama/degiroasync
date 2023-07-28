@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     setuptools.setup(
         name="degiroasync",
-        version="0.20.0",
+        version="0.21.0",
         author_email="ohmajesticlama@gmail.com",
         description=description,
         long_description=long_description,
@@ -26,6 +26,7 @@ if __name__ == '__main__':
                 'https://ohmajesticlama.github.io/degiroasync/index.html'
             },
         packages=setuptools.find_packages(),
+        python_requires=">=3.8",
         install_requires=[
             'httpx >= 0.21.3, < 1.0',
             'jsonloader >= 0.8.1, < 1.0',
