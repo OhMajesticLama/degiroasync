@@ -1,4 +1,4 @@
-from typing import Union, Dict, Any, Optional
+from typing import Dict, Any, Optional
 import logging
 import json
 import base64
@@ -9,7 +9,6 @@ import time
 
 from ..core.constants import LOGGER_NAME
 from ..core.constants import LOGIN
-from ..core.constants import TIMEOUT
 from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import check_session_config
 from ..core.helpers import check_response
@@ -284,7 +283,10 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
                                      {'id': 'underlyingProductId',
                                       'name': 'underlyingProductId'},
                                      {'id': 'exchange', 'name': 'exchange'},
-                                     {'id': 'underlying', 'name': 'underlying'},
+                                     {
+                                        'id': 'underlying',
+                                        'name': 'underlying'
+                                     },
                                      {'id': 'issuer', 'name': 'issuer'},
                                      {'id': 'expirationDateRange',
                                       'name': 'expirationDateRange'}],

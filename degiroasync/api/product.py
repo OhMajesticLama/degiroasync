@@ -97,7 +97,7 @@ class ProductFactory:
     @classmethod
     async def init_batch(
             cls,
-            session: SessionCore,
+            session: Session,
             attributes_iter: Iterable[Dict[str, Any]],
             size=50
     ) -> AsyncGenerator[ProductBase, None]:
@@ -116,7 +116,7 @@ class ProductFactory:
 
         .. code-block:: python
 
-            import asyncio
+            ...  # This code should be inside an async callable
             products_attrs = (
                         {'id': 1, 'product_type_id': PRODUCT.TYPEID.STOCK},
                         {'id': 2, 'product_type_id': PRODUCT.TYPEID.STOCK},
@@ -251,7 +251,6 @@ class ProductFactory:
                         "api.ProductFactory.init_product| type_id %s class %s",
                         product_type_id, inst_cls)
                 product_info = camelcase_dict_to_snake(product_info)
-                #if inst_cls is Stock:
                 if (
                         product_info.get('exchange_id')
                         and issubclass(inst_cls, Stock)
@@ -378,7 +377,22 @@ class Position:
     portfolio_value_correction: Union[float, int]
 
     # Example camel case JSON:
-# {'id': '8217023', 'position_type': 'PRODUCT', 'size': 70, 'price': 55.39, 'value': 3877.3, 'pl_base': {'EUR': -4796.53}, 'today_pl_base': {'EUR': -3877.3}, 'portfolio_value_correction': 0, 'break_even_price': 68.36, 'average_fx_rate': 1, 'realized_product_pl': -11.33, 'realized_fx_pl': 0, 'today_realized_product_pl': 0.0, 'today_realized_fx_pl': 0}
+    # {
+    # 'id': '8217023',
+    # 'position_type': 'PRODUCT',
+    # 'size': 70,
+    # 'price': 55.39,
+    # 'value': 3877.3,
+    # 'pl_base': {'EUR': -4796.53},
+    # 'today_pl_base': {'EUR': -3877.3},
+    # 'portfolio_value_correction': 0,
+    # 'break_even_price': 68.36,
+    # 'average_fx_rate': 1,
+    # 'realized_product_pl': -11.33,
+    # 'realized_fx_pl': 0,
+    # 'today_realized_product_pl': 0.0,
+    # 'today_realized_fx_pl': 0
+    # }
 
 
 async def get_portfolio(
@@ -584,7 +598,8 @@ class PriceSeries(PriceSeriesTime):
     def iterrows(self) -> Iterable[Dict[str, Union[datetime.datetime, float]]]:
         """
         Provide data by columns, can be fed directly to instantiate a
-        `pandas.DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`
+        `pandas.DataFrame
+        <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`_
 
         With `pandas.DataFrame`:
 
@@ -633,7 +648,7 @@ class PriceSeries(PriceSeriesTime):
 
     @property
     def date(self):
-        #print(
+        # print(
         #        "degiroasync.PriceSeries.date is deprecated and will be "
         #        "removed in a future version. "
         #        "Please use PriceSeries.items() or PriceSeries.iterrows().",
@@ -643,7 +658,7 @@ class PriceSeries(PriceSeriesTime):
 
     @property
     def price(self) -> Sequence[Union[float, Sequence[float]]]:
-        #print(
+        # print(
         #        "degiroasync.PriceSeries.price is deprecated and will be "
         #        "removed in a future version. "
         #        "Please use PriceSeries.items() or PriceSeries.iterrows()",
