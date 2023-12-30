@@ -179,25 +179,18 @@ STOP_LIMITED.</p>
 </dd>
 </dl>
 <p>Check <cite>degiroasync.core.ORDER</cite> for details.</p>
-<p>Example data with request:
-<a href="#id7"><span class="problematic" id="id8">``</span></a>`
-{</p>
-<blockquote>
-<div><p>“buySell”: “BUY”,
-“orderType”: 0,
-“price”: 10,
-“productId”: “96008”,
-“size”: 1,
-“timeType”: 1</p>
-</div></blockquote>
-<section id="id9">
-<h2>}<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
-<p>Example JSON response:
-<a href="#id10"><span class="problematic" id="id11">``</span></a>`
-# TODO: Next time we place an order
-{‘data’: {‘confirmationId’: ‘a8e49a7e-4d79-4f21-961b-988dc0806d09’, ‘freeSpaceNew’: 55395, ‘transactionFee’: 0.5, ‘showExAnteReportLink’: True}}</p>
-<p><a href="#id12"><span class="problematic" id="id13">``</span></a><a href="#id14"><span class="problematic" id="id15">`</span></a></p>
-</section>
+<p>Example data with request:</p>
+<p>Example JSON response:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;confirmationId&#39;</span><span class="p">:</span> <span class="s1">&#39;a8e49a7e-4d79-4f21-961b-988dc0806d09&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;freeSpaceNew&#39;</span><span class="p">:</span> <span class="mi">55395</span><span class="p">,</span>
+    <span class="s1">&#39;transactionFee&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="s1">&#39;showExAnteReportLink&#39;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -272,7 +265,7 @@ STOP_LIMITED.</p>
 </dd>
 </dl>
 <p>Example return in json():
-<a href="#id16"><span class="problematic" id="id17">``</span></a>`
+<a href="#id7"><span class="problematic" id="id8">``</span></a>`
 {</p>
 <blockquote>
 <div><dl>
@@ -302,8 +295,8 @@ STOP_LIMITED.</p>
 </dl>
 <p>}</p>
 </div></blockquote>
-<section id="id18">
-<h2>}<a class="headerlink" href="#id18" title="Link to this heading"></a></h2>
+<section id="id9">
+<h2>}<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
 </section>
 </dd></dl>
 
@@ -983,7 +976,7 @@ STOP_LIMITED.</p>
 <dd class="field-odd"><p><ul>
 <li><p><em>Example JSON below, most rows were removed to keepsome structure</em></p></li>
 <li><p><em>readibility. Example from 2023.07.</em></p></li>
-<li><p><a href="#id19"><span class="problematic" id="id20">``</span></a>` JSON</p></li>
+<li><p><a href="#id10"><span class="problematic" id="id11">``</span></a>` JSON</p></li>
 <li><p><strong>{‘bondExchanges’</strong> (<em>[{‘country’: 905, ‘exchange’: 5001, ‘id’: 5001},</em>) –</p>
 <blockquote>
 <div><dl class="simple">
@@ -1168,7 +1161,12 @@ STOP_LIMITED.</p>
 </dd>
 </dl>
 <p>{‘id’: ‘exchange’, ‘name’: ‘exchange’},
-{‘id’: ‘underlying’, ‘name’: ‘underlying’},
+{</p>
+<blockquote>
+<div><p>’id’: ‘underlying’,
+‘name’: ‘underlying’</p>
+</div></blockquote>
+<p>},
 {‘id’: ‘issuer’, ‘name’: ‘issuer’},
 {‘id’: ‘expirationDateRange’,</p>
 <blockquote>
@@ -1264,7 +1262,7 @@ STOP_LIMITED.</p>
 </dd>
 </dl>
 </li>
-<li><p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p></li>
+<li><p><a href="#id12"><span class="problematic" id="id13">``</span></a><a href="#id14"><span class="problematic" id="id15">`</span></a></p></li>
 </ul>
 </p>
 </dd>
@@ -1288,7 +1286,7 @@ STOP_LIMITED.</p>
 </dd>
 </dl>
 <p>Example return in json():
-<a href="#id25"><span class="problematic" id="id26">``</span></a>`
+<a href="#id16"><span class="problematic" id="id17">``</span></a>`
 {</p>
 <blockquote>
 <div><dl>
@@ -1320,8 +1318,8 @@ STOP_LIMITED.</p>
 </dl>
 <p>}</p>
 </div></blockquote>
-<section id="id27">
-<h2>}<a class="headerlink" href="#id27" title="Link to this heading"></a></h2>
+<section id="id18">
+<h2>}<a class="headerlink" href="#id18" title="Link to this heading"></a></h2>
 </section>
 </dd></dl>
 
