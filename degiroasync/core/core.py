@@ -269,8 +269,7 @@ class URLs:
                     )
         url = join_url(
             config.trading_url,
-            f'v5/update/{client.int_account}',
-            f';jsessionid={jsessionid}')
+            f'v5/update/{client.int_account};jsessionid={jsessionid}')
         LOGGER.debug('get_portfolio_url| %s', url)
         return url
 
