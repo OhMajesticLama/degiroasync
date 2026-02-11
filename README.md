@@ -1,5 +1,7 @@
 # DegiroAsync
 
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/degiroasync?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/degiroasync)
+
 ## Documentation
 
 Check out the [online documentation](https://ohmajesticlama.github.io/degiroasync/index.html).
