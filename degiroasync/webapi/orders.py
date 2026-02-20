@@ -12,6 +12,7 @@ from ..core import check_session_client
 from ..core import check_session_config
 from ..core.helpers import check_response
 from ..core.helpers import dict_from_attr_list
+from ..core.constants import HEADERS_DEFAULT
 
 
 LOGGER = logging.getLogger(constants.LOGGER_NAME)
@@ -112,6 +113,7 @@ async def confirm_order(
             url,
             params=params,
             json=data,
+            headers=HEADERS_DEFAULT,
         )
     check_response(response)
     resp_json = response.json()
@@ -236,10 +238,7 @@ async def check_order(
             url,
             params=params,
             json=data,
-            headers={
-                'content-type': 'application/json;charset=UTF-8'
-            },
-            cookies=session._cookies
+            headers=HEADERS_DEFAULT,
         )
     check_response(response)
     resp_json = response.json()
@@ -361,10 +360,7 @@ async def get_orders_history(
         response = await client.get(
             url,
             params=params,
-            headers={
-                'content-type': 'application/json'
-            },
-            cookies=session._cookies
+            headers=HEADERS_DEFAULT,
         )
     check_response(response)
     resp_json = response.json()
@@ -435,10 +431,7 @@ async def get_transactions(
         response = await client.get(
             url,
             params=params,
-            headers={
-                'content-type': 'application/json'
-            },
-            cookies=session._cookies
+            headers=HEADERS_DEFAULT,
         )
     check_response(response)
     resp_json = response.json()

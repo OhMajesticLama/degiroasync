@@ -412,7 +412,7 @@ if RUN_INTEGRATION_TESTS:
                 self.assertIn('type', order)
                 self.assertIn('status', order)
                 self.assertIn('last', order)
-                self.assertIn('isActive', order)
+                self.assertIn('active', order)
                 self.assertIn('currentTradedSize', order)
                 self.assertIn('totalTradedSize', order)
 

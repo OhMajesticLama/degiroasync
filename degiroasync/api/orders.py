@@ -38,7 +38,7 @@ class Order:
     total_traded_size: int = 0
     # 'CREATE' or ... ?
     type: Optional[str] = None
-    is_active: bool
+    active: bool
 
     #: Not always available for "Outstanding" orders
     status: Optional[ORDER.STATUS] = None
@@ -61,6 +61,12 @@ class Order:
     # 'transactionTypeId': 0,
     # 'tradingVenue': 'XPAR'
     # }
+    @property
+    def is_active(self):
+        LOGGER.warning("Order.is_active is deprecated."
+            " It has been removed from Degiro web API and "
+            "will be removed from degiroasync.")
+        return self.is_active
 
 
 @JSONclass(annotations=True, annotations_type=True)
@@ -186,12 +192,12 @@ async def get_orders(
     orders_dict = orders_current_resp['orders']
     del orders_current_resp
     for order in orders_dict:
-        if 'isActive' not in order and 'created' not in order:
+        if 'active' not in order and 'created' not in order:
             # If no information and not created, consider order not active.
-            # It was chosen to mark isActive = False explicitly instead of
+            # It was chosen to mark active = False explicitly instead of
             # having an Optional is_active attribute as a None might easily
             # be misinterpreted as False by clients.
-            order['isActive'] = False
+            order['active'] = False
 
     orders_history_dict = orders_history_resp['data']
     LOGGER.debug("get_orders orders_dict| %s", orders_dict)
