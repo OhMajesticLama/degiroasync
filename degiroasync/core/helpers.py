@@ -432,6 +432,7 @@ class ThrottlingClient:
         self._count_open = 0
         self._kwargs = kwargs
 
+    @staticmethod
     def _throttle(method):
         "Decorator to wrap method to add throttling capabilities."
         @functools.wraps(method)
@@ -471,7 +472,7 @@ class ThrottlingClient:
         if self._async_client is None:
             self._async_client = httpx.AsyncClient(**self._kwargs)
         if self._client_open is None:
-            self._client_open = await self._async_client.__aenter__()
+            self._client_open = await self._async_client.__aenter__()  # type: ignore  # checking it just before.
         self._count_open += 1
         return self
 

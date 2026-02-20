@@ -7,7 +7,7 @@ import hmac
 import hashlib
 import time
 
-from ..core.constants import LOGGER_NAME
+from ..core.constants import HEADERS_DEFAULT, LOGGER_NAME
 from ..core.constants import LOGIN
 from ..core import Credentials, SessionCore, URLs, Config, PAClient
 from ..core import check_session_config
@@ -41,10 +41,18 @@ async def login(
     }
     async with _LOGIN_THROTTLE as client:
         LOGGER.debug("login| url %s", url)
-        response = await client.post(url, content=json.dumps(payload))
+        response = await client.post(
+            url,
+            content=json.dumps(payload),
+            headers=HEADERS_DEFAULT,
+        )
         LOGGER.debug("login| response %s", response.__dict__)
 
-        response_load = response.json()
+        try:
+            response_load = response.json()
+        except json.JSONDecodeError:
+            LOGGER.error("Login error. Abort. Response content: %s", response.content)
+            raise
 
         if response_load['status'] == LOGIN.TOTP_NEEDED:
             # totp needed
@@ -64,7 +72,8 @@ async def login(
             response = await client.post(
                 url,
                 content=json.dumps(payload),
-                cookies=response.cookies)
+                headers=HEADERS_DEFAULT,
+            )
             LOGGER.debug(response.__dict__)
             LOGGER.debug(response.json())
 
@@ -86,7 +95,10 @@ async def get_config(session: SessionCore) -> SessionCore:
     """
     _check_active_session(session)
     async with session as client:
-        res = await client.get(URLs.CONFIG, cookies=session._cookies)
+        res = await client.get(
+            URLs.CONFIG,
+            headers=HEADERS_DEFAULT,
+        )
 
     check_response(res)
     config = Config(camelcase_dict_to_snake(res.json()['data']))
@@ -106,7 +118,8 @@ async def get_client_info(session: SessionCore) -> SessionCore:
         res = await client.get(
             url,
             params={'sessionId': session._cookies[session.JSESSIONID]},
-            cookies=session._cookies)
+            headers=HEADERS_DEFAULT,
+        )
 
     check_response(res)
     resp_data = res.json()['data']
@@ -124,7 +137,7 @@ async def get_account_info(session: SessionCore) -> SessionCore:
     url = URLs.get_account_info_url(session)
     async with session as client:
         res = await client.get(url,
-                               cookies=session._cookies
+                               headers=HEADERS_DEFAULT,
                                )
     check_response(res)
     res_json = res.json()
@@ -363,8 +376,8 @@ async def get_product_dictionary(session: SessionCore) -> Dict[str, Any]:
     )
     async with session as client:
         response = await client.get(url,
-                                    cookies=session._cookies,
-                                    params=params
+                                    params=params,
+                                    headers=HEADERS_DEFAULT,
                                     )
     check_response(response)
     LOGGER.debug("webapi.get_product_dictionary response| %s", response.json())

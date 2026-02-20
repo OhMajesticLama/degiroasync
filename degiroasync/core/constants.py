@@ -294,6 +294,21 @@ class POSITION:
     class TYPE(StrEnum):
         PRODUCT = 'PRODUCT'
 
+HEADERS_DEFAULT = {
+        "Host": "trader.degiro.nl",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-GB,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Origin": "https://trader.degiro.nl",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "Connection": "keep-alive",
+        "Priority": "u=0",
+        "TE": "trailers",
+    }
 
 # HTTP Requests global timeout, in seconds. DEGIRO endpoints are sometimes
 # a bit slow to answer, maybe due to endpoint throttling: this is necessary

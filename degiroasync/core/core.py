@@ -153,7 +153,7 @@ class PAClient:
     id: Union[str, None]
     int_account: Union[int, None]
     is_allocation_available: Union[bool, None]
-    is_am_client_active: Union[bool, None]
+    #is_am_client_active: Union[bool, None]
 
 
 @dataclasses.dataclass
@@ -213,7 +213,8 @@ class SessionCore:
             self._http_client = ThrottlingClient(
                     max_requests=self._max_requests_default,
                     period_seconds=self._period_seconds_default,
-                    timeout=TIMEOUT
+                    timeout=TIMEOUT,
+                    cookies=self._cookies
                     )
         return await self._http_client.__aenter__()
 
