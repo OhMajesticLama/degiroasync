@@ -9,6 +9,7 @@ from ..core import check_session_client
 from ..core.constants import LOGGER_NAME
 from ..core.constants import PRICE
 from ..core.constants import PRODUCT
+from ..core.constants import HEADERS_DEFAULT
 from ..core.helpers import check_response
 
 
@@ -559,12 +560,12 @@ async def get_products_info(
     async with session as httpxclient:
         response = await httpxclient.post(
             url,
-            cookies=session.cookies,
             params={
                 'intAccount': client.int_account,
                 'sessionId': config.session_id
             },
-            json=products_ids
+            json=products_ids,
+            headers=HEADERS_DEFAULT,
         )
         try:
             check_response(response)
@@ -596,7 +597,7 @@ async def get_company_profile(
     async with session as httpclient:
         response = await httpclient.get(
             url,
-            cookies=session.cookies,
+            headers=HEADERS_DEFAULT,
             params={
                 'intAccount': client.int_account,
                 'sessionId': config.session_id
@@ -622,7 +623,7 @@ async def get_news_by_company(
     async with session as httpxclient:
         response = await httpxclient.get(
             url,
-            cookies=session.cookies,
+            headers=HEADERS_DEFAULT,
             params={
                 'isin': isin,
                 'limit': limit,
@@ -779,8 +780,11 @@ async def get_price_series(
         # 2023: Cookies are not needed for that call.
         # Since it looks like a third party, don't share session id if not
         # needed.
-        response = await client.get(url,
-                                    params=params)
+        response = await client.get(
+            url,
+            params=params,
+            headers=HEADERS_DEFAULT,
+        )
     check_response(response)
     resp_json = response.json()
     LOGGER.debug('get_price_series response| %s', resp_json)
@@ -810,9 +814,10 @@ async def get_trading_update(
     """
     url = URLs.get_portfolio_url(session)
     async with session as client:
-        response = await client.get(url,
-                                    cookies=session._cookies,
-                                    params=params)
+        response = await client.get(
+            url,
+            headers=HEADERS_DEFAULT,
+            params=params)
 
     check_response(response)
     LOGGER.debug("get_trading_update| %s", response.json())
@@ -835,67 +840,100 @@ async def search_product(
     -------
 
     Example JSON response below, will be returned as a Python dict.
+    Since move to `product_search_v2`, results are grouped by ISIN.
+    This impact ISIN that are traded on different exchanges,
+    for example in 2026, AMD stock ISIN is traded on 3 exchanges with the same.
 
     .. code-block:: JSON
 
-        {
-            "offset": 0,
-            "products": [
-                {
-                    "active": true,
-                    "buyOrderTypes": [
-                        "LIMIT",
-                        "MARKET",
-                        "STOPLOSS",
-                        "STOPLIMIT"
-                    ],
-                    "category": "B",
-                    "closePrice": 113.3,
-                    "closePriceDate": "2022-02-02",
-                    "contractSize": 1.0,
-                    "currency": "EUR",
-                    "exchangeId": "710",
-                    "feedQuality": "R",
-                    "feedQualitySecondary": "CX",
-                    "id": "96008",
-                    "isin": "NL0000235190",
-                    "name": "AIRBUS",
-                    "onlyEodPrices": false,
-                    "orderBookDepth": 0,
-                    "orderBookDepthSecondary": 0,
-                    "orderTimeTypes": [
-                        "DAY",
-                        "GTC"
-                    ],
-                    "productBitTypes": [],
-                    "productType": "STOCK",
-                    "productTypeId": 1,
-                    "qualitySwitchFree": false,
-                    "qualitySwitchFreeSecondary": false,
-                    "qualitySwitchable": false,
-                    "qualitySwitchableSecondary": false,
-                    "sellOrderTypes": [
-                        "LIMIT",
-                        "MARKET",
-                        "STOPLOSS",
-                        "STOPLIMIT"
-                    ],
-                    "strikePrice": -0.0001,
-                    "symbol": "AIR",
-                    "tradable": true,
-                    "vwdId": "360114899",
-                    "vwdIdSecondary": "955000256",
-                    "vwdIdentifierType": "issueid",
-                    "vwdIdentifierTypeSecondary": "issueid",
-                    "vwdModuleId": 1,
-                    "vwdModuleIdSecondary": 2
-                }
-            ]
+        {'products': [[{'active': True,
+                'buyOrderTypes': ['LIMIT', 'MARKET', 'STOPLOSS', 'STOPLIMIT'],
+                'category': 'A',
+                'closePrice': 187.1,
+                'closePriceDate': '2026-02-19',
+                'contractSize': 1.0,
+                'currency': 'EUR',
+                'exchangeId': 710,
+                'feedQuality': 'R',
+                'id': 96008,
+                'isShortable': True,
+                'isin': 'NL0000235190',
+                'name': 'Airbus SE',
+                'onlyEodPrices': False,
+                'orderBookDepth': 0,
+                'orderTimeTypes': ['DAY', 'GTC'],
+                'primaryListing': 2,
+                'productType': 'STOCK',
+                'productTypeId': 1,
+                'qualitySwitchFree': False,
+                'qualitySwitchable': False,
+                'sellOrderTypes': ['LIMIT', 'MARKET', 'STOPLOSS', 'STOPLIMIT'],
+                'strikePrice': -1,
+                'symbol': 'AIR',
+                'tradable': True,
+                'vwdId': '360114899',
+                'vwdIdentifierType': 'issueid',
+                'vwdModuleId': 1},
+               {'active': True,
+                'buyOrderTypes': ['LIMIT', 'MARKET', 'STOPLOSS', 'STOPLIMIT'],
+                'category': 'A',
+                'closePrice': 187.48,
+                'closePriceDate': '2026-02-19',
+                'contractSize': 1.0,
+                'currency': 'EUR',
+                'exchangeId': 590,
+                'feedQuality': 'CX',
+                'id': 4626902,
+                'isShortable': False,
+                'isin': 'NL0000235190',
+                'name': 'Airbus SE',
+                'onlyEodPrices': False,
+                'orderBookDepth': 0,
+                'orderTimeTypes': ['DAY', 'GTC'],
+                'productType': 'STOCK',
+                'productTypeId': 1,
+                'qualitySwitchFree': False,
+                'qualitySwitchable': False,
+                'sellOrderTypes': ['LIMIT', 'MARKET', 'STOPLOSS', 'STOPLIMIT'],
+                'symbol': 'AIR',
+                'tradable': True,
+                'vwdId': '956609763',
+                'vwdIdentifierType': 'issueid',
+                'vwdModuleId': 2}],
+              [{'active': True,
+                'buyOrderTypes': ['LIMIT', 'STOPLOSS', 'STOPLIMIT'],
+                'category': 'J',
+                'closePrice': 0.0195,
+                'closePriceDate': '2026-02-19',
+                'contractSize': 1.0,
+                'currency': 'EUR',
+                'exchangeId': 192,
+                'expirationDate': '2026-03-20',
+                'feedQuality': 'R',
+                'id': 103146748,
+                'isShortable': False,
+                'isin': 'DE000FA6YUQ3',
+                'name': 'SG Airbus Warrant Call 223.48 P 10 20/03/2026',
+                'onlyEodPrices': False,
+                'orderBookDepth': 0,
+                'orderTimeTypes': ['DAY', 'GTC'],
+                'productType': 'LEVERAGED',
+                'productTypeId': 14,
+                'qualitySwitchFree': False,
+                'qualitySwitchable': False,
+                'sellOrderTypes': ['LIMIT', 'STOPLOSS', 'STOPLIMIT'],
+                'symbol': 'B36PS',
+                'tradable': True,
+                'vwdId': 'DE000FA6YUQ3.SCGPFR,W',
+                'vwdIdentifierType': 'vwdkey',
+                'vwdModuleId': 35}]
+                ]
         }
+
 
     """
     check_session_config(session)
-    url = URLs.get_product_search_url(session, product_type_id)
+    url = URLs.get_product_search_url_v2(session)
     # Example query for stocks:
     # indexId=5&stockCountryId=886&requireTotal=true&offset=0&limit=100&sortColumns=name&sortTypes=asc&intAccount=123123123&sessionId=sdfasdfasdf
     params = dict(
@@ -903,7 +941,7 @@ async def search_product(
         limit=limit,
         intAccount=session.client.int_account,
         sessionId=session.config.session_id,
-        requireTotal=True
+        requireTotal=True,
     )
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
@@ -919,9 +957,11 @@ async def search_product(
         params['searchText'] = search_txt
     LOGGER.debug("webapi.search_product params| %s", params)
     async with session as client:
-        response = await client.get(url,
-                                    cookies=session._cookies,
-                                    params=params)
+        response = await client.get(
+            url,
+            headers=HEADERS_DEFAULT,
+            params=params
+        )
     check_response(response)
     LOGGER.debug("webapi.search_product response| %s", response.json())
     return response.json()

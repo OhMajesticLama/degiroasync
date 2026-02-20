@@ -244,9 +244,9 @@ if RUN_INTEGRATION_TESTS:
                     search)
             self.assertIn('products', resp_json, resp_json)
             self.assertGreaterEqual(len(resp_json['products']), 1)
-            self.assertIn('id', resp_json['products'][0], resp_json)
-            self.assertIn('isin', resp_json['products'][0], resp_json)
-            self.assertIn('name', resp_json['products'][0], resp_json)
+            self.assertIn('id', resp_json['products'][0][0], resp_json)
+            self.assertIn('isin', resp_json['products'][0][0], resp_json)
+            self.assertIn('name', resp_json['products'][0][0], resp_json)
 
         #async def test_search_product_exchange(self):
         #    raise NotImplementedError()

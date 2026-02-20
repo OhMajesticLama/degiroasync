@@ -188,6 +188,7 @@ def join_url(*sections):
     >>> import urllib.parse
     >>> urllib.parse.urljoin('https://foo.bar/product', '/rest//of/url')
     'https://foo.bar/rest/of/url'
+    >>> # Notice the /product that was lost.
 
     """
     return '/'.join(s.strip('/') for s in sections)

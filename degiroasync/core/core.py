@@ -81,7 +81,12 @@ class Config:
     pa_url: str
     payment_service_url: Optional[str]
     product_notes_url: Optional[str]
+
     product_search_url: str
+    "Legacy product searchURL"
+
+    product_search_v2_url: str
+
     product_types_url: str
     refinitiv_agenda_url: Optional[str]
     refinitiv_clips_url: Optional[str]
@@ -395,12 +400,26 @@ class URLs:
             product_type_id,  # type: ignore
             URLs.PRODUCT_SEARCH_TYPE.GENERIC
         )
+        LOGGER.warning(
+            "Deprecated: Degiro implemented a product_search_v2. "
+            "Calls to legacy product_search may stop working at any time.")
         config = check_session_config(session)
         url = join_url(
             config.product_search_url,
             'v5',
             specialization)
         LOGGER.debug('get_product_search_url: %s', url)
+        return url
+
+    @staticmethod
+    def get_product_search_url_v2(
+            session: SessionCore) -> str:
+        config = check_session_config(session)
+        url = join_url(
+            config.product_search_v2_url,
+            'v2',
+            'lookup')
+        LOGGER.debug('get_product_search_url_v2: %s', url)
         return url
 
     @staticmethod
