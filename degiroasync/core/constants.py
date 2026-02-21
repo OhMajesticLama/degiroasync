@@ -214,7 +214,7 @@ class PRODUCT:
         FUNDS
             Investment funds products.
 
-        LEVERAGE_PRODUCTS
+        LEVERAGED_PRODUCTS
             Leverage products.
 
         ETFS
@@ -237,7 +237,7 @@ class PRODUCT:
         FUTURES = 7
         OPTIONS = 8
         FUNDS = 13
-        LEVERAGE_PRODUCTS = 14
+        LEVERAGED_PRODUCTS = 14
         ETFS = 131
         CFDS = 535
         WARRANTS = 536
@@ -293,6 +293,7 @@ class PRICE:
 class POSITION:
     class TYPE(StrEnum):
         PRODUCT = 'PRODUCT'
+        CASH = 'CASH'
 
 HEADERS_DEFAULT = {
         "Host": "trader.degiro.nl",

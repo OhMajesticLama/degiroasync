@@ -1,5 +1,6 @@
 import json
 import logging
+import itertools
 from typing import Any, List, Dict
 from typing import Optional
 
@@ -853,9 +854,9 @@ async def search_product(
     This impact ISIN that are traded on different exchanges,
     for example in 2026, AMD stock ISIN is traded on 3 exchanges with the same.
 
-    .. code-block:: JSON
+    .. code-block:: Python
 
-        {'products': [[{'active': True,
+        {'products': [{'active': True,
                 'buyOrderTypes': ['LIMIT', 'MARKET', 'STOPLOSS', 'STOPLIMIT'],
                 'category': 'A',
                 'closePrice': 187.1,
@@ -908,8 +909,8 @@ async def search_product(
                 'tradable': True,
                 'vwdId': '956609763',
                 'vwdIdentifierType': 'issueid',
-                'vwdModuleId': 2}],
-              [{'active': True,
+                'vwdModuleId': 2},
+              {'active': True,
                 'buyOrderTypes': ['LIMIT', 'STOPLOSS', 'STOPLIMIT'],
                 'category': 'J',
                 'closePrice': 0.0195,
@@ -935,12 +936,13 @@ async def search_product(
                 'tradable': True,
                 'vwdId': 'DE000FA6YUQ3.SCGPFR,W',
                 'vwdIdentifierType': 'vwdkey',
-                'vwdModuleId': 35}]
+                'vwdModuleId': 35}
                 ]
         }
 
 
     """
+    #assert index_id is None, "product_search_v2 from Degiro doesn't support search by index_id."
     check_session_config(session)
     url = URLs.get_product_search_url_v2(session)
     # Example query for stocks:
@@ -950,21 +952,31 @@ async def search_product(
         limit=limit,
         intAccount=session.client.int_account,
         sessionId=session.config.session_id,
-        requireTotal=True,
     )
+    flatten = True
     if product_type_id is not None:
         params['productTypeId'] = product_type_id
     if country_id is not None:
+        assert product_type_id == PRODUCT.TYPEID.STOCK, (
+            "country_id supported only with PRODUCT.TYPEID.STOCK.")
+        assert isinstance(country_id, str), f"{country_id} is not a str."
         params['stockCountryId'] = country_id
+        url = URLs.get_product_search_stocks_url(session)
+        flatten = False  # already flat results
     if index_id is not None:
         params['indexId'] = index_id
         if search_txt is None:
             # 202307: Searching by indexId with no 'searchTxt' triggers
             # internal server error. We must provide an empty string
             search_txt = ''
+        # Index search now requires to use different endpoint.
+        # can be managed here.
+        url = URLs.get_product_search_stocks_url(session)
+        flatten = False  # already flat results
     if search_txt is not None:
         params['searchText'] = search_txt
-    LOGGER.debug("webapi.search_product params| %s", params)
+    LOGGER.debug("webapi.search_product| url: %s", url)
+    LOGGER.debug("webapi.search_product| params: %s", params)
     async with session as client:
         response = await client.get(
             url,
@@ -972,8 +984,12 @@ async def search_product(
             params=params
         )
     check_response(response)
-    LOGGER.debug("webapi.search_product response| %s", response.json())
-    return response.json()
+    LOGGER.debug("webapi.search_product| response: %s", response.json())
+    products_json = response.json()
+    if flatten and 'products' in products_json:
+        products_json['products'] = [p for p in itertools.chain(*products_json['products'])]
+
+    return products_json
 
 
 __all__ = [

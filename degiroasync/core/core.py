@@ -392,7 +392,7 @@ class URLs:
                 URLs.PRODUCT_SEARCH_TYPE.BONDS,
             PRODUCT.TYPEID.FUNDS:
                 URLs.PRODUCT_SEARCH_TYPE.FUNDS,
-            PRODUCT.TYPEID.LEVERAGE_PRODUCTS:
+            PRODUCT.TYPEID.LEVERAGED_PRODUCTS:
                 URLs.PRODUCT_SEARCH_TYPE.LEVERAGED_PRODUCTS,
             PRODUCT.TYPEID.WARRANTS:
                 URLs.PRODUCT_SEARCH_TYPE.WARRANTS,
@@ -411,7 +411,7 @@ class URLs:
             config.product_search_url,
             'v5',
             specialization)
-        LOGGER.debug('get_product_search_url: %s', url)
+        LOGGER.debug('get_product_search_url| %s', url)
         return url
 
     @staticmethod
@@ -422,7 +422,7 @@ class URLs:
             config.product_search_v2_url,
             'v2',
             'lookup')
-        LOGGER.debug('get_product_search_url_v2: %s', url)
+        LOGGER.debug('get_product_search_url_v2| %s', url)
         return url
 
     @staticmethod
@@ -434,14 +434,25 @@ class URLs:
             'v1',
             'products',
             'info')
-        LOGGER.debug('get_product_search_url_v2: %s', url)
+        LOGGER.debug('get_product_info_url| %s', url)
+        return url
+    @staticmethod
+
+    def get_product_search_stocks_url(
+            session: SessionCore) -> str:
+        config = check_session_config(session)
+        url = join_url(
+            config.product_search_v2_url,
+            'v1',
+            'stocks')
+        LOGGER.debug('get_product_search_stocks_url| %s', url)
         return url
 
     @staticmethod
     def get_product_dictionary_url(session: SessionCore) -> str:
         config = check_session_config(session)
         url = config.dictionary_url
-        LOGGER.debug('get_product_search_url: %s', url)
+        LOGGER.debug('get_product_dictionary_url| %s', url)
         return url
 
     @classmethod

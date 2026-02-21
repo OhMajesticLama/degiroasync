@@ -9,8 +9,10 @@ import unittest.mock
 from unittest.mock import MagicMock
 
 import httpx
+import pytest
 
 import degiroasync
+from degiroasync.api.session import Exchange
 import degiroasync.webapi
 import degiroasync.core
 import degiroasync.core.helpers
@@ -244,9 +246,35 @@ if RUN_INTEGRATION_TESTS:
                     search)
             self.assertIn('products', resp_json, resp_json)
             self.assertGreaterEqual(len(resp_json['products']), 1)
-            self.assertIn('id', resp_json['products'][0][0], resp_json)
-            self.assertIn('isin', resp_json['products'][0][0], resp_json)
-            self.assertIn('name', resp_json['products'][0][0], resp_json)
+            self.assertIn('id', resp_json['products'][0], resp_json)
+            self.assertIn('isin', resp_json['products'][0], resp_json)
+            self.assertIn('name', resp_json['products'][0], resp_json)
+
+        async def test_search_product_by_country(self):
+            "Test to detect if search_product is working as expected when filtering per country."
+            session = await _IntegrationLogin._login()
+
+            # Get country ID for france
+            country_name = 'FR'
+            country = session.dictionary.country_by(name=country_name)
+            country_id = country.id
+            resp_dict = await degiroasync.webapi.search_product(
+                    session,
+                    country_id=country_id,
+                    product_type_id=PRODUCT.TYPEID.STOCK,
+            )
+            self.assertIn('products', resp_dict, resp_dict)
+            self.assertGreaterEqual(len(resp_dict['products']), 1)
+            self.assertIn('id', resp_dict['products'][0], resp_dict)
+            #self.assertIn('isin', resp_dict['products'][0], resp_dict)
+            self.assertIn('name', resp_dict['products'][0], resp_dict)
+            for prod_dict in resp_dict['products']:
+                # First need to get exchange of the product
+                self.assertIn('exchangeId', prod_dict, prod_dict)
+                exchange_id = prod_dict['exchangeId']
+                # Then get country of the exchange.
+                exchange: Exchange = session.dictionary.exchange_by(id=str(prod_dict['exchangeId']))
+                self.assertEqual(exchange.country_name, country_name, prod_dict)
 
         #async def test_search_product_exchange(self):
         #    raise NotImplementedError()
@@ -331,7 +359,7 @@ if RUN_INTEGRATION_TESTS:
                     product_type_id=PRODUCT.TYPEID.STOCK
                     )
             self.assertEqual(len(products), 1,
-                             "We should only have one product here")
+                             f"We should only have one product here. Instead got: {products}")
             product = products[0]
             # Reminder: typeId = 1 is STOCK
             LOGGER.debug("test_check_order| product: %s . %s . %s . %s",

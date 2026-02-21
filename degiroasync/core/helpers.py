@@ -281,15 +281,25 @@ def dict_from_attr_list(
     """
     dict_out = {}
     for attr in attributes_list:
-        if 'name' not in attr or 'value' not in attr:
-            message = (f"A provided params does not have a 'name' or 'value': "
-                       f"{attr}")
-            LOGGER.info(message)
-            if not ignore_error:
-                raise ValueError(message)
-            else:
+        value = None
+        if 'name' not in attr:
+            if ignore_error:
                 continue
-        name, value = attr['name'], attr['value']
+            else:
+                message = (f"A provided params does not have a 'name': "
+                        f"{attr}")
+                LOGGER.warning(message)
+                raise ValueError(message)
+        if 'value' not in attr:
+            if ignore_error:
+                name = attr['name']
+                value = True
+            else:
+                message = (f"A provided params does not have a 'value': "
+                        f"{attr}.")
+                LOGGER.warning(message)
+                raise ValueError(message)
+        name, value = attr['name'], attr.get('value', value)
         if not hasattr(name, int.__hash__.__name__):
             raise ValueError(f"{name} in {attr} is not hashable:"
                              " it can't be used as dict key.")

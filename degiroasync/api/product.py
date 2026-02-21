@@ -67,7 +67,6 @@ class ProductBase:
         name: str
         symbol: str
         currency: str
-        exchange_id: str
         product_type_id: Union[PRODUCT.TYPEID, int]  # is int for unknown types
     base: Base
     info: Info
@@ -89,8 +88,9 @@ class ProductBase:
             raise NotImplementedError("Please use ProductFactory.init_batch.")
 
     def __repr__(self):
+        symbol = self.info.symbol if hasattr(self.info, 'symbol') else 'NoSymbol'
         return (f'<degiroasync.api.product.{self.__class__.__name__} '
-                f'[{self.info.name} | {self.info.symbol}]>')
+                f'[{self.info.name} | {symbol}]>')
 
 
 class ProductFactory:
@@ -247,7 +247,8 @@ class ProductFactory:
                 # Get specialized class if there is one implemented
                 inst_cls = {
                     PRODUCT.TYPEID.CURRENCY: Currency,
-                    PRODUCT.TYPEID.STOCK: Stock
+                    PRODUCT.TYPEID.STOCK: Stock,
+                    PRODUCT.TYPEID.LEVERAGED_PRODUCTS: Leveraged,
                 }.get(
                     product_type_id,
                     ProductGeneric
@@ -258,7 +259,10 @@ class ProductFactory:
                 product_info = camelcase_dict_to_snake(product_info)
                 if (
                         product_info.get('exchange_id')
-                        and issubclass(inst_cls, Stock)
+                        and (
+                            issubclass(inst_cls, Stock)
+                            or issubclass(inst_cls, Leveraged)
+                            )
                         ):
                     # WARNING: There could be exchange_id key, but empty value,
                     # We don't want to set it here if that's the case
@@ -295,13 +299,53 @@ class Stock(ProductBase):
         isin: str
         symbol: str
         name: str
+        exchange_id: str
         exchange: Exchange
         vwd_id: Optional[str] = None  # not set if non-tradable
         vwd_identifier_type: Optional[str] = None  # not set if non-tradable
         product_type: str
         product_type_id: PRODUCT.TYPEID
         tradable: bool
+        category: Optional[str] = None
+        # feed_quality: str  # Not always available
+
+    class VWDIDTYPES(StrEnum):
+        ISSUEID = 'issueId'
+        VWDKEY = 'vwdkey'
+
+    info: Info
+
+class Leveraged(ProductBase):
+    @JSONclass(annotations=True, annotations_type=True)
+    class Info:
+        "Store Info calls return."
+        id: str
+        name: str
+        isin: str
+        contract_size: int
+        product_type: str
+        product_type_id: PRODUCT.TYPEID
+        tradable: bool
         category: str
+        currency: str
+        active: bool
+        exchange_id: str
+        exchange: Exchange
+        only_EOD_prices: Optional[bool] = None
+        order_time_types: Optional[List[str]] = None
+        buy_order_types: Optional[List[str]] = None
+        sell_order_types: Optional[List[str]] = None
+        close_price: float
+        close_price_date: str
+        feed_quality: str
+        order_book_depth: int
+        vwd_id: Optional[str] = None  # not set if non-tradable
+        vwd_module_id: Optional[int] = None  # not set if non-tradable
+        vwd_identifier_type: Optional[str] = None  # not set if non-tradable
+        quality_switchable: bool
+        quality_switch_free: bool
+
+        exchange: Exchange
         # feed_quality: str  # Not always available
 
     class VWDIDTYPES(StrEnum):
@@ -320,6 +364,7 @@ class ProductGeneric(ProductBase):
         isin: str
         symbol: str
         name: str
+        exchange_id: str
         tradable: bool
 
     info: Info
@@ -416,13 +461,17 @@ async def get_portfolio(
             camelcase_dict_to_snake(
                 dict_from_attr_list(v['value'], ignore_error=True))
             for v in portf_json]
-    LOGGER.debug("api.get_portfolio| %s", pprint.pformat(portf_dict_json))
+    LOGGER.debug("api.get_portfolio| json portfolio %s", pprint.pformat(portf_dict_json))
 
     portfolio = ProductFactory.init_batch(
             session,
             ({'id': p['id']} for p in portf_dict_json))
 
-    products = {p.info.id: p async for p in portfolio}
+    #products = {p.info.id: p async for p in portfolio}
+    # Product.base.id may be different from product.info.id,
+    # for example in the case of currencies.
+    products = {p.base.id: p async for p in portfolio}
+    LOGGER.debug("api.get_portfolio| products %s", pprint.pformat(products))
     for portf in portf_dict_json:
         portf['product'] = products[portf['id']]
         try:
@@ -699,7 +748,6 @@ async def get_price_series(
         product: Stock,
         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,  # type: ignore
         period: PRICE.PERIOD = PRICE.PERIOD.P1MONTH,  # type: ignore
-        timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE  # type: ignore
         ) -> PriceSeries:
@@ -748,7 +796,6 @@ async def get_price_series(
         vwdIdentifierType=product.info.vwd_identifier_type,
         resolution=resolution,
         period=period,
-        timezone=timezone,
         culture=culture,
         data_type=data_type,
         )
@@ -824,7 +871,11 @@ async def _search_one(
                           (by_symbol, 'symbol'),
                           (exchange_id, 'exchangeId'),
                           ):
-            if attr is not None and p_json.get(key) != attr:
+            # JSON returned by API endpoints is sometimes int sometimes str
+            # based on endpoint, for the 4 attributes we want to check we
+            # can convert everything to str.
+            if attr is not None and str(p_json.get(key)) != str(attr):
+                LOGGER.debug("_search_one| filter out due to %s, %s != %s", key, p_json.get(key), attr)
                 return False
         return True
     if exchange_id is not None:
@@ -850,13 +901,13 @@ async def _search_one(
     #total = resp_json['total']  # Total number of products returned
     if 'products' in resp_json:
         n_unfiltered = len(resp_json['products'])
-        products_json_grouped = resp_json['products']
-        LOGGER.debug("api.search_product n_products| %s",
-                     products_json_grouped)
-        if len(products_json_grouped) == 0:
+
+        products_json = resp_json['products']
+
+        LOGGER.debug("api.search_product| n_products %s",
+                     products_json)
+        if len(products_json) == 0:
             return [], n_unfiltered
-        # Flatten products
-        products_json = itertools.chain(*products_json_grouped)
 
         batch_gen = ProductFactory.init_batch(
                 session,
@@ -885,7 +936,7 @@ async def search_product(
         by_exchange: Optional[Union[str, Exchange]] = None,
         by_index: Optional[Union[str, Index]] = None,
         product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
-        max_iter: Optional[int] = 1000
+        max_iter: int = 100
         ) -> List[ProductBase]:
     """
     Access `product_search` endpoint.
@@ -975,11 +1026,13 @@ async def search_product(
     if by_exchange is not None:
         if isinstance(by_exchange, Exchange):
             exchange_id = by_exchange.id
+            LOGGER.debug("search_product| exchange_id set to %s", exchange_id)
         elif isinstance(by_exchange, str):
             check_session_dictionary(session)
             exchange = session.dictionary.exchange_by(
                 hiq_abbr=by_exchange)
             exchange_id = exchange.id
+            LOGGER.debug("search_product| exchange_id set to %s", exchange_id)
         else:
             raise TypeError(
                 "Only Exchange or str types supported for 'by_exchange'.")
@@ -995,6 +1048,7 @@ async def search_product(
         else:
             raise TypeError(
                 "Only Index or str types supported for 'by_index'.")
+        LOGGER.debug("search_product| index_id set to %s", index_id)
 
     limit = 100
     products = []
@@ -1002,9 +1056,8 @@ async def search_product(
 
     # No more "total" field available with product_search_v2
     # Need to pull and until empty answer.
-    max_iterations = 100
-    for _ in range(max_iterations):
-        products, n_unfiltered = await _search_one(
+    for _ in range(max_iter):
+        products_one, n_unfiltered = await _search_one(
                 session,
                 by_text=by_text,
                 by_isin=by_isin,
@@ -1012,10 +1065,12 @@ async def search_product(
                 country_id=country_id,
                 exchange_id=exchange_id,
                 index_id=index_id,
+                product_type_id=product_type_id,
                 offset=offset,
                 limit=limit
                 )
         offset += n_unfiltered
+        products += products_one
         if n_unfiltered < limit:
             # We reached the end.
             break

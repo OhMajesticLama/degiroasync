@@ -702,14 +702,14 @@ class TestDegiroasyncPrice(
         product.info = MagicMock()
         product.info.product_type_id = PRODUCT.TYPEID.STOCK
 
+        # We're mocking underlying function, just pass None when not needed for test.
         ohlc_series = await degiroasync.api.get_price_series(
-                None,
+                None,  # type: ignore
                 product,
-                None,
-                None,
-                None,
-                None,
-                None
+                None,  # type: ignore
+                None,  # type: ignore
+                None,  # type: ignore
+                None,  # type: ignore
                 )
         data = resp_json['series'][0]['data']
         for ind, row in enumerate(ohlc_series.iterrows()):
@@ -941,10 +941,11 @@ if RUN_INTEGRATION_TESTS:
 
         async def test_search_product_symbol_air(self):
             session = await _IntegrationLogin._login()
-            symbol = 'AIR'  # GE symbol on EPA
+            symbol = 'AIR'  # Airbus symbol on EPA
+            exchange = 'EPA'
             products = await degiroasync.api.search_product(session,
                                                             by_symbol=symbol,
-                                                            by_exchange='EPA')
+                                                            by_exchange=exchange)
             self.assertGreaterEqual(len(products), 1)
             for product in products:
                 # We should only have airbus products here
@@ -1017,7 +1018,7 @@ if RUN_INTEGRATION_TESTS:
                     by_index='CAC 40',
                     max_iter=1,  # We don't need every product for this test.
                     )
-            LOGGER.debug("Integration Test search_product_index| %s", products)
+            LOGGER.debug("Integration Test search_product_index| %s", pprint.pformat(products))
             # The point of implementing filtering on symbol and exchange
             # is to target one specific product. Raise an error if it doesn't
             # work.
