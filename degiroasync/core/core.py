@@ -361,6 +361,9 @@ class URLs:
     def get_price_data_url(session: SessionCore) -> str:
         check_session_config(session)
         # Check if this should be pulled from session config
+        # vwdservices api could be pulled from config.vwd_chart_api_url.
+        # This would require another call in setting the configuration in order to
+        # get vwd data endpoint.
         return 'https://charting.vwdservices.com/hchart/v1/deGiro/data.js'
 
     class PRODUCT_SEARCH_TYPE(StrEnum):

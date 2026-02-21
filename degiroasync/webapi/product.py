@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, List, Dict
 from typing import Optional
@@ -639,22 +640,12 @@ async def get_news_by_company(
     return resp_json
 
 
-async def get_price_data(*args, **kwargs):
-    "DEPRECATED: Please use get_price_series instead"
-    LOGGER.warn(
-            "get_price_data is deprecated, please use get_price_series "
-            "instead."
-            )
-    return await get_price_series(*args, **kwargs)
-
-
 async def get_price_series(
         session: SessionCore,
         vwdId: str,
         vwdIdentifierType: str,
         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
         period: PRICE.PERIOD = PRICE.PERIOD.P1MONTH,
-        timezone: str = 'Europe/Paris',
         culture: str = 'fr-FR',
         data_type: PRICE.TYPE = PRICE.TYPE.PRICE
 ) -> Dict[str, Any]:
@@ -767,6 +758,7 @@ async def get_price_series(
     check_session_config(session)
     url = URLs.get_price_data_url(session)
     LOGGER.debug('get_price_series url| %s', url)
+    # 2026: API blocked when no callback set.
     params = {
         'requestid': 1,
         'resolution': str(resolution),
@@ -774,20 +766,36 @@ async def get_price_series(
         'period': str(period),
         'series': f'{data_type}:{vwdIdentifierType}:{vwdId}',
         'format': 'json',
-        'userToken': session.config.client_id
+        'callback': 'String',
+        'userToken': session.config.client_id,
     }
     LOGGER.debug('get_price_series params| %s', params)
     async with session as client:
         # 2023: Cookies are not needed for that call.
-        # Since it looks like a third party, don't share session id if not
-        # needed.
+        # Since it looks like a third party, don't share session __import__('ipdb').set_trace()
+        # if not needed.
         response = await client.get(
             url,
             params=params,
-            headers=HEADERS_DEFAULT,
+            headers={
+                **HEADERS_DEFAULT,
+                **{
+                    'Referer': URLs.BASE,
+                    'Cache-Control': 'no-cache',
+                    'Priority': 'u=4',
+                    'Sect-Fetch-Dest': 'Script',
+                    'Sect-Fetch-Mode': 'no-cors',
+                    'Sect-Fetch-Storage-Access': 'none',
+                    'Sect-Fetch-Site': 'cross-site',
+                    'Pragma': 'no-cache',
+                    'Host': 'charting.vwdservices.com',
+                }
+            },
         )
+    LOGGER.debug('get_price_series| response: %s', response.content)
     check_response(response)
-    resp_json = response.json()
+    # Remove JS around data
+    resp_json = json.loads(response.content[7:-1])
     LOGGER.debug('get_price_series response| %s', resp_json)
     return resp_json
 
