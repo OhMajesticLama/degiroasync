@@ -136,6 +136,11 @@ class ProductFactory:
         for ind, attributes in enumerate(attributes_iter, 1):
             # Check that minimum keys are in attributes
             attributes = camelcase_dict_to_snake(attributes)
+            if 'id' in attributes:
+                # product_search_v2 returns id as an int.
+                # Convert to str to maintain compatibility.
+
+                attributes['id'] = str(attributes['id'])
             # 2022.04 Poor JSONclass compatibility with mypy
             ProductBase.Base(attributes)  # type: ignore
             attributes_batch.append(attributes)
@@ -794,7 +799,7 @@ async def _search_one(
         product_type_id: Optional[PRODUCT.TYPEID] = PRODUCT.TYPEID.STOCK,
         offset: int = 0,
         limit: int = 100,
-        ) -> (Sequence[ProductBase], int, int):
+        ) -> Tuple[Sequence[ProductBase], int]:
     """
     Returns
     -------
@@ -837,15 +842,22 @@ async def _search_one(
         offset=offset)
     LOGGER.debug("api.search_product response| %s",
                  pprint.pformat(resp_json))
+    # No more "total" field available with product_search_v2
+    # Will need to pull until answer < limit.
     # Calls with more than one page could be parallelized:
     # First page is needed first to get the total answers, but
     # further pages could be fetched several at a time.
-    total = resp_json['total']  # Total number of products returned
+    #total = resp_json['total']  # Total number of products returned
     if 'products' in resp_json:
         n_unfiltered = len(resp_json['products'])
-        products_json = resp_json['products']
+        products_json_grouped = resp_json['products']
         LOGGER.debug("api.search_product n_products| %s",
-                     products_json)
+                     products_json_grouped)
+        if len(products_json_grouped) == 0:
+            return [], n_unfiltered
+        # Flatten products
+        products_json = itertools.chain(*products_json_grouped)
+
         batch_gen = ProductFactory.init_batch(
                 session,
                 filter(__custom_filter,
@@ -856,11 +868,8 @@ async def _search_one(
         # blocking further calls to be launched, should it be needed.
         LOGGER.debug("api.search_product (batch len, symbol)| (%s, %s)",
                      len(products), by_symbol)
-        return products, n_unfiltered, total
+        return products, n_unfiltered
 
-    elif total <= offset:
-        # It's expected to be empty here. Return.
-        return [], 0, total
     else:
         LOGGER.debug("No 'products' key in response. Stop.")
         raise ResponseError(f"No 'products' key in response {resp_json} ")
@@ -989,46 +998,27 @@ async def search_product(
 
     limit = 100
     products = []
+    offset = 0
 
-    # trigger first call to get total:
-    products, n_unfiltered, total = await _search_one(
-            session,
-            by_text=by_text,
-            by_isin=by_isin,
-            by_symbol=by_symbol,
-            country_id=country_id,
-            exchange_id=exchange_id,
-            index_id=index_id,
-            offset=0,
-            limit=limit
-            )
-
-    if n_unfiltered < total:
-        # Generate args
-        args = ({
-            'session': session,
-            'by_text': by_text,
-            'by_isin': by_isin,
-            'by_symbol': by_symbol,
-            'index_id': index_id,
-            'country_id': country_id,
-            'exchange_id': exchange_id,
-            'offset': offset,
-            'limit': limit,
-            } for offset in range(n_unfiltered, total, limit)
-            )
-        # The use of _search_one and gather improves performance over
-        # sequential queries in a while loop as before.
-        # 20230713 FR symbols query, throttling at 10 queries per 1 second:
-        #   - With gather+_search_one: 3.6s
-        #   - With legacy sequential calls: 6.9s
-        # Waiting times could be further reduced by making a queue and an async
-        # generator for the consumer instead of using a gather here.
-        # However, consumption is less straightforward.
-        answers = await asyncio.gather(
-                    *[_search_one(**kwa) for kwa in args])
-        for prods, _, _ in answers:
-            products += prods
+    # No more "total" field available with product_search_v2
+    # Need to pull and until empty answer.
+    max_iterations = 100
+    for _ in range(max_iterations):
+        products, n_unfiltered = await _search_one(
+                session,
+                by_text=by_text,
+                by_isin=by_isin,
+                by_symbol=by_symbol,
+                country_id=country_id,
+                exchange_id=exchange_id,
+                index_id=index_id,
+                offset=offset,
+                limit=limit
+                )
+        offset += n_unfiltered
+        if n_unfiltered < limit:
+            # We reached the end.
+            break
 
     return list(unique_everseen(products, lambda p: p.info.id))
 

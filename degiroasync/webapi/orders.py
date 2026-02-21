@@ -333,7 +333,7 @@ async def get_orders_history(
                     'type': 'CREATE',
                     'status': 'CONFIRMED',
                     'last': '2021-11-6T12:33:23+01:00',
-                    'isActive': True
+                    'active': True
                 }
             ]
         }

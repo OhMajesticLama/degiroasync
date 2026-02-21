@@ -426,6 +426,18 @@ class URLs:
         return url
 
     @staticmethod
+    def get_product_info_url(
+            session: SessionCore) -> str:
+        config = check_session_config(session)
+        url = join_url(
+            config.product_search_v2_url,
+            'v1',
+            'products',
+            'info')
+        LOGGER.debug('get_product_search_url_v2: %s', url)
+        return url
+
+    @staticmethod
     def get_product_dictionary_url(session: SessionCore) -> str:
         config = check_session_config(session)
         url = config.dictionary_url

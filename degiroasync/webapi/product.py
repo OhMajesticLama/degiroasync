@@ -555,9 +555,9 @@ async def get_products_info(
         raise AssertionError("productSearchUrl is None:"
                              " have you called get_config?")
 
-    LOGGER.debug('get_products_info products_ids| %s', products_ids)
-    url = join_url(config.product_search_url,
-                   'v5/products/info')
+    LOGGER.debug('get_products_info| products_ids: %s', products_ids)
+    url = URLs.get_product_info_url(session)
+    LOGGER.debug('get_products_info| url: %s', products_ids)
     async with session as httpxclient:
         response = await httpxclient.post(
             url,
@@ -571,10 +571,10 @@ async def get_products_info(
         try:
             check_response(response)
         except Exception:
-            LOGGER.error('get_products_info response| %s', response)
-            LOGGER.error('get_products_info url| %s', url)
-            LOGGER.error('get_products_info products_ids| %s', products_ids)
-            LOGGER.error('get_products_info products_ids| %s', products_ids)
+            LOGGER.error('get_products_info| response: %s', response)
+            LOGGER.error('get_products_info| url: %s', url)
+            LOGGER.error('get_products_info| products_ids: %s', products_ids)
+            LOGGER.error('get_products_info| products_ids: %s', products_ids)
             raise
         resp_json = response.json()
         LOGGER.debug('get_products_info| %s', resp_json)
