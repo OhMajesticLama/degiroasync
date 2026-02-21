@@ -90,7 +90,7 @@ class Config:
     product_types_url: str
     refinitiv_agenda_url: Optional[str]
     refinitiv_clips_url: Optional[str]
-    refinitiv_company_profile_url: Optional[str]
+    refinitiv_company_profile_url: str
     refinitiv_company_ratios_url: Optional[str]
     refinitiv_esgs_url: Optional[str]
     refinitiv_estimates_url: Optional[str]

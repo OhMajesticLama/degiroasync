@@ -593,7 +593,8 @@ async def get_company_profile(
 
     # Look for dgtbxdsservice in network logs for financial statements etc.
     # might have intraday data as well
-    url = join_url(URLs.BASE, 'dgtbxdsservice/company-profile/v2', isin)
+    url = join_url(session.config.refinitiv_company_profile_url, isin)
+    LOGGER.debug("get_company_profile| url: %s", url)
     async with session as httpclient:
         response = await httpclient.get(
             url,
