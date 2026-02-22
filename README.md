@@ -110,9 +110,9 @@ DEGIRO_TOTP_SECRET  # Only if the account requires 2FA for login
 
 ```bash
 # Unittests only
-DEGIROASYNC_INTEGRATION=0 pytest --color yes
+DEGIROASYNC_INTEGRATION=0 pytest tests/ --color yes
 # Integration tests & Unittests
-DEGIROASYNC_INTEGRATION=1 pytest --color yes
+DEGIROASYNC_INTEGRATION=1 pytest tests/ --color yes
 ```
 
 ### Tests coverage
