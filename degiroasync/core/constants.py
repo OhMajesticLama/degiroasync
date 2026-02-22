@@ -14,6 +14,7 @@ except ImportError:
 
 # Used to get same Logger instance across submodules.
 LOGGER_NAME = 'degiroasync'
+LOGGER_VERY_VERBOSE = 1
 
 
 class _EnumBase(enum.Enum):
@@ -248,7 +249,10 @@ class PRODUCT:
         INDEX = 'INDEX'
         FUND = 'FUND'
         CASH = 'CASH'
-        CFD = 'CFD'
+
+        # 'cfd' product type is returned in small caps by endpoint.
+        CFD = 'cfd'
+
         CURRENCY = 'CURRENCY'
 
 

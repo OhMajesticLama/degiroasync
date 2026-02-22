@@ -10,6 +10,7 @@ import copy
 from jsonloader import JSONclass
 
 from ..core import LOGGER_NAME
+from ..core import LOGGER_VERY_VERBOSE
 from ..core import SessionCore
 from ..core import Config
 from ..core import PAClient
@@ -86,7 +87,7 @@ class Index:
     @JSONclass(annotations=True)
     class Info:
         id: str
-        isin: str
+        isin: str | None = None
         name: str
         symbol: str
         product_type: PRODUCT.TYPE
@@ -204,8 +205,9 @@ class ExchangeDictionary:
             index['id'] = str(index['id'])
             if 'product_id' in index:
                 index['product_id'] = str(index['product_id'])
-            self._indices[index['id']] = Index(index)
-            self._indices_name[index['name'].lower()] = Index(index)
+            _ind = Index(index)
+            self._indices[index['id']] = _ind
+            self._indices_name[index['name'].lower()] = _ind
 
         return self
 
@@ -298,15 +300,30 @@ class ExchangeDictionary:
                 for i in self._indices.values()
                 if i.product_id
                 ]
+        LOGGER.log(LOGGER_VERY_VERBOSE, "ExchangeDictionary.populate_indices_info| _indices: %s",
+                     pprint.pformat(self._indices)
+                     )
         # Query data
         resp = await webapi.get_products_info(session, ids)
+        LOGGER.debug("ExchangeDictionary.populate_indices_info| resp: %s",
+                     pprint.pformat(resp)
+                     )
         # Populate info parameter for all indices
         for index in self._indices.values():
-            if index.product_id:
+            if index.product_id is not None:
                 index.info = Index._dict2info(
                         session,
                         resp['data'][index.product_id]
                         )
+                LOGGER.log(LOGGER_VERY_VERBOSE, "ExchangeDictionary.populate_indices_info| index: %s",
+                            pprint.pformat(index),
+                            )
+            else:
+                LOGGER.log(LOGGER_VERY_VERBOSE, "ExchangeDictionary.populate_indices_info| no product_id: %s",
+                            pprint.pformat(index)
+                            )
+        LOGGER.log(LOGGER_VERY_VERBOSE, "ExchangeDictionary.populate_indices_info| self._indices: %s",
+                     pprint.pformat(self._indices))
 
 
 class Session(SessionCore):

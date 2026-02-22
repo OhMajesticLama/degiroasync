@@ -23,6 +23,7 @@ from .constants import TRANSACTION
 from .constants import PRICE
 from .constants import POSITION
 from .constants import LOGGER_NAME
+from .constants import LOGGER_VERY_VERBOSE
 from .core import check_session_client
 from .core import check_session_config
 from .core import Credentials
@@ -42,8 +43,8 @@ __all__ = [obj.__name__ for obj in (  # type: ignore
     camelcase_to_snake,
     camelcase_dict_to_snake,
     set_params,
-    PRODUCT,
     ORDER,
+    PRODUCT,
     TRANSACTION,
     POSITION,
     PRICE,
@@ -58,5 +59,6 @@ __all__ = [obj.__name__ for obj in (  # type: ignore
     PAClient,
     URLs,
     )] + [
-        LOGGER_NAME
+        LOGGER_NAME,
+        LOGGER_VERY_VERBOSE,
     ]

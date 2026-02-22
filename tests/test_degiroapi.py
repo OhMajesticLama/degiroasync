@@ -1049,6 +1049,7 @@ if RUN_INTEGRATION_TESTS:
             await session.dictionary.populate_indices_info(session)
 
             index = session.dictionary.index_by(name='CAC 40')
+            LOGGER.debug("test_index_populate_indices| index: %s", index)
             self.assertEqual(index.info.symbol, 'CAC INDEX')
 
         async def test_index_info(self):
