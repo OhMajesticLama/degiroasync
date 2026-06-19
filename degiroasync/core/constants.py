@@ -250,8 +250,7 @@ class PRODUCT:
         FUND = 'FUND'
         CASH = 'CASH'
 
-        # 'cfd' product type is returned in small caps by endpoint.
-        CFD = 'cfd'
+        CFD = 'CFD'
 
         CURRENCY = 'CURRENCY'
 
