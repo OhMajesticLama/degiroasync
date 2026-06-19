@@ -648,7 +648,9 @@ async def get_price_series(
         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,
         period: PRICE.PERIOD = PRICE.PERIOD.P1MONTH,
         culture: str = 'fr-FR',
-        data_type: PRICE.TYPE = PRICE.TYPE.PRICE
+        data_type: PRICE.TYPE = PRICE.TYPE.PRICE,
+        *,
+        ignore_resolution: bool = False,
 ) -> Dict[str, Any]:
     """
     Get price data for a company.
@@ -795,8 +797,14 @@ async def get_price_series(
         )
     LOGGER.debug('get_price_series| response: %s', response.content)
     check_response(response)
+    # API returns a JS function call, remove.
     # Remove JS around data
     resp_json = json.loads(response.content[7:-1])
+
+    resp_resolution = resp_json.get('resolution')
+    if ignore_resolution or str(resolution) != resp_resolution:
+        raise AssertionError(f"HTTP API returned {resp_resolution} resolution, when {resolution} was requested. Abort. Set 'ignore_resolution' parameter to ignore this check.")
+
     LOGGER.debug('get_price_series response| %s', resp_json)
     return resp_json
 

@@ -188,11 +188,11 @@ if RUN_INTEGRATION_TESTS:
                     session,
                     vwdId=vwdId,
                     period=PRICE.PERIOD.P1MONTH,
-                    resolution=PRICE.RESOLUTION.PT1M,
+                    resolution=PRICE.RESOLUTION.PT1D,
                     vwdIdentifierType='issueid')
             LOGGER.debug(resp_json)
             self.assertIn('resolution', resp_json)
-            self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1M)
+            self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1D)
             self.assertIn('series', resp_json)
             self.assertIn('data', resp_json['series'][0])
 
@@ -205,13 +205,13 @@ if RUN_INTEGRATION_TESTS:
                     session,
                     vwdId=vwdId,
                     period=PRICE.PERIOD.P1MONTH,
-                    resolution=PRICE.RESOLUTION.PT1M,
+                    resolution=PRICE.RESOLUTION.PT1D,
                     vwdIdentifierType='issueid',
                     data_type=PRICE.TYPE.OHLC,
                     )
             LOGGER.debug(resp_json)
             self.assertIn('resolution', resp_json)
-            self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1M)
+            self.assertEqual(resp_json['resolution'], PRICE.RESOLUTION.PT1D)
             self.assertIn('series', resp_json)
             self.assertIn('data', resp_json['series'][0])
             self.assertEqual(

@@ -736,7 +736,7 @@ class PriceSeriesTime(PriceSeries):
 
 async def get_price_data(*args, **kwargs):
     "DEPRECATED: Please use get_price_series instead."
-    LOGGER.warn(
+    LOGGER.warning(
             "get_price_data is deprecated, please use get_price_series instead"
             )
     return await get_price_series(*args, **kwargs)
@@ -749,7 +749,9 @@ async def get_price_series(
         resolution: PRICE.RESOLUTION = PRICE.RESOLUTION.PT1D,  # type: ignore
         period: PRICE.PERIOD = PRICE.PERIOD.P1MONTH,  # type: ignore
         culture: str = 'fr-FR',
-        data_type: PRICE.TYPE = PRICE.TYPE.PRICE  # type: ignore
+        data_type: PRICE.TYPE = PRICE.TYPE.PRICE,  # type: ignore
+        *,
+        ignore_resolution: bool = False,
         ) -> PriceSeries:
     """
     Get price data for `product`.
@@ -798,6 +800,7 @@ async def get_price_series(
         period=period,
         culture=culture,
         data_type=data_type,
+        ignore_resolution=ignore_resolution,
         )
     LOGGER.debug("api.get_price_series resp_json| %s", resp_json)
 
