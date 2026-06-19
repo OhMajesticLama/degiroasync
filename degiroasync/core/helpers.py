@@ -6,6 +6,7 @@ import sys
 import functools
 import asyncio
 import time
+import inspect
 
 
 import asyncstdlib.functools as afunctools
@@ -78,7 +79,7 @@ def lru_cache_timed(
     """
     first_start: List[float] = []
     if func is not None:
-        if asyncio.iscoroutinefunction(func):
+        if inspect.iscoroutinefunction(func):
             @afunctools.lru_cache(maxsize=maxsize, typed=typed)
             async def _in(time_key, *args, **kwargs):
                 return await func(*args, **kwargs)
