@@ -337,13 +337,13 @@ class Leveraged(ProductBase):
         sell_order_types: Optional[List[str]] = None
         close_price: float
         close_price_date: str
-        feed_quality: str
-        order_book_depth: int
+        feed_quality: Optional[str] = None
+        order_book_depth: Optional[int] = None
         vwd_id: Optional[str] = None  # not set if non-tradable
         vwd_module_id: Optional[int] = None  # not set if non-tradable
         vwd_identifier_type: Optional[str] = None  # not set if non-tradable
-        quality_switchable: bool
-        quality_switch_free: bool
+        quality_switchable: Optional[bool] = None
+        quality_switch_free: Optional[bool] = None
 
         exchange: Exchange
         # feed_quality: str  # Not always available
