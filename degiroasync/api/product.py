@@ -1,6 +1,6 @@
 from typing import Iterable, Any, List, Dict, Union
 from typing import Optional, AsyncGenerator, Sequence
-from typing import Tuple
+from typing import Tuple, Literal
 import re
 import logging
 import pprint
@@ -446,11 +446,20 @@ class Position:
 
 
 async def get_portfolio(
-        session: SessionCore
+        session: SessionCore,
+        *,
+        filter: Literal['all', 'open', 'closed'] = 'all',
 ) -> Sequence[Position]:
     """
     Returns Products in portfolio. Refer to  `Products` classes for minimum
     available attributes.
+
+    filter
+        'all' (default) returns all open and closed positions.
+
+        'open' only returns open positions (size != 0).
+
+        'closed' only returns closed position (size == 0).
     """
     check_session_client(session)
     check_session_config(session)
@@ -482,7 +491,12 @@ async def get_portfolio(
                         portf['position_type'])
         del portf['id']
     # 2022.04 JSONclass has poor compatibility with mypy
-    return [Position(portf) for portf in portf_dict_json]  # type: ignore
+    positions = (Position(portf) for portf in portf_dict_json)  # type: ignore
+    if filter == 'open':
+        positions = (p for p in positions if p.size != 0)
+    if filter == 'closed':
+        positions = (p for p in positions if p.size == 0)
+    return [p for p in positions]
 
 
 async def get_portfolio_total(
